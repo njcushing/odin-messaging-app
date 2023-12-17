@@ -12,7 +12,6 @@
 
 :root {
     display: flex;
-    justify-content: center;
 
     font-family: Spectral, 'DM Serif Display', Gabarito, Roboto, Nunito, Jost, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
@@ -36,11 +35,19 @@
 }
 
 body {
+    align-self: center;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
     padding: 0.8rem;
-    margin: 0rem;
+    margin: 0rem auto;
 
     width: 100%;
     max-width: 1280px;
+    min-width: 1000px;
+    height: 100%;
 }
 
 .no-select {
