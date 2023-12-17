@@ -1,0 +1,21 @@
+.wrapper {
+    container-type: inline-size;
+    
+    width: auto;
+}
+
+.navigation-buttons-list {
+    display: flex;
+    justify-content: center;
+    gap: 0.15rem;
+
+    list-style: none;
+
+    padding: 0rem;
+    margin: 0rem;
+}
+
+.navigation-button {
+    display: flex;
+    justify-content: center;
+}
