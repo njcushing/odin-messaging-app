@@ -13,7 +13,7 @@ const Router = () => {
     ]);
 
     return (
-        <RouterProvider router={browserRouter} />
+        <RouterProvider router={browserRouter}/>
     )
 }
 
