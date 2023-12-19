@@ -1,6 +1,9 @@
+import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
-const ChatSelectionPanel = () => {
+const ChatSelectionPanel = ({
+    chatType,
+}) => {
     return (
         <div className={styles["wrapper"]}>
         <div className={styles["container"]}>
@@ -8,5 +11,9 @@ const ChatSelectionPanel = () => {
         </div>
     );
 };
+
+ChatSelectionPanel.propTypes = {
+    chatType: PropTypes.oneOf(["friends", "groups", "communities"]).isRequired,
+}
 
 export default ChatSelectionPanel;
