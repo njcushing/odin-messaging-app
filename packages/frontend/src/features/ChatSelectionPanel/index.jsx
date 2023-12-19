@@ -35,7 +35,16 @@ const ChatSelectionPanel = ({
         <div className={styles["wrapper"]}>
         <div className={styles["container"]}>
             <ul className={styles["chat-list"]}>
-
+                {chatList.map((chatOption, i) => {
+                    return (
+                        <li
+                            className={styles["chat-option"]}
+                            key={i}
+                        >
+                            {chatOption.displayName}
+                        </li>
+                    );
+                })}
             </ul>
             <div className={styles["chat-panel"]}>
                 <ChatPanel />
