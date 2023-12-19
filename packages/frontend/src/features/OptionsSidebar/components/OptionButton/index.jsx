@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import './index.css';
 
 import Tooltip from "@/components/Tooltip";
-import TooltipPropTypes from "@/components/Tooltip/TooltipPropTypes.jsx";
 
 const OptionButton = ({
     text,
@@ -51,12 +50,13 @@ const OptionButton = ({
 OptionButton.propTypes = {
     text: PropTypes.string.isRequired,
     tooltipText: PropTypes.string.isRequired,
-    tooltipPosition: TooltipPropTypes.position,
-    onClickHandler: PropTypes.func.isRequired,
+    tooltipPosition: PropTypes.oneOf(["top", "right", "bottom", "left"]),
+    onClickHandler: PropTypes.func,
 }
 
-OptionButton.propTypes = {
+OptionButton.defaultProps = {
     tooltipPosition: "bottom",
+    onClickHandler: () => {},
 }
 
 export default OptionButton;
