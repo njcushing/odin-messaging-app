@@ -18,7 +18,7 @@
     
     padding: 8px;
     width: auto;
-    height: calc(100% - (10px * 2));
+    height: calc(100% - (8px * 2));
 }
 
 .chat-options,
