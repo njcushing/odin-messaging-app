@@ -1,0 +1,42 @@
+@keyframes fade-in {
+    from {
+        opacity: 0%;
+    }
+    to {
+        opacity: 100%;
+    }
+}
+
+.wrapper {
+    container-type: inline-size;
+
+    position: absolute;
+
+    display: flex;
+
+    margin: 0rem;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.text {
+    color: rgba(0, 0, 0, 0.92);
+    font-size: 1.2rem;
+    font-family: Gabarito;
+    background-color: rgba(255, 255, 255, 1.0);
+    border-radius: 6px;
+    
+    padding: 0.2rem 0.4rem;
+
+    opacity: 0%;
+    animation: 0.1s ease-in-out 0.15s 1 normal forwards fade-in;
+}
+
+.arrow {
+    opacity: 0%;
+    animation: 0.1s ease-in-out 0.15s 1 normal forwards fade-in;
+}
