@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
+import TooltipPropTypes from "./TooltipPropTypes.jsx";
+
 // When using this component, ensure its parent's 'position' style rule is set to 'relative'
 
 const Tooltip = ({
@@ -104,14 +106,14 @@ const Tooltip = ({
 };
 
 Tooltip.propTypes = {
-    text: PropTypes.string.isRequired,
-    position: PropTypes.oneOf(["top", "right", "bottom", "left"]),
-    pixelBuffer: PropTypes.number,
-}
+    ...TooltipPropTypes,
+    text: TooltipPropTypes.text.isRequired,
+    position: TooltipPropTypes.position.isRequired,
+};
 
 Tooltip.defaultProps = {
     position: "bottom",
     pixelBuffer: 6,
-}
+};
 
 export default Tooltip;
