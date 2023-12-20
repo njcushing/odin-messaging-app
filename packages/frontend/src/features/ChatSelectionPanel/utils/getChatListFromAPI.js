@@ -1,19 +1,39 @@
 export const friends = async () => {
     return [
         {
-            displayName: "John Smith",
+            name: "John Smith",
+            tagLine: "Example tagline",
+            status: "online",
+            imageSrc: "",
+            imageAlt: "",
         },
         {
-            displayName: "Davey Jones",
+            name: "Davey Jones",
+            tagLine: "Example tagline",
+            status: "away",
+            imageSrc: "",
+            imageAlt: "",
         },
         {
-            displayName: "Elizabeth Swann",
+            name: "Elizabeth Swann",
+            tagLine: "Example tagline",
+            status: "busy",
+            imageSrc: "",
+            imageAlt: "",
         },
         {
-            displayName: "William Turner",
+            name: "William Turner",
+            tagLine: "Example tagline",
+            status: "offline",
+            imageSrc: "",
+            imageAlt: "",
         },
         {
-            displayName: "Jack Sparrow",
+            name: "Jack Sparrow",
+            tagLine: "Example tagline",
+            status: "offline",
+            imageSrc: "",
+            imageAlt: "",
         },
     ];
 };
@@ -21,13 +41,22 @@ export const friends = async () => {
 export const groups = async () => {
     return [
         {
-            groupName: "School Group",
+            name: "School Group",
+            tagLine: "Example tagline",
+            imageSrc: "",
+            imageAlt: "",
         },
         {
-            groupName: "John's Party 21st October",
+            name: "John's Party 21st October",
+            tagLine: "Example tagline",
+            imageSrc: "",
+            imageAlt: "",
         },
         {
-            groupName: "Running Club",
+            name: "Running Club",
+            tagLine: "Example tagline",
+            imageSrc: "",
+            imageAlt: "",
         },
     ];
 };
@@ -35,13 +64,22 @@ export const groups = async () => {
 export const communities = async () => {
     return [
         {
-            communityName: "Software Developers UK",
+            name: "Software Developers UK",
+            tagLine: "Example tagline",
+            imageSrc: "",
+            imageAlt: "",
         },
         {
-            communityName: "Labrador Owners",
+            name: "Labrador Owners",
+            tagLine: "Example tagline",
+            imageSrc: "",
+            imageAlt: "",
         },
         {
-            communityName: "Hiking UK",
+            name: "Hiking UK",
+            tagLine: "Example tagline",
+            imageSrc: "",
+            imageAlt: "",
         },
     ];
 };
