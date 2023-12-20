@@ -1,0 +1,86 @@
+@keyframes fade-in {
+    from {
+        border-radius: 1px;
+    }
+    to {
+        border-radius: 4px;
+    }
+}
+
+.container {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.4rem;
+
+    background-color: transparent;
+    border: none;
+    outline: 1px solid rgba(255, 255, 255, 0.92);
+    border-radius: 1px;
+
+    padding: 0.4rem;
+
+    transition: background-color 0.15s ease-in-out 0s;
+}
+
+.container:hover {
+    animation: 0.25s ease-in-out 0.0s 1 normal forwards fade-in;
+}
+
+@media (hover: hover) {
+    .container:hover {
+        background-color: rgba(255, 255, 255, 0.12);
+
+        outline: 2px solid rgba(255, 255, 255, 0.92);
+        cursor: pointer;
+    }
+}
+
+.container:focus {
+    background-color: rgba(255, 255, 255, 0.06);
+
+    outline: 2px solid rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+}
+
+.image-container {
+    grid-area: 1 / 1 / -1 / 2;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-indicator {
+    grid-area: 1 / 1 / -1 / 2;
+}
+
+.texts {
+    grid-area: 1 / 2 / -1 / -1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    min-width: 100%;
+}
+
+.display-name,
+.tag-line {
+    font-family: Gabarito;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    padding: 0rem;
+    margin: 0rem;
+}
+
+.display-name {
+    color: rgba(255, 255, 255, 0.87);
+    font-size: 1.2rem;
+}
+
+.tag-line {
+    color: rgba(220, 220, 220, 0.87);
+    font-size: 0.85rem;
+}
