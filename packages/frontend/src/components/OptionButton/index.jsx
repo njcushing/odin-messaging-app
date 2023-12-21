@@ -8,6 +8,9 @@ const OptionButton = ({
     text,
     tooltipText,
     tooltipPosition,
+    widthPx,
+    heightPx,
+    fontSizePx,
     onClickHandler,
 }) => {
     const [tooltipElement, setTooltipElement] = useState(null);
@@ -39,8 +42,17 @@ const OptionButton = ({
                 e.currentTarget.blur();
                 setTooltipElement(null);
             }}
+            style={{
+                width: `${widthPx}px`,
+                height: `${heightPx}px`,
+            }}
         >
-            <ul><li className="material-symbols-rounded">{text}</li></ul>
+            <ul><li
+                className="material-symbols-rounded"
+                style={{
+                    fontSize: `${fontSizePx}px`
+                }}
+            >{text}</li></ul>
         </button>
         {tooltipElement}
         </div>
@@ -51,11 +63,17 @@ OptionButton.propTypes = {
     text: PropTypes.string.isRequired,
     tooltipText: PropTypes.string.isRequired,
     tooltipPosition: PropTypes.oneOf(["top", "right", "bottom", "left"]),
+    widthPx: PropTypes.number,
+    heightPx: PropTypes.number,
+    fontSizePx: PropTypes.number,
     onClickHandler: PropTypes.func,
 }
 
 OptionButton.defaultProps = {
     tooltipPosition: "bottom",
+    widthPx: 64,
+    heightPx: 64,
+    fontSizePx: 32,
     onClickHandler: () => {},
 }
 
