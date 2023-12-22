@@ -103,6 +103,23 @@ describe("UI/DOM Testing...", () => {
             expect(chatListTitle).toBeInTheDocument();
         });
     });
+    describe("The chat selection panel options list...", () => {
+        test(`Should be present in the document`, async () => {
+            await act(() => renderComponent());
+            const chatSelectionPanelOptionsList = screen.getByRole("list", { name: "chat-selection-panel-options-list" });
+            expect(chatSelectionPanelOptionsList).toBeInTheDocument();
+        });
+        test(`Should contain an option to add a friend`, async () => {
+            await act(() => renderComponent());
+            const addFriendButton = screen.getByRole("listitem", { name: "add-friend-button" });
+            expect(addFriendButton).toBeInTheDocument();
+        });
+        test(`Should contain an option to create a new chat`, async () => {
+            await act(() => renderComponent());
+            const createChatButton = screen.getByRole("listitem", { name: "create-chat-button" });
+            expect(createChatButton).toBeInTheDocument();
+        });
+    });
     describe("The chat list...", () => {
         test(`Should be present in the document`, async () => {
             await act(() => renderComponent());
