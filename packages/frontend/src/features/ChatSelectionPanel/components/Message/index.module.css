@@ -3,20 +3,20 @@
 }
 
 .container {
-    display: grid;
-    grid-template-columns: repeat(2, auto);
+    display: flex;
     align-items: end;
     gap: 0.4rem;
 
     max-width: 85%;
 }
 
-.message-text-container {
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+.message-info-container {
+    display: flex;
+    flex-direction: column;
+}
 
-    width: 100%;
-    min-height: 1rem;
+.message-text-container {
+    display: flex;
 }
 
 .message-text {
@@ -24,7 +24,21 @@
     font-size: 1.0rem;
     line-height: 1.36rem;
     font-family: Gabarito;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 
+    min-height: 1rem;
     padding: 0.4rem 0.6rem;
+    margin: 0rem;
+}
+
+.name-and-date-string {
+    display: flex;
+
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.7rem;
+    font-family: Gabarito;
+
+    padding: 0rem;
     margin: 0rem;
 }
