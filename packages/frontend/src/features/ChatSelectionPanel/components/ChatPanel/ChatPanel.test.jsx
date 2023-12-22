@@ -7,7 +7,7 @@ import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
 import ChatPanel from './index.jsx'
 
-const renderComponent = async () => { await act(() => render(<ChatPanel />)); }
+const renderComponent = async () => { act(() => render(<ChatPanel />)); }
 
 vi.mock('@/components/ProfileImage', () => ({ 
     default: ({
