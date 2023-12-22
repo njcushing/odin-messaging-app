@@ -35,27 +35,32 @@ const ChatSelectionPanel = ({
     return (
         <div className={styles["wrapper"]}>
         <div className={styles["container"]}>
-            <ul className={styles["chat-list"]}>
+            <div className={styles["chat-selection-panel"]}>
                 <h3
                     className={styles["chat-list-title"]}
                     aria-label="chat-list-title"
                 >{chatType}</h3>
-                {chatList.map((chatOption, i) => {
-                    return (
-                        <li
-                            aria-label="chat-option"
-                            key={i}
-                        ><ChatOption
-                            name={chatOption.name}
-                            tagLine={chatOption.tagLine}
-                            status={chatOption.status}
-                            imageSrc={chatOption.imageSrc}
-                            imageAlt={chatOption.imageAlt}
-                            onClickHandler={() => {}}
-                        /></li>
-                    );
-                })}
-            </ul>
+                <ul
+                    className={styles["chat-list-options"]}
+                    aria-label="chat-list-options"
+                >
+                    {chatList.map((chatOption, i) => {
+                        return (
+                            <li
+                                aria-label="chat-option"
+                                key={i}
+                            ><ChatOption
+                                name={chatOption.name}
+                                tagLine={chatOption.tagLine}
+                                status={chatOption.status}
+                                imageSrc={chatOption.imageSrc}
+                                imageAlt={chatOption.imageAlt}
+                                onClickHandler={() => {}}
+                            /></li>
+                        );
+                    })}
+                </ul>
+            </div>
             <div className={styles["chat-panel"]}>
                 <ChatPanel />
             </div>
