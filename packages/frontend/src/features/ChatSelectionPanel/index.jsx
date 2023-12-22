@@ -69,7 +69,13 @@ const ChatSelectionPanel = ({
                         >
                             <OptionButton
                                 text="add"
-                                tooltipText="Create New Chat"
+                                tooltipText={
+                                    chatType === "friends"
+                                    ? "Create New Chat"
+                                        : chatType === "groups"
+                                        ? "Create New Group"
+                                    : "Error"
+                                }
                                 tooltipPosition="bottom"
                                 widthPx={50}
                                 heightPx={50}
