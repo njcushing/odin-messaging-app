@@ -93,3 +93,21 @@
 .text-editor-container {
     grid-area: 3 / 1 / -1 / -1;
 }
+
+.no-chat-message-container {
+    grid-area: 1 / 1 / -1 / -1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-chat-message {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.4rem;
+    font-family: Gabarito;
+    text-align: center;
+
+    padding: 0rem;
+    margin: 0rem;
+}
