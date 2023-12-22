@@ -12,7 +12,7 @@ const ChatOption = ({
     onClickHandler,
 }) => {
     return (
-        <li
+        <div
             className={styles["container"]}
             aria-label="chat-option"
             tabIndex={0}
@@ -50,7 +50,7 @@ const ChatOption = ({
                     >{tagLine}</h4>
                 :   null}
             </div>
-        </li>
+        </div>
     );
 };
 
