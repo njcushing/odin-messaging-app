@@ -68,7 +68,7 @@ const Message = ({
 Message.propTypes = {
     text: PropTypes.string,
     name: PropTypes.string,
-    dateSent: PropTypes.string,
+    dateSent: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     imageSrc: PropTypes.string,
     imageAlt: PropTypes.string,
     position: PropTypes.oneOf(["left", "right"]),
