@@ -206,4 +206,19 @@ describe("UI/DOM Testing...", () => {
             expect(emptyChatText).toBeInTheDocument();
         });
     });
+    describe("A 'no chat' message...", () => {
+        test(`Should be present if the chat returned by the 'getChatFromAPI'
+         function is null`, async () => {
+            getChatFromAPI.mockReturnValueOnce(null);
+            await act(() => renderComponent());
+            const emptyChatMessage = screen.getByLabelText("no-chat-here");
+            expect(emptyChatMessage).toBeInTheDocument();
+        });
+        test(`Should not be present if the chat returned by the 'getChatFromAPI'
+         function is not null`, async () => {
+            await act(() => renderComponent());
+            const emptyChatMessage = screen.queryByLabelText("no-chat-here");
+            expect(emptyChatMessage).toBeNull();
+        });
+    });
 });
