@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
-import OptionButton from "./components/OptionButton";
+import OptionButton from "@/components/OptionButton";
 
 const OptionsSidebar = ({
     onOptionSelect,
