@@ -63,10 +63,13 @@ body > #root {
 }
 
 ::-webkit-scrollbar {
+    border-radius: 9999px;
+    
     width: 8px;
 }
 
 ::-webkit-scrollbar-track {
+    border-radius: 9999px;
     background-color: transparent;
 }
 
@@ -77,6 +80,7 @@ body > #root {
 }
 
 ::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
     background-color: rgba(255, 255, 255, 0.7);
 }
 
