@@ -5,14 +5,14 @@ import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
-import AddFriendModal from './index.jsx'
+import AddFriendPanel from './index.jsx'
 
 const renderComponent = async (
     onCloseHandler = () => {},
     addFriendHandler = () => {},
     addFriendSubmissionErrors = [],
 ) => { act(() => render(
-    <AddFriendModal
+    <AddFriendPanel
         onCloseHandler={onCloseHandler}
         addFriendHandler={addFriendHandler}
         addFriendSubmissionErrors={addFriendSubmissionErrors}
