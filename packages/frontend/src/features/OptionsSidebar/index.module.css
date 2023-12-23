@@ -1,6 +1,10 @@
 .wrapper {
     container-type: inline-size;
 
+    /* Needed to make the Tooltip component appear above surrounding elements */
+    position: relative;
+    z-index: 100;
+
     width: 100%;
     min-width: 80px;
     max-width: 80px;
