@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
 import OptionButton from "@/components/OptionButton";
+import AddFriendPanel from "./components/AddFriendPanel";
 import ChatOption from "./components/ChatOption";
 import ChatPanel from "./components/ChatPanel";
 
@@ -12,6 +13,7 @@ const ChatSelectionPanel = ({
     chatType,
 }) => {
     const [chatList, setChatList] = useState([]);
+    const [addingFriend, setAddingFriend] = useState(false);
 
     useEffect(() => {
         (async () => {
@@ -32,6 +34,23 @@ const ChatSelectionPanel = ({
             setChatList(chatListNew);
         })();
     }, [chatType]);
+
+    let rightPanelContent = null;
+    if (addingFriend) {
+        rightPanelContent = (
+            <AddFriendPanel
+                onCloseHandler={() => setAddingFriend(false)}
+                addFriendHandler={() => {}}
+                addFriendSubmissionErrors={[]}
+            />
+        );
+    } else {
+        rightPanelContent = (
+            <div className={styles["chat-panel"]}>
+                <ChatPanel />
+            </div>
+        );
+    }
 
     return (
         <div className={styles["wrapper"]}>
@@ -59,7 +78,7 @@ const ChatSelectionPanel = ({
                                     heightPx={50}
                                     fontSizePx={24}
                                     borderStyle="circular"
-                                    onClickHandler={() => {}}
+                                    onClickHandler={() => setAddingFriend(!addingFriend)}
                                 />
                             </li>
                         :   null}
@@ -107,9 +126,7 @@ const ChatSelectionPanel = ({
                     })}
                 </ul>
             </div>
-            <div className={styles["chat-panel"]}>
-                <ChatPanel />
-            </div>
+            {rightPanelContent}
         </div>
         </div>
     );
