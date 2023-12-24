@@ -60,7 +60,7 @@ describe("UI/DOM Testing...", () => {
     describe("The heading element displaying the title...", () => {
         test(`Should be present in the document`, async () => {
             await renderComponent();
-            const title = screen.getByRole("heading", { name: "add-friend-modal" });
+            const title = screen.getByRole("heading", { name: "add-friend-panel" });
             expect(title).toBeInTheDocument();
         });
     });
