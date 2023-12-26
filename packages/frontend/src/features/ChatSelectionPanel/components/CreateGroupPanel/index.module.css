@@ -1,0 +1,300 @@
+@keyframes fade-in {
+    from {
+        opacity: 0%;
+        transform: translateY(0.5rem);
+    }
+    to {
+        opacity: 100%;
+        transform: translateY(0rem);
+    }
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0%;
+        transform: scale(95%);
+    }
+    to {
+        opacity: 100%;
+        transform: scale(100%);
+    }
+}
+
+.wrapper {
+    container-type: inline-size;
+
+    width: 100%;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgb(22, 22, 22);
+
+    width: auto;
+    height: 100%;
+}
+
+.box {
+    display: flex;
+    flex-direction: column;
+
+    background-color: rgb(22, 22, 22);
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+
+    width: 320px;
+    padding: 0.9rem;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0.15s 1 normal forwards fade-in;
+}
+
+.title {
+    position: absolute;
+    top: -1.5rem;
+    left: 0.6rem;
+
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 1.2rem;
+    font-family: Gabarito;
+    text-align: center;
+    background-color: rgb(22, 22, 22);
+
+    padding: 0.6rem;
+    margin: 0rem;
+}
+
+.option-button {
+    position: absolute;
+    top: -1rem;
+    left: calc(100% - 2.4rem);
+    z-index: 100;
+
+    background-color: rgb(22, 22, 22);
+}
+
+.friends-adding-container {
+    padding: 0.2rem;
+    margin: 1rem 0rem 0rem 0rem;
+}
+
+.friends-adding-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow-y: auto;
+
+    list-style: none;
+
+    border: none;
+    border-radius: 8px;
+    outline: 1px solid rgba(255, 255, 255, 0.5);
+
+    max-height: 12rem;
+    padding: 0.8rem;
+    margin: 0rem;
+}
+
+.friend-adding {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.8rem;
+
+    width: 100%;
+
+    opacity: 0%;
+    transform: scale(95%);
+    animation: 0.25s ease-in-out 0s 1 normal forwards scale-in;
+}
+
+.friend-adding-name,
+.friend-name {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 1.1rem;
+    font-family: Gabarito;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    padding: 0rem;
+    margin: 0rem;
+}
+
+.remove-from-group-button,
+.add-to-group-button,
+.create-group-button {
+    color: rgba(255, 255, 255, 0.87);
+    font-size: 1.0rem;
+    font-family: Gabarito;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 2px;
+    outline: none;
+
+    padding: 0.2rem 0.6rem;
+
+    transition: border-radius 0.25s ease-in-out 0s,
+                transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) 0s;
+}
+
+@media (hover: hover) {
+    .remove-from-group-button:hover,
+    .add-to-group-button:hover,
+    .create-group-button:hover {
+        border-radius: 8px;
+        transform: scale(92%);
+    
+        cursor: pointer;
+    }
+}
+
+.remove-from-group-button:focus,
+.add-to-group-button:focus,
+.create-group-button:focus {
+    border-radius: 8px;
+    transform: scale(84%);
+    
+    cursor: pointer;
+}
+
+.remove-from-group-button {
+    background-color: rgb(207, 9, 9);
+}
+
+.remove-from-group-button:hover {
+    background-color: rgb(241, 33, 33);
+}
+
+.remove-from-group-button:focus {
+    background-color: rgb(168, 4, 4);
+}
+
+.friends-list-container {
+    margin: 1rem 0rem 0rem 0rem;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0.3s 1 normal forwards fade-in;
+}
+
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    overflow-y: auto;
+
+    list-style: none;
+
+    max-height: 24rem;
+    padding: 0.1rem 0.2rem;
+    margin: 0rem;
+}
+
+.friend {
+    display: grid;
+    grid-template-rows: repeat(2, auto);
+    grid-template-columns: auto 1fr;
+    gap: 0rem 0.8rem;
+
+    border: none;
+    border-radius: 8px;
+    outline: 1px solid rgba(255, 255, 255, 0.5);
+
+    width: calc(100% - (0.8rem * 2));
+    padding: 0.8rem;
+}
+
+.profile-image {
+    grid-area: 1 / 1 / -1 / 2;
+
+    display: flex;
+}
+
+.friend-name {
+    grid-area: 1 / 2 / 2 / -1;
+}
+
+.add-to-group-button {
+    grid-area: 2 / 2 / -1 / -1;
+
+    justify-self: start;
+
+    background-color: rgb(15, 156, 15);
+}
+
+.add-to-group-button:hover {
+    background-color: rgb(12, 189, 12);
+}
+
+.add-to-group-button:focus {
+    background-color: rgb(14, 122, 14);
+}
+
+.no-friends {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    font-family: Gabarito;
+    text-align: center;
+
+    padding: 0rem;
+    margin: 0rem;
+}
+
+.create-group-button {
+    align-self: center;
+
+    background-color: rgb(7, 148, 184);
+
+    margin: 1rem 0rem 0rem 0rem;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0s 1 normal forwards fade-in;
+}
+
+.create-group-button:hover {
+    background-color: rgb(17, 172, 211);
+}
+
+.create-group-button:focus {
+    background-color: rgb(3, 113, 141);
+}
+
+.create-group-submission-errors {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0.45s 1 normal forwards fade-in;
+}
+
+.create-group-submission-errors-title {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 1.0rem;
+    font-family: Gabarito;
+    font-weight: normal;
+
+    padding: 0rem;
+    margin: 0rem;
+}
+
+.create-group-submission-errors-list {
+    padding: 0rem auto;
+    margin: 0rem;
+}
+
+.create-group-submission-error-item {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.9rem;
+    font-family: Gabarito;
+    font-weight: normal;
+}
