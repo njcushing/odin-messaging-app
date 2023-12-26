@@ -142,8 +142,8 @@ describe("UI/DOM Testing...", () => {
                 },
             ]);
             await renderComponent();
-            const friendName = screen.getByText("Person 1");
-            expect(friendName).toBeInTheDocument();
+            const friendName = screen.getByRole("heading", { name: "friend-name" });
+            expect(friendName.textContent).toBe("Person 1");
         });
         test("Should display a 'Create Chat' button", async () => {
             getFriendsList.mockReturnValueOnce([
