@@ -192,7 +192,7 @@
 
     list-style: none;
 
-    max-height: 24rem;
+    max-height: 16rem;
     padding: 0.1rem 0.2rem;
     margin: 0rem;
 }
@@ -247,16 +247,22 @@
     margin: 0rem;
 }
 
-.create-group-button {
+.create-group-button-container {
     align-self: center;
 
-    background-color: rgb(7, 148, 184);
+    display: flex;
 
     margin: 1rem 0rem 0rem 0rem;
 
     opacity: 0%;
     transform: translateY(0.5rem);
     animation: 0.2s ease-in-out 0s 1 normal forwards fade-in;
+}
+
+.create-group-button {
+    align-self: center;
+
+    background-color: rgb(7, 148, 184);
 }
 
 .create-group-button:hover {
