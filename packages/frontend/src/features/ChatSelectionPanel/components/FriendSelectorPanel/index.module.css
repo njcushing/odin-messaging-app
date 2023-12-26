@@ -78,12 +78,12 @@
     background-color: rgb(22, 22, 22);
 }
 
-.friends-adding-container {
+.friends-selected-container {
     padding: 0.2rem;
     margin: 1rem 0rem 0rem 0rem;
 }
 
-.friends-adding-list {
+.friends-selected-list {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -100,7 +100,7 @@
     margin: 0rem;
 }
 
-.friend-adding {
+.friend-selected {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 0.8rem;
@@ -112,7 +112,7 @@
     animation: 0.25s ease-in-out 0s 1 normal forwards scale-in;
 }
 
-.friend-adding-name,
+.friend-selected-name,
 .friend-name {
     color: rgba(255, 255, 255, 0.92);
     font-size: 1.1rem;
@@ -126,9 +126,9 @@
     margin: 0rem;
 }
 
-.remove-from-group-button,
-.add-to-group-button,
-.create-group-button {
+.remove-button,
+.add-button,
+.submit-button {
     color: rgba(255, 255, 255, 0.87);
     font-size: 1.0rem;
     font-family: Gabarito;
@@ -145,9 +145,9 @@
 }
 
 @media (hover: hover) {
-    .remove-from-group-button:hover,
-    .add-to-group-button:hover,
-    .create-group-button:hover {
+    .remove-button:hover,
+    .add-button:hover,
+    .submit-button:hover {
         border-radius: 8px;
         transform: scale(92%);
     
@@ -155,24 +155,24 @@
     }
 }
 
-.remove-from-group-button:focus,
-.add-to-group-button:focus,
-.create-group-button:focus {
+.remove-button:focus,
+.add-button:focus,
+.submit-button:focus {
     border-radius: 8px;
     transform: scale(84%);
     
     cursor: pointer;
 }
 
-.remove-from-group-button {
+.remove-button {
     background-color: rgb(207, 9, 9);
 }
 
-.remove-from-group-button:hover {
+.remove-button:hover {
     background-color: rgb(241, 33, 33);
 }
 
-.remove-from-group-button:focus {
+.remove-button:focus {
     background-color: rgb(168, 4, 4);
 }
 
@@ -221,7 +221,7 @@
     grid-area: 1 / 2 / 2 / -1;
 }
 
-.add-to-group-button {
+.add-button {
     grid-area: 2 / 2 / -1 / -1;
 
     justify-self: start;
@@ -229,11 +229,11 @@
     background-color: rgb(15, 156, 15);
 }
 
-.add-to-group-button:hover {
+.add-button:hover {
     background-color: rgb(12, 189, 12);
 }
 
-.add-to-group-button:focus {
+.add-button:focus {
     background-color: rgb(14, 122, 14);
 }
 
@@ -247,7 +247,7 @@
     margin: 0rem;
 }
 
-.create-group-button-container {
+.submit-button-container {
     align-self: center;
 
     display: flex;
@@ -259,21 +259,21 @@
     animation: 0.2s ease-in-out 0s 1 normal forwards fade-in;
 }
 
-.create-group-button {
+.submit-button {
     align-self: center;
 
     background-color: rgb(7, 148, 184);
 }
 
-.create-group-button:hover {
+.submit-button:hover {
     background-color: rgb(17, 172, 211);
 }
 
-.create-group-button:focus {
+.submit-button:focus {
     background-color: rgb(3, 113, 141);
 }
 
-.create-group-submission-errors {
+.submission-errors {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
@@ -283,7 +283,7 @@
     animation: 0.2s ease-in-out 0.45s 1 normal forwards fade-in;
 }
 
-.create-group-submission-errors-title {
+.submission-errors-title {
     color: rgba(255, 255, 255, 0.92);
     font-size: 1.0rem;
     font-family: Gabarito;
@@ -293,12 +293,12 @@
     margin: 0rem;
 }
 
-.create-group-submission-errors-list {
+.submission-errors-list {
     padding: 0rem auto;
     margin: 0rem;
 }
 
-.create-group-submission-error-item {
+.submission-error-item {
     color: rgba(255, 255, 255, 0.92);
     font-size: 0.9rem;
     font-family: Gabarito;
