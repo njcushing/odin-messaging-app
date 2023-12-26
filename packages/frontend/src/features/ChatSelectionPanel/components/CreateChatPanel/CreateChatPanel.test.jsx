@@ -68,7 +68,7 @@ const mockFriendsList = [
     },
 ];
 const getFriendsList = vi.fn(() => mockFriendsList);
-vi.mock('./utils/getFriendsList', async () => ({
+vi.mock('../../utils/getFriendsList', async () => ({
     default: () => getFriendsList(),
 }));
 
