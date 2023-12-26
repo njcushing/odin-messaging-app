@@ -4,6 +4,8 @@ import styles from "./index.module.css";
 
 import OptionButton from "@/components/OptionButton";
 import AddFriendPanel from "./components/AddFriendPanel";
+import CreateChatPanel from "./components/CreateChatPanel";
+import CreateGroupPanel from "./components/CreateGroupPanel";
 import ChatOption from "./components/ChatOption";
 import ChatPanel from "./components/ChatPanel";
 
@@ -14,6 +16,8 @@ const ChatSelectionPanel = ({
 }) => {
     const [chatList, setChatList] = useState([]);
     const [addingFriend, setAddingFriend] = useState(false);
+    const [creatingChat, setCreatingChat] = useState(false);
+    const [creatingGroup, setCreatingGroup] = useState(false);
 
     useEffect(() => {
         (async () => {
@@ -42,6 +46,22 @@ const ChatSelectionPanel = ({
                 onCloseHandler={() => setAddingFriend(false)}
                 addFriendHandler={() => {}}
                 addFriendSubmissionErrors={[]}
+            />
+        );
+    } else if (creatingChat) {
+        rightPanelContent = (
+            <CreateChatPanel
+                onCloseHandler={() => setCreatingChat(false)}
+                createChatHandler={() => {}}
+                createChatSubmissionErrors={[]}
+            />
+        );
+    } else if (creatingGroup) {
+        rightPanelContent = (
+            <CreateGroupPanel
+                onCloseHandler={() => setCreatingGroup(false)}
+                createGroupHandler={() => {}}
+                createGroupSubmissionErrors={[]}
             />
         );
     } else {
@@ -78,7 +98,11 @@ const ChatSelectionPanel = ({
                                     heightPx={50}
                                     fontSizePx={24}
                                     borderStyle="circular"
-                                    onClickHandler={() => setAddingFriend(!addingFriend)}
+                                    onClickHandler={() => {
+                                        setAddingFriend(!addingFriend);
+                                        setCreatingChat(false);
+                                        setCreatingGroup(false);
+                                    }}
                                 />
                             </li>
                         :   null}
@@ -100,7 +124,24 @@ const ChatSelectionPanel = ({
                                 heightPx={50}
                                 fontSizePx={24}
                                 borderStyle="circular"
-                                onClickHandler={() => {}}
+                                onClickHandler={() => {
+                                    switch (chatType) {
+                                        case "friends":
+                                            setAddingFriend(false);
+                                            setCreatingChat(!creatingChat);
+                                            setCreatingGroup(false);
+                                            break;
+                                        case "groups":
+                                            setAddingFriend(false);
+                                            setCreatingChat(false);
+                                            setCreatingGroup(!creatingGroup);
+                                            break;
+                                        default:
+                                            setAddingFriend(false);
+                                            setCreatingChat(false);
+                                            setCreatingGroup(false);
+                                    }
+                                }}
                             />
                         </li>
                     </ul>
