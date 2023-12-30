@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 
+import {
+    validateUsername,
+    validateEmail,
+    validatePassword,
+} from "../../../utils/validateCreateAccountFields.js";
+
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
@@ -7,12 +13,36 @@ const UserSchema = new Schema({
         type: String,
         trim: true,
         unique: true,
-        required: true,
+        validate: {
+            validator: function (value) {
+                return validateUsername(value).status;
+            },
+            message: (props) => validateUsername(props.value).message.back,
+        },
+        required: [true, "'username' field required"],
+    },
+    email: {
+        type: String,
+        trim: true,
+        unique: true,
+        validate: {
+            validator: function (value) {
+                return validateEmail(value).status;
+            },
+            message: (props) => validateEmail(props.value).message.back,
+        },
+        required: [true, "'email' field required"],
     },
     password: {
         type: String,
         trim: true,
-        required: true,
+        validate: {
+            validator: function (value) {
+                return validatePassword(value).status;
+            },
+            message: (props) => validatePassword(props.value).message.back,
+        },
+        required: [true, "'password' field required"],
     },
     admin: {
         type: Boolean,
