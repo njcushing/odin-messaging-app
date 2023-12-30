@@ -1,4 +1,4 @@
-const successfulRequest = (res, status, message, data) => {
+const sendResponse = (res, status, message, data) => {
     return res.status(status).send({
         status: status,
         message: message,
@@ -6,4 +6,4 @@ const successfulRequest = (res, status, message, data) => {
     });
 };
 
-export default successfulRequest;
+export default sendResponse;

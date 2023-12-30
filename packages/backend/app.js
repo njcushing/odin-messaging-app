@@ -102,20 +102,23 @@ app.use("*", cors(getCorsOpts));
 
 import * as routes from "./routes/index.js";
 app.use("/", routes.index);
+app.use("/create-account", routes.createaccount);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));
 });
 
+import sendResponse from "./utils/sendResponse.js";
+
 // error handler
 app.use(function (err, req, res, next) {
     // send error
-    res.status(err.status || 500);
     if (req.app.get("env") === "development") {
+        res.status(err.status || 500);
         res.send(`${err.status} - ${err.stack}`);
     } else {
-        res.send({ status: err.status, message: err.message, data: null });
+        sendResponse(res, err.status || 500, err.message, null);
     }
 });
 
