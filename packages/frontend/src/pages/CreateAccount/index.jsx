@@ -62,7 +62,7 @@ const CreateAccount = () => {
 
     const updatePasswordErrors = () => {
         const validPassword = validatePassword(passwordInputRef.current.value);
-        const validConfirmPassword = validatePassword(confirmPasswordInputRef.current.value);
+        const validConfirmPassword = validatePassword(confirmPasswordInputRef.current.value, true);
         if (!validPassword.status) {
             setPasswordError(validPassword.message.front);
         } else {
