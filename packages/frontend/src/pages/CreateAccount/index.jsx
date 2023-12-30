@@ -2,10 +2,11 @@ import { useState, useCallback, useRef } from "react";
 import styles from "./index.module.css";
 
 import createAccountAPI from "./utils/createAccountAPI";
-import { validateUsername, validatePassword } from "./utils/validateFields";
+import { validateUsername, validateEmail, validatePassword } from "./utils/validateFields";
 
 const CreateAccount = () => {
     const [usernameError, setUsernameError] = useState(null);
+    const [emailError, setEmailError] = useState(null);
     const [passwordError, setPasswordError] = useState(null);
     const [confirmPasswordError, setConfirmPasswordError] = useState(null);
     const [attemptingCreateAccount, setAttemptingCreateAccount] = useState(false);
@@ -13,6 +14,7 @@ const CreateAccount = () => {
     const [createAccountError, setCreateAccountError] = useState(null);
 
     const usernameInputRef = useRef(null);
+    const emailInputRef = useRef(null);
     const passwordInputRef = useRef(null);
     const confirmPasswordInputRef = useRef(null);
 
@@ -23,11 +25,16 @@ const CreateAccount = () => {
         // Client-side validation
         let validCredentials = true;
         const validUsername = validateUsername(formFields.username);
+        const validEmail = validateEmail(formFields.email);
         const validPassword = validatePassword(formFields.password);
         const validConfirmPassword = validatePassword(formFields.confirmPassword);
         if (!validUsername.status) {
             validCredentials = false;
             setUsernameError(validUsername.message);
+        }
+        if (!validEmail.status) {
+            validCredentials = false;
+            setEmailError(validEmail.message);
         }
         if (!validPassword.status) {
             validCredentials = false;
@@ -85,7 +92,10 @@ const CreateAccount = () => {
                 window.location.href = "/dashboard";
             }
             setAttemptingCreateAccount(false);
-            setCredentials({ username: credentials.username });
+            setCredentials({
+                username: credentials.username,
+                email: credentials.email,
+            });
         })();
     }
 
@@ -132,6 +142,33 @@ const CreateAccount = () => {
                                     className={styles["error"]}
                                     aria-label="username-error"
                                 >{usernameError}</h3>
+                            :   null}
+                        </label>
+                        <label className={styles["email-label"]}
+                        >Email*:
+                            <input
+                                className={styles[`email-input${emailError !== null ? "-error" : ""}`]}
+                                aria-label="email-input"
+                                id="email"
+                                name="email"
+                                required
+                                defaultValue={credentials.email ? credentials.email : ""}
+                                style={{ resize: "none" }}
+                                onChange={(e) => {
+                                    const validEmail = validateEmail(e.target.value);
+                                    if (!validEmail.status) {
+                                        setEmailError(validEmail.message);
+                                    } else {
+                                        setEmailError(null);
+                                    }
+                                }}
+                                ref={emailInputRef}
+                            ></input>
+                            {emailError !== null
+                            ?   <h3
+                                    className={styles["error"]}
+                                    aria-label="email-error"
+                                >{emailError}</h3>
                             :   null}
                         </label>
                         <label className={styles["password-label"]}
