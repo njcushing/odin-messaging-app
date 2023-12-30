@@ -37,7 +37,7 @@ const LogIn = () => {
             if (logInResponse.status >= 400) {
                 setLogInError(logInResponse.message);
             } else {
-                // redirect to dashboard
+                window.location.href = "/dashboard";
             }
             setAttemptingLogIn(false);
             setCredentials({ username: credentials.username });
