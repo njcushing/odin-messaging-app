@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import styles from "./index.module.css";
 
 import createAccountAPI from "./utils/createAccountAPI";
-import { validateUsername, validateEmail, validatePassword } from "./utils/validateFields";
+import { validateUsername, validateEmail, validatePassword } from "./../../../../../utils/validateCreateAccountFields";
 
 const CreateAccount = () => {
     const [usernameError, setUsernameError] = useState(null);
@@ -30,19 +30,19 @@ const CreateAccount = () => {
         const validConfirmPassword = validatePassword(formFields.confirmPassword);
         if (!validUsername.status) {
             validCredentials = false;
-            setUsernameError(validUsername.message);
+            setUsernameError(validUsername.message.front);
         }
         if (!validEmail.status) {
             validCredentials = false;
-            setEmailError(validEmail.message);
+            setEmailError(validEmail.message.front);
         }
         if (!validPassword.status) {
             validCredentials = false;
-            setPasswordError(validPassword.message);
+            setPasswordError(validPassword.message.front);
         }
         if (!validConfirmPassword.status) {
             validCredentials = false;
-            setConfirmPasswordError(validConfirmPassword.message);
+            setConfirmPasswordError(validConfirmPassword.message.front);
         }
         if (
             validPassword.status &&
@@ -64,12 +64,12 @@ const CreateAccount = () => {
         const validPassword = validatePassword(passwordInputRef.current.value);
         const validConfirmPassword = validatePassword(confirmPasswordInputRef.current.value);
         if (!validPassword.status) {
-            setPasswordError(validPassword.message);
+            setPasswordError(validPassword.message.front);
         } else {
             setPasswordError(null);
         }
         if (!validConfirmPassword.status) {
-            setConfirmPasswordError(validConfirmPassword.message);
+            setConfirmPasswordError(validConfirmPassword.message.front);
         } else {
             setConfirmPasswordError(null);
         }
@@ -87,7 +87,7 @@ const CreateAccount = () => {
         (async () => {
             const createAccountResponse = await createAccountAPI(credentials);
             if (createAccountResponse.status >= 400) {
-                setCreateAccountError(createAccountResponse.message);
+                setCreateAccountError(createAccountResponse.message.front);
             } else {
                 window.location.href = "/dashboard";
             }
@@ -130,7 +130,7 @@ const CreateAccount = () => {
                                 onChange={(e) => {
                                     const validUsername = validateUsername(e.target.value);
                                     if (!validUsername.status) {
-                                        setUsernameError(validUsername.message);
+                                        setUsernameError(validUsername.message.front);
                                     } else {
                                         setUsernameError(null);
                                     }
@@ -157,7 +157,7 @@ const CreateAccount = () => {
                                 onChange={(e) => {
                                     const validEmail = validateEmail(e.target.value);
                                     if (!validEmail.status) {
-                                        setEmailError(validEmail.message);
+                                        setEmailError(validEmail.message.front);
                                     } else {
                                         setEmailError(null);
                                     }
