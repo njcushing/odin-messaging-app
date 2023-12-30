@@ -5,7 +5,7 @@ import styles from "./index.module.css";
 import OptionButton from "@/components/OptionButton";
 import AddFriendPanel from "./components/AddFriendPanel";
 import CreateChatPanel from "./components/CreateChatPanel";
-import CreateGroupPanel from "./components/CreateGroupPanel";
+import FriendSelectorPanel from "./components/FriendSelectorPanel";
 import ChatOption from "./components/ChatOption";
 import ChatPanel from "./components/ChatPanel";
 
@@ -58,10 +58,15 @@ const ChatSelectionPanel = ({
         );
     } else if (creatingGroup) {
         rightPanelContent = (
-            <CreateGroupPanel
+            <FriendSelectorPanel
+                title="Create New Group"
+                removeButtonText="Remove"
+                addButtonText="Add"
+                submitButtonText="Create Group"
+                noFriendsText="You have no friends with whom you can create a group"
                 onCloseHandler={() => setCreatingGroup(false)}
-                createGroupHandler={() => {}}
-                createGroupSubmissionErrors={[]}
+                onSubmitHandler={() => {}}
+                submissionErrors={[]}
             />
         );
     } else {
