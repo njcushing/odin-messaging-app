@@ -113,13 +113,7 @@ import sendResponse from "./utils/sendResponse.js";
 
 // error handler
 app.use(function (err, req, res, next) {
-    // send error
-    if (req.app.get("env") === "development") {
-        res.status(err.status || 500);
-        res.send(`${err.status} - ${err.stack}`);
-    } else {
-        sendResponse(res, err.status || 500, err.message, null);
-    }
+    sendResponse(res, err.status || 500, err.message, null, err);
 });
 
 export default app;
