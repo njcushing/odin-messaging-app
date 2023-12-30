@@ -10,6 +10,12 @@ import CreateAccount from './index.jsx'
 import * as createAccountAPI from './utils/createAccountAPI.js'
 import * as validateFields from './utils/validateFields.js'
 
+// For 'Not implemented: navigation' error 
+let assignMock = vi.fn();
+delete window.location;
+window.location = { assign: assignMock };
+afterEach(() => { assignMock.mockClear(); });
+
 const renderComponent = async () => {
     act(() => render(<CreateAccount />));
 }
