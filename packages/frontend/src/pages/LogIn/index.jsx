@@ -9,6 +9,7 @@ const LogIn = () => {
     const [passwordError, setPasswordError] = useState(null);
     const [attemptingLogIn, setAttemptingLogIn] = useState(false);
     const [credentials, setCredentials] = useState({});
+    const [defaultValues, setDefaultValues] = useState({});
     const [logInError, setLogInError] = useState(null);
 
     const usernameInputRef = useRef(null);
@@ -39,7 +40,7 @@ const LogIn = () => {
                 // redirect to dashboard
             }
             setAttemptingLogIn(false);
-            setCredentials({});
+            setCredentials({ username: credentials.username });
         })();
     }
 
@@ -65,6 +66,7 @@ const LogIn = () => {
                                 id="username"
                                 name="username"
                                 required
+                                defaultValue={credentials.username ? credentials.username : ""}
                                 style={{ resize: "none" }}
                                 onChange={(e) => {
                                     const validUsername = validateUsername(e.target.value);
