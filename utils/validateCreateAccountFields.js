@@ -69,13 +69,17 @@ export const validateEmail = (email) => {
     };
 };
 
-export const validatePassword = (password) => {
+export const validatePassword = (password, confirming = false) => {
     if (password.length === 0) {
         return {
             status: false,
             message: {
-                front: "Your Password must not be empty.",
-                back: "'password' field (String) must not be empty",
+                front: `Your ${
+                    confirming ? "Confirm " : ""
+                }Password must not be empty.`,
+                back: `'${
+                    confirming ? "confirmP" : "p"
+                }assword' field (String) must not be empty`,
             },
         };
     }
@@ -83,21 +87,24 @@ export const validatePassword = (password) => {
         return {
             status: false,
             message: {
-                front: `Your Password must contain at least 8 characters,
-                including at least one letter from a-z, at least one number from
-                0-9, and at least one of the following symbols: @$!%*#?&`,
-                back: `'password' field (String) must contain at least 8
-                characters, including at least one letter from a-z, at least one
-                number from 0-9, and at least one of the following symbols:
-                @$!%*#?&`,
+                front: `Your ${confirming ? "Confirm " : ""}Password must
+                contain at least 8 characters, including at least one letter
+                from a-z, at least one number from 0-9, and at least one of the
+                following symbols: @$!%*#?&`,
+                back: `'${confirming ? "confirmP" : "p"}assword' field (String)
+                must contain at least 8 characters, including at least one
+                letter from a-z, at least one number from 0-9, and at least one
+                of the following symbols: @$!%*#?&`,
             },
         };
     }
     return {
         status: true,
         message: {
-            front: "Valid Password.",
-            back: "'password' field (String) is valid",
+            front: `Valid ${confirming ? "Confirm " : ""}Password.`,
+            back: `'${
+                confirming ? "confirmP" : "p"
+            }assword' field (String) is valid`,
         },
     };
 };
