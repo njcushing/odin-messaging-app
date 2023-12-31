@@ -14,7 +14,7 @@
         "startserver": "node ./packages/backend/bin/www.js",
         "startserverdev": "nodemon ./packages/backend/bin/www.js",
         "testserver": "vitest watch --root ./packages/backend",
-        "coverageserver": "vitest run --root ./packages/frontend --coverage"
+        "coverageserver": "vitest run --root ./packages/backend --coverage"
     },
     "dependencies": {
         "bcryptjs": "^2.4.3",
