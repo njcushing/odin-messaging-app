@@ -10,6 +10,12 @@ import LogIn from './index.jsx'
 import * as logInAPI from './utils/logInAPI.js'
 import * as validateFields from './utils/validateFields.js'
 
+// For 'Not implemented: navigation' error 
+let assignMock = vi.fn();
+delete window.location;
+window.location = { assign: assignMock };
+afterEach(() => { assignMock.mockClear(); });
+
 const renderComponent = async () => {
     act(() => render(<LogIn />));
 }
