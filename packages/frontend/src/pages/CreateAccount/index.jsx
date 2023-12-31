@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./index.module.css";
 
 import createAccountAPI from "./utils/createAccountAPI";
-import { validateUsername, validateEmail, validatePassword } from "./../../../../../utils/validateCreateAccountFields";
+import { validateUsername, validateEmail, validatePassword } from "../../../../../utils/validateCreateAccountFields";
 
 const CreateAccount = () => {
     const [usernameError, setUsernameError] = useState(null);
@@ -83,21 +83,24 @@ const CreateAccount = () => {
         }
     };
 
-    if (attemptingCreateAccount) {
-        (async () => {
-            const createAccountResponse = await createAccountAPI(credentials);
-            if (createAccountResponse.status >= 400) {
-                setCreateAccountError(createAccountResponse.message.front);
-            } else {
-                window.location.href = "/dashboard";
-            }
-            setAttemptingCreateAccount(false);
-            setCredentials({
-                username: credentials.username,
-                email: credentials.email,
-            });
-        })();
-    }
+    useEffect(() => {
+        // Had to wrap this inside useEffect to prevent two API calls in StrictMode
+        if (attemptingCreateAccount) {
+            (async () => {
+                const createAccountResponse = await createAccountAPI(credentials);
+                if (createAccountResponse.status >= 400) {
+                    setCreateAccountError(createAccountResponse.message);
+                    setAttemptingCreateAccount(false);
+                    setCredentials({
+                        username: credentials.username,
+                        email: credentials.email,
+                    });
+                } else {
+                    window.location.href = "/dashboard";
+                }
+            })();
+        }
+    }, [attemptingCreateAccount]);
 
     return (
         <div className={styles["wrapper"]}>
