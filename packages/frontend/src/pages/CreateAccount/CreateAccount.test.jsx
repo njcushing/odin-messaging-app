@@ -8,7 +8,7 @@ import { BrowserRouter } from "react-router-dom"
 import CreateAccount from './index.jsx'
 
 import * as createAccountAPI from './utils/createAccountAPI.js'
-import * as validateFields from './utils/validateFields.js'
+import * as validateCreateAccountFields from '../../../../../utils/validateCreateAccountFields.js'
 
 // For 'Not implemented: navigation' error 
 let assignMock = vi.fn();
@@ -32,15 +32,20 @@ const validateUsername = vi.fn(() => ({
     status: true,
     message: "Valid Username.",
 }));
+const validateEmail = vi.fn(() => ({
+    status: true,
+    message: "Valid Email.",
+}));
 const validatePassword = vi.fn(() => ({
     status: true,
     message: "Valid Password.",
 }));
-vi.mock('./utils/validateFields', async () => {
-    const actual = await vi.importActual("./utils/validateFields");
+vi.mock('../../../../../utils/validateCreateAccountFields', async () => {
+    const actual = await vi.importActual("../../../../../utils/validateCreateAccountFields");
     return {
         ...actual,
         validateUsername: () => validateUsername(),
+        validateEmail: () => validateEmail(),
         validatePassword: () => validatePassword(),
     }
 });
@@ -75,7 +80,7 @@ describe("UI/DOM Testing...", () => {
         });
         test(`On change, should invoke the validateUsername function`, async () => {
             const user = userEvent.setup();
-            const validateUsernameSpy = vi.spyOn(validateFields, "validateUsername");
+            const validateUsernameSpy = vi.spyOn(validateCreateAccountFields, "validateUsername");
             await renderComponent();
             const usernameInput = screen.getByRole("textbox", { name: "username-input" });
             await user.type(usernameInput, "a");
@@ -118,7 +123,7 @@ describe("UI/DOM Testing...", () => {
         });
         test(`On change, should invoke the validatePassword function`, async () => {
             const user = userEvent.setup();
-            const validatePasswordSpy = vi.spyOn(validateFields, "validatePassword");
+            const validatePasswordSpy = vi.spyOn(validateCreateAccountFields, "validatePassword");
             await renderComponent();
             const passwordInput = screen.getByLabelText("password-input");
             await user.type(passwordInput, "a");
@@ -178,7 +183,7 @@ describe("UI/DOM Testing...", () => {
         });
         test(`On change, should invoke the validatePassword function`, async () => {
             const user = userEvent.setup();
-            const validatePasswordSpy = vi.spyOn(validateFields, "validatePassword");
+            const validatePasswordSpy = vi.spyOn(validateCreateAccountFields, "validatePassword");
             await renderComponent();
             const confirmPasswordInput = screen.getByLabelText("confirm-password-input");
             await user.type(confirmPasswordInput, "a");
@@ -238,8 +243,8 @@ describe("UI/DOM Testing...", () => {
             expect(createAccountButton).toBeInTheDocument();
         });
         test(`When clicked, should not invoke the 'createAccountAPI' function if
-         any of the 'Username', 'Password' or 'Confirm Password' fields are
-         invalid`, async () => {
+         any of the 'Username', 'Email', 'Password' or 'Confirm Password' fields
+         are invalid`, async () => {
             const user = userEvent.setup();
             const createAccountAPISpy = vi.spyOn(createAccountAPI, "default");
             validateUsername.mockReturnValueOnce({
