@@ -64,15 +64,12 @@ passport.use(
         async (jwt_payload, done) => {
             const { username, password } = jwt_payload.user;
             try {
-                const [status, user, msg] = await validateUserCredentials(
+                const [status, user, message] = await validateUserCredentials(
                     username,
                     password
                 );
-                if (!status) return done(null, false, { message: msg });
-                if (!user.admin) {
-                    return done(null, false, { message: "Unauthorised user." });
-                }
-                return done(null, true);
+                if (!status) return done(null, false, { message: message });
+                return done(null, user);
             } catch (err) {
                 return done(err);
             }
@@ -103,6 +100,7 @@ app.use("*", cors(getCorsOpts));
 import * as routes from "./routes/index.js";
 app.use("/", routes.index);
 app.use("/create-account", routes.createaccount);
+app.use("/log-in", routes.login);
 app.use("/dashboard", routes.dashboard);
 
 // catch 404 and forward to error handler
