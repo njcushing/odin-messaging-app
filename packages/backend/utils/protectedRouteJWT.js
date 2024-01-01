@@ -1,22 +1,23 @@
-import createError from "http-errors";
 import passport from "passport";
 
+import sendResponse from "./sendResponse.js";
+
 const protectedRouteJWT = (req, res, next) => {
-    passport.authenticate(
-        "jwt",
-        { session: false },
-        (err, success, options) => {
-            if (success) {
-                return next();
-            } else if (options && options.message) {
-                res.redirect(401, "/log-in");
-            } else {
-                return next(
-                    createError(500, `Something went wrong with your request.`)
-                );
-            }
+    passport.authenticate("jwt", { session: false }, (err, user, options) => {
+        if (user) {
+            return next();
+        } else if (options && options.message) {
+            return next(sendResponse(res, 401, "Invalid credentials."));
+        } else {
+            return next(
+                sendResponse(
+                    res,
+                    500,
+                    "Something went wrong with your request."
+                )
+            );
         }
-    )(req, res, next);
+    })(req, res, next);
 };
 
 export default protectedRouteJWT;
