@@ -62,7 +62,7 @@ passport.use(
             secretOrKey: process.env.AUTH_SECRET_KEY,
         },
         async (jwt_payload, done) => {
-            const { username, password } = jwt_payload.user;
+            const { username, password } = jwt_payload;
             try {
                 const [status, user, message] = await validateUserCredentials(
                     username,
