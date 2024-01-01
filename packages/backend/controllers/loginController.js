@@ -63,7 +63,7 @@ export const loginPost = [
                     );
                 } else {
                     sendResponse(res, 200, "Log-in successful.", {
-                        token: token,
+                        token: `Bearer ${token}`,
                     });
                 }
             }

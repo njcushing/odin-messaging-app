@@ -161,7 +161,7 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect((res) => {
                     const data = res.body.data;
-                    if (data.token !== "token") {
+                    if (data.token !== "Bearer token") {
                         throw new Error(`Server has not responded with token`);
                     }
                 });
