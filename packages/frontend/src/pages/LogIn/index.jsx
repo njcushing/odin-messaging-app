@@ -9,7 +9,6 @@ const LogIn = () => {
     const [passwordError, setPasswordError] = useState(null);
     const [attemptingLogIn, setAttemptingLogIn] = useState(false);
     const [credentials, setCredentials] = useState({});
-    const [defaultValues, setDefaultValues] = useState({});
     const [logInError, setLogInError] = useState(null);
 
     const usernameInputRef = useRef(null);
