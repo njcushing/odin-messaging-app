@@ -5,6 +5,7 @@ import sendResponse from "./sendResponse.js";
 const protectedRouteJWT = (req, res, next) => {
     passport.authenticate("jwt", { session: false }, (err, user, options) => {
         if (user) {
+            req.user = user;
             return next();
         } else if (options && options.message) {
             return next(sendResponse(res, 401, "Invalid credentials."));
