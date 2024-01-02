@@ -65,7 +65,31 @@ afterEach(async () => {
 afterAll(() => mongoose.connection.close());
 
 describe("Route testing...", () => {
-    describe("/create-account POST route...", () => {
+    describe("/user GET route...", () => {
+        test(`Should respond with status code 404 if the user is not found in
+         the database`, async () => {
+            await request(app).get(`/personDoesNotExist`).expect(404);
+        });
+        test(`Should respond with status code 200 if the user is found in
+         the database`, async () => {
+            await request(app).get(`/Person1`).expect(200);
+        });
+        test(`Should respond with the user's information`, async () => {
+            await request(app)
+                .get(`/Person1`)
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (!data.hasOwnProperty("user")) {
+                        throw new Error(
+                            `Server has not responded with user information`
+                        );
+                    }
+                });
+        });
+    });
+
+    describe("/user POST route...", () => {
         test(`Should respond with status code 400 if the body object in the
          request object does not contain the necessary information`, async () => {
             await request(app)
@@ -187,7 +211,10 @@ describe("Route testing...", () => {
                 };
                 return next();
             });
-            await request(app).get(`/friends`).expect(400);
+            await request(app)
+                .get(`/friends`)
+                .expect((req) => console.log(req.user))
+                .expect(400);
         });
         test(`Should respond with status code 404 if the user is not found in
          the database`, async () => {
