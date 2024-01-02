@@ -99,7 +99,6 @@ app.use("*", cors(getCorsOpts));
 
 import * as routes from "./routes/index.js";
 app.use("/", routes.index);
-app.use("/create-account", routes.createaccount);
 app.use("/log-in", routes.login);
 app.use("/user", routes.user);
 app.use("/dashboard", routes.dashboard);
