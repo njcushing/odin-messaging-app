@@ -12,7 +12,7 @@ const createAccountAPI = async (credentials) => {
             if (
                 responseJSON.data !== null &&
                 typeof responseJSON === "object" &&
-                responseJSON.hasOwnProperty("token")
+                "token" in responseJSON.data
             ) {
                 localStorage.setItem(
                     "odin-messaging-app-auth-token",

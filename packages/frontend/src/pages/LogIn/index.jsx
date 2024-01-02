@@ -34,7 +34,6 @@ const LogIn = () => {
         if (attemptingLogIn) {
             (async () => {
                 const logInResponse = await logInAPI(credentials);
-                console.log(logInResponse);
                 if (logInResponse.status >= 400) {
                     setAttemptingLogIn(false);
                     setCredentials({ username: credentials.username });

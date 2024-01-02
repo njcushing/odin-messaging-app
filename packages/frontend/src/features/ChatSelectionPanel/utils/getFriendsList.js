@@ -1,54 +1,46 @@
 const getFriendsList = async () => {
-    return [
+    const data = await fetch(
+        `${import.meta.env.VITE_SERVER_DOMAIN}/user/friends`,
         {
-            _id: "1",
-            name: "John Smith",
-            tagLine: "Example tagline",
-            status: "online",
-            imageSrc: "",
-            imageAlt: "",
-        },
-        {
-            _id: "2",
-            name: "Davey Jones",
-            tagLine: "Example tagline",
-            status: "away",
-            imageSrc: "",
-            imageAlt: "",
-        },
-        {
-            _id: "3",
-            name: "Elizabeth Swann",
-            tagLine: "Example tagline",
-            status: "busy",
-            imageSrc: "",
-            imageAlt: "",
-        },
-        {
-            _id: "4",
-            name: "William Turner",
-            tagLine: "Example tagline",
-            status: "offline",
-            imageSrc: "",
-            imageAlt: "",
-        },
-        {
-            _id: "5",
-            name: "Jack Sparrow",
-            tagLine: "Example tagline",
-            status: "offline",
-            imageSrc: "",
-            imageAlt: "",
-        },
-        {
-            _id: "6",
-            name: "Barbosa",
-            tagLine: "Example tagline",
-            status: "online",
-            imageSrc: "",
-            imageAlt: "",
-        },
-    ];
+            method: "GET",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+                authorization: localStorage.getItem(
+                    "odin-messaging-app-auth-token"
+                ),
+            },
+        }
+    )
+        .then(async (response) => {
+            const responseJSON = await response.json();
+            if (responseJSON.status === 401) {
+                window.location.href = "/log-in";
+            }
+            if (
+                responseJSON.data !== null &&
+                typeof responseJSON === "object" &&
+                "token" in responseJSON.data
+            ) {
+                localStorage.setItem(
+                    "odin-messaging-app-auth-token",
+                    responseJSON.data.token
+                );
+            }
+            return {
+                status: responseJSON.status,
+                message: responseJSON.message,
+                friends: responseJSON.data.friends,
+            };
+        })
+        .catch((error) => {
+            return {
+                status: 500,
+                message: "Requesting friends list failed",
+                data: [],
+            };
+        });
+    return data;
 };
 
 export default getFriendsList;
