@@ -172,7 +172,13 @@ export const friendsGet = [
     protectedRouteJWT,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let user = await User.findById(req.user._id).select("friends").exec();
+        let user = await User.findById(req.user._id)
+            .select("friends")
+            .populate({
+                path: "friends",
+                select: "_id username preferences email",
+            })
+            .exec();
         if (user === null) {
             userNotFound(res, next, req.user._id);
         } else {
