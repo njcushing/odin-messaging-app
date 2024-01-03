@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
@@ -12,12 +12,24 @@ const AddFriendPanel = ({
     addFriendHandler,
     addFriendSubmissionErrors,
 }) => {
+    const [searchUsername, setSearchUsername] = useState("");
+    const [abortController, setAbortController] = useState(null);
     const [resultFound, setResultFound] = useState(null);
 
-    const updateResult = async (inputValue) => {
-        const newUser = await findUser(inputValue);
-        setResultFound(newUser);
-    }
+    useEffect(() => {
+        if (abortController) abortController.abort;
+        if (searchUsername.length > 0) {
+            const abortControllerNew = new AbortController();
+            setAbortController(abortControllerNew);
+            (async () => {
+                const response = await findUser(searchUsername, abortController);
+                setResultFound(response.user);
+            })();
+        }
+        return () => {
+            if (abortController) abortController.abort;
+        }
+    }, [searchUsername]);
 
     return (
         <div className={styles["wrapper"]}>
@@ -50,10 +62,11 @@ const AddFriendPanel = ({
                         id="friend-name"
                         name="friendName"
                         required
+                        defaultValue={searchUsername}
                         style={{
                             resize: "none"
                         }}
-                        onChange={(e) => updateResult(e.target.value)}
+                        onChange={(e) => setSearchUsername(e.target.value)}
                     ></input>
                 </div>
                 <div className={styles["result-found-container"]}>
@@ -72,7 +85,7 @@ const AddFriendPanel = ({
                             <p
                                 className={styles["result-found-name"]}
                                 aria-label="result-found-name"
-                            >{resultFound.name}</p>
+                            >{resultFound.username}</p>
                             <button
                                 className={styles["add-friend-button"]}
                                 aria-label="add-friend-button"
