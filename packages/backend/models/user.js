@@ -45,6 +45,7 @@ const UserSchema = new Schema({
     },
     account_creation_date: { type: Date, default: Date.now },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    friendRequests: [{ type: Schema.Types.ObjectId, ref: "User" }],
     chats: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
     preferences: {
         displayName: {
