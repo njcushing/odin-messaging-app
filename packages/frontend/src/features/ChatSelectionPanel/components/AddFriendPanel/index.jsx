@@ -6,6 +6,8 @@ import OptionButton from "@/components/OptionButton";
 import ProfileImage from "@/components/ProfileImage";
 
 import findUser from "./utils/findUser";
+import getFriend from "./utils/getFriend.js";
+import getFriendCanBeAdded from "./utils/getFriendCanBeAdded.js";
 
 const AddFriendPanel = ({
     onCloseHandler,
@@ -15,6 +17,7 @@ const AddFriendPanel = ({
     const [searchUsername, setSearchUsername] = useState("");
     const [abortController, setAbortController] = useState(null);
     const [resultFound, setResultFound] = useState(null);
+    const [responseMessage, setResponseMessage] = useState(null);
 
     useEffect(() => {
         if (abortController) abortController.abort;
@@ -22,8 +25,13 @@ const AddFriendPanel = ({
             const abortControllerNew = new AbortController();
             setAbortController(abortControllerNew);
             (async () => {
-                const response = await findUser(searchUsername, abortController);
-                setResultFound(response.user);
+                const response = await getFriendCanBeAdded(searchUsername, abortControllerNew);
+                setResultFound(response.friend);
+                if (response.friend === null && response.status === 400) {
+                    setResponseMessage(response.message);
+                } else {
+                    setResponseMessage(null);
+                }
             })();
         }
         return () => {
@@ -99,10 +107,18 @@ const AddFriendPanel = ({
                                 }}
                             >Add Friend</button>
                         </div>
-                    :   <h5
-                            className={styles["no-result-found"]}
-                            aria-label="no-result-found"
-                        >No result found</h5>
+                    :   <>
+                        {responseMessage
+                        ?   <h5
+                                className={styles["response-message"]}
+                                aria-label="response-message"
+                            >{responseMessage}</h5>
+                        :   <h5
+                                className={styles["no-result-found"]}
+                                aria-label="no-result-found"
+                            >No result found</h5>
+                        }
+                        </>
                     }
                 </div>
                 {addFriendSubmissionErrors.length > 0
