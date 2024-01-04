@@ -10,7 +10,7 @@ const compileValidationErrors = (arr) => {
     return reducedErrorArray.join(", ");
 };
 
-const checkBodyValidationError = (req, res, next) => {
+const checkRequestValidationError = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const errorString = compileValidationErrors(errors.array());
@@ -23,4 +23,4 @@ const checkBodyValidationError = (req, res, next) => {
     return next();
 };
 
-export default checkBodyValidationError;
+export default checkRequestValidationError;
