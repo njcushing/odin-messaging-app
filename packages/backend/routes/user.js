@@ -3,6 +3,7 @@ const router = express.Router();
 
 import * as controller from "../controllers/userController.js";
 
+router.get("/friend/:username", controller.friendGet);
 router.post("/friends/:username", controller.friendsPost);
 router.get("/friends", controller.friendsGet);
 router.get("/:username", controller.userGet);

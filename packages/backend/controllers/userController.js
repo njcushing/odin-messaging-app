@@ -193,6 +193,52 @@ export const userPost = [
     }),
 ];
 
+export const friendGet = [
+    protectedRouteJWT,
+    param("username", "'username' parameter (String) must not be empty")
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        let friend = await User.findOne({
+            username: req.params.username,
+        }).exec();
+        if (friend === null) {
+            return userNotFound(res, next, req.params.username);
+        }
+        let user = await User.findById(req.user._id)
+            .select("friends")
+            .populate({
+                path: "friends",
+                select: "_id",
+                match: { _id: friend._id },
+            })
+            .exec();
+        if (user === null) {
+            return userNotFound(res, next, req.user._id);
+        }
+        const token = await generateToken(req.user.username, req.user.password);
+        if (user.friends.length === 0) {
+            sendResponse(
+                res,
+                400,
+                "User found, but is not a friend of the currently logged-in user.",
+                {
+                    friend: null,
+                    token: token,
+                }
+            );
+        } else {
+            sendResponse(res, 200, "Friend found.", {
+                friend: friend,
+                token: token,
+            });
+        }
+    }),
+];
+
 export const friendsGet = [
     protectedRouteJWT,
     asyncHandler(async (req, res, next) => {
