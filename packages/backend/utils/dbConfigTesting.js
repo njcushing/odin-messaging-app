@@ -23,29 +23,88 @@ const initialiseMongoServer = async () => {
         console.log(`MongoDB successfully connected to ${mongoUri}`);
     });
 
-    // Populate database
-    const users = [];
-    await createUsers();
-
-    async function newUser(username, email, password) {
+    async function newUser(
+        index,
+        _id,
+        username,
+        email,
+        password,
+        friends,
+        friendRequests
+    ) {
         const user = new User({
+            _id: _id,
             username: username,
             email: email,
             password: password,
+            friends: friends,
+            friendRequests: friendRequests,
         });
         await user.save();
-        users[users.length] = user;
+        users[index] = user;
     }
+
+    const userIds = [
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+    ];
 
     async function createUsers() {
         await Promise.all([
-            newUser("Person1", "person1@company.com", "person1*"),
-            newUser("Person2", "person2@company.com", "person2*"),
-            newUser("Person3", "person3@company.com", "person3*"),
-            newUser("Person4", "person4@company.com", "person4*"),
-            newUser("Person5", "person5@company.com", "person5*"),
+            newUser(
+                0,
+                userIds[0],
+                "Person1",
+                "person1@company.com",
+                "person1*",
+                [userIds[4], userIds[1]],
+                [userIds[2]]
+            ),
+            newUser(
+                1,
+                userIds[1],
+                "Person2",
+                "person2@company.com",
+                "person2*",
+                [userIds[0], userIds[2]],
+                [userIds[3]]
+            ),
+            newUser(
+                2,
+                userIds[2],
+                "Person3",
+                "person3@company.com",
+                "person3*",
+                [userIds[1], userIds[3]],
+                [userIds[4]]
+            ),
+            newUser(
+                3,
+                userIds[3],
+                "Person4",
+                "person4@company.com",
+                "person4*",
+                [userIds[2], userIds[4]],
+                [userIds[0]]
+            ),
+            newUser(
+                4,
+                userIds[4],
+                "Person5",
+                "person5@company.com",
+                "person5*",
+                [userIds[3], userIds[0]],
+                [userIds[1]]
+            ),
         ]);
     }
+
+    // Populate database
+    const users = [];
+    await createUsers();
 
     return [users];
 };
