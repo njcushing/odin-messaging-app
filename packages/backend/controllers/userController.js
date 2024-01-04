@@ -281,7 +281,7 @@ export const friendCanBeAdded = [
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
         let friend = await User.findOne({ username: req.params.username })
-            .select("_id friendRequests")
+            .select("_id username friendRequests")
             .populate({
                 path: "friendRequests",
                 select: "_id",
@@ -324,7 +324,10 @@ export const friendCanBeAdded = [
                 200,
                 `${friend.username} can be added as a friend`,
                 {
-                    friend: friend,
+                    friend: {
+                        _id: friend._id,
+                        username: friend.username,
+                    },
                     token: token,
                 }
             );
