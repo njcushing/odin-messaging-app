@@ -1,9 +1,10 @@
-const declineFriendRequest = async (username) => {
+const declineFriendRequest = async (username, abortController) => {
     const data = await fetch(
         `${
             import.meta.env.VITE_SERVER_DOMAIN
         }/user/friend-requests/${username}/decline`,
         {
+            signal: abortController.signal,
             method: "PUT",
             mode: "cors",
             headers: {

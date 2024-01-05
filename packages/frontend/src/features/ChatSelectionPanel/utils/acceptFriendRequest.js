@@ -1,9 +1,10 @@
-const acceptFriendRequest = async (username) => {
+const acceptFriendRequest = async (username, abortController) => {
     const data = await fetch(
         `${
             import.meta.env.VITE_SERVER_DOMAIN
         }/user/friend-requests/${username}/accept`,
         {
+            signal: abortController.signal,
             method: "PUT",
             mode: "cors",
             headers: {
