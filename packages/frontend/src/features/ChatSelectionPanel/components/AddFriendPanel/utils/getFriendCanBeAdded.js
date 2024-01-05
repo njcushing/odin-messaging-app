@@ -2,7 +2,7 @@ const getFriendCanBeAdded = async (username, abortController) => {
     const data = await fetch(
         `${
             import.meta.env.VITE_SERVER_DOMAIN
-        }/user/friend/can-be-added/${username}`,
+        }/user/friends/can-be-added/${username}`,
         {
             signal: abortController.signal,
             method: "GET",

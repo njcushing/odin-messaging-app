@@ -1,6 +1,6 @@
 const getFriend = async (username, abortController) => {
     const data = await fetch(
-        `${import.meta.env.VITE_SERVER_DOMAIN}/user/friend/${username}`,
+        `${import.meta.env.VITE_SERVER_DOMAIN}/user/friends/${username}`,
         {
             signal: abortController.signal,
             method: "GET",
