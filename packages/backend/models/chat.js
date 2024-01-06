@@ -5,8 +5,12 @@ const Schema = mongoose.Schema;
 const ChatSchema = new Schema({
     participants: [
         {
-            user: { type: Schema.Types.ObjectId, ref: "User" },
-            role: { type: String, enum: ["admin", "moderator", "guest"] },
+            user: { type: Schema.Types.ObjectId, ref: "User", require: true },
+            role: {
+                type: String,
+                enum: ["admin", "moderator", "guest"],
+                default: "guest",
+            },
             muted: { type: Boolean, default: false },
         },
     ],
