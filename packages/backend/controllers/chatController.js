@@ -16,8 +16,20 @@ const validateUserId = (res, next, userId) => {
     }
 };
 
+const validateChatId = (res, next, chatId) => {
+    if (!mongoose.Types.ObjectId.isValid(chatId)) {
+        return next(
+            sendResponse(res, 400, "Provided chat id is not a valid id.")
+        );
+    }
+};
+
 const userNotFound = (res, userId) => {
     return sendResponse(res, 404, "User not found in database.");
+};
+
+const chatNotFound = (res, chatId) => {
+    return sendResponse(res, 404, "Chat not found in database.");
 };
 
 const validators = {
@@ -44,8 +56,34 @@ const validators = {
 };
 
 export const chatGet = [
+    protectedRouteJWT,
     asyncHandler(async (req, res, next) => {
-        sendResponse(res, 200, "Chat found.", { chat: {} });
+        validateUserId(res, next, req.user._id);
+        let user = await User.findById(req.user._id).exec();
+        if (user === null) return userNotFound(res, next, req.user._id);
+
+        validateChatId(res, next, req.params.chatId);
+        let chat = await Chat.findById(req.params.chatId);
+        if (chat === null) return chatNotFound(res, next, req.params.chatId);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        if (!user.chats.includes(req.params.chatId.toString())) {
+            sendResponse(
+                res,
+                401,
+                "Currently logged-in user is not authorised to view this chat.",
+                {
+                    token: token,
+                    chat: null,
+                }
+            );
+        } else {
+            sendResponse(res, 200, "Chat found.", {
+                token: token,
+                chat: chat,
+            });
+        }
     }),
 ];
 
