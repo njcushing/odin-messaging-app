@@ -2,7 +2,7 @@ const findUser = async (username, abortController) => {
     const data = await fetch(
         `${import.meta.env.VITE_SERVER_DOMAIN}/user/${username}`,
         {
-            signal: abortController.signal,
+            signal: abortController ? abortController.signal : null,
             method: "GET",
             mode: "cors",
         }
