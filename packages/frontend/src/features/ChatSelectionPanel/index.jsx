@@ -11,6 +11,7 @@ import ChatPanel from "./components/ChatPanel";
 import FriendRequest from "./components/FriendRequest";
 
 import * as getChatListFromAPI from "./utils/getChatListFromAPI.js";
+import getFriendsList from "./utils/getFriendsList.js";
 import getFriendRequests from "./utils/getFriendRequests.js";
 
 import { v4 as uuidv4 } from 'uuid';
@@ -19,6 +20,7 @@ const ChatSelectionPanel = ({
     chatType,
 }) => {
     const [chatList, setChatList] = useState([]);
+    const [chatTypeAC, setChatTypeAC] = useState(null);
     const [addingFriend, setAddingFriend] = useState(false);
     const [creatingChat, setCreatingChat] = useState(false);
     const [creatingGroup, setCreatingGroup] = useState(false);
@@ -27,25 +29,35 @@ const ChatSelectionPanel = ({
     const [friendRequestsAC, setFriendRequestsAC] = useState(null);
 
     useEffect(() => {
+        if (chatTypeAC) chatTypeAC.abort;
+        const chatTypeACNew = new AbortController();
+        setChatTypeAC(chatTypeACNew);
         (async () => {
-            let chatListNew = [];
+            let response;
             switch (chatType) {
                 case "friends":
-                    chatListNew = await getChatListFromAPI.friends();
+                    response = await getFriendsList(chatTypeACNew);
+                    setChatList(response.friends);
+                    setChatTypeAC(chatTypeACNew);
                     break;
                 case "groups":
-                    chatListNew = await getChatListFromAPI.groups();
+                    response = await getChatListFromAPI.groups();
+                    setChatList(response);
+                    setChatTypeAC(chatTypeACNew);
                     break;
                 case "communities":
-                    chatListNew = await getChatListFromAPI.communities();
+                    response = await getChatListFromAPI.communities();
+                    setChatList(response);
+                    setChatTypeAC(chatTypeACNew);
                     break;
                 default:
-                    chatListNew = [];
+                    setChatList([]);
+                    setChatTypeAC(null);
             }
-            setChatList(chatListNew);
         })();
 
         return () => {
+            if (chatTypeAC) chatTypeAC.abort;
             if (friendRequestsAC) friendRequestsAC.abort;
         }
     }, [chatType]);
@@ -63,6 +75,7 @@ const ChatSelectionPanel = ({
             setFriendRequestsAC(null);
         }
         return () => {
+            if (chatTypeAC) chatTypeAC.abort;
             if (friendRequestsAC) friendRequestsAC.abort;
         }
     }, [viewingFriendRequests]);
@@ -249,17 +262,20 @@ const ChatSelectionPanel = ({
                 :   <ul
                         className={styles["chat-list-options"]}
                         aria-label="chat-list-options"
-                        key={uuidv4()}
                     >
-                        {chatList.map((chat, i) => {
+                        {chatList.map((chat) => {
                             return (
                                 <li
                                     aria-label="chat-option"
                                     key={chat._id}
                                 ><ChatOption
-                                    name={chat.name}
-                                    tagLine={chat.tagLine}
-                                    status={chat.status}
+                                    name={chat.username}
+                                    tagLine={chat.preferences.tagLine}
+                                    status={
+                                        chat.preferences.setStatus !== null ?
+                                        chat.preferences.setStatus :
+                                        chat.status
+                                    }
                                     imageSrc={chat.imageSrc}
                                     imageAlt={chat.imageAlt}
                                     onClickHandler={() => {}}
