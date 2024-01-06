@@ -47,6 +47,8 @@ const UserSchema = new Schema({
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
     friendRequests: [{ type: Schema.Types.ObjectId, ref: "User" }],
     chats: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
+    groups: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
+    communities: [{ type: Schema.Types.ObjectId, ref: "Community" }],
     preferences: {
         displayName: {
             type: String,
