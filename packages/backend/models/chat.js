@@ -3,19 +3,12 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const ChatSchema = new Schema({
-    participants: [
-        {
-            user: { type: Schema.Types.ObjectId, ref: "User", require: true },
-            role: {
-                type: String,
-                enum: ["admin", "moderator", "guest"],
-                default: "guest",
-            },
-            muted: { type: Boolean, default: false },
-        },
-    ],
-    name: { type: String, trim: true },
-    image: { type: Schema.Types.ObjectId, ref: "Image" },
+    linkId: {
+        type: String,
+        trim: true,
+        unique: true,
+        required: [true, "'linkId' field required"],
+    },
     messages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
 });
 
