@@ -44,10 +44,26 @@ const UserSchema = new Schema({
         default: false,
     },
     account_creation_date: { type: Date, default: Date.now },
-    friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    friends: [
+        {
+            _id: { type: Schema.Types.ObjectId, ref: "User", required: true },
+            chat: { type: Schema.Types.ObjectId, ref: "Chat", default: null },
+            becameFriendsDate: { type: Date, default: Date.now },
+            status: {
+                type: String,
+                enum: ["normal", "unfriended"],
+                default: "normal",
+            },
+        },
+    ],
     friendRequests: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
+    chats: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
     communities: [{ type: Schema.Types.ObjectId, ref: "Community" }],
+    status: {
+        type: String,
+        enum: ["online", "busy", "away", "offline", null],
+        default: null,
+    },
     preferences: {
         displayName: {
             type: String,

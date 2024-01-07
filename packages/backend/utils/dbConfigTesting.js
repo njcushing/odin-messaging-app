@@ -31,8 +31,7 @@ const initialiseMongoServer = async () => {
         email,
         password,
         friends,
-        friendRequests,
-        chats
+        friendRequests
     ) => {
         const user = new User({
             _id: _id,
@@ -41,21 +40,29 @@ const initialiseMongoServer = async () => {
             password: password,
             friends: friends,
             friendRequests: friendRequests,
-            chats: chats,
         });
         await user.save();
         users[index] = user;
     };
 
-    const newChat = async (index, linkId) => {
+    const newChat = async (index, _id, participants) => {
         const chat = new Chat({
-            linkId: linkId,
+            _id: _id,
+            participants: participants,
         });
         await chat.save();
         chats[index] = chat;
     };
 
     const userIds = [
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+    ];
+
+    const chatIds = [
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
@@ -71,7 +78,16 @@ const initialiseMongoServer = async () => {
                 "Person1",
                 "person1@company.com",
                 "person1*",
-                [userIds[4], userIds[1]],
+                [
+                    {
+                        _id: userIds[4],
+                        chat: chatIds[4],
+                    },
+                    {
+                        _id: userIds[1],
+                        chat: chatIds[0],
+                    },
+                ],
                 [userIds[2]]
             ),
             newUser(
@@ -80,7 +96,16 @@ const initialiseMongoServer = async () => {
                 "Person2",
                 "person2@company.com",
                 "person2*",
-                [userIds[0], userIds[2]],
+                [
+                    {
+                        _id: userIds[0],
+                        chat: chatIds[0],
+                    },
+                    {
+                        _id: userIds[2],
+                        chat: chatIds[1],
+                    },
+                ],
                 [userIds[3]]
             ),
             newUser(
@@ -89,7 +114,16 @@ const initialiseMongoServer = async () => {
                 "Person3",
                 "person3@company.com",
                 "person3*",
-                [userIds[1], userIds[3]],
+                [
+                    {
+                        _id: userIds[1],
+                        chat: chatIds[1],
+                    },
+                    {
+                        _id: userIds[3],
+                        chat: chatIds[2],
+                    },
+                ],
                 [userIds[4]]
             ),
             newUser(
@@ -98,7 +132,16 @@ const initialiseMongoServer = async () => {
                 "Person4",
                 "person4@company.com",
                 "person4*",
-                [userIds[2], userIds[4]],
+                [
+                    {
+                        _id: userIds[2],
+                        chat: null,
+                    },
+                    {
+                        _id: userIds[4],
+                        chat: chatIds[3],
+                    },
+                ],
                 [userIds[0]]
             ),
             newUser(
@@ -107,7 +150,16 @@ const initialiseMongoServer = async () => {
                 "Person5",
                 "person5@company.com",
                 "person5*",
-                [userIds[3], userIds[0]],
+                [
+                    {
+                        _id: userIds[3],
+                        chat: new mongoose.Types.ObjectId(),
+                    },
+                    {
+                        _id: userIds[0],
+                        chat: chatIds[4],
+                    },
+                ],
                 [userIds[1]]
             ),
         ]);
@@ -115,11 +167,26 @@ const initialiseMongoServer = async () => {
 
     const createChats = async () => {
         await Promise.all([
-            newChat(0, `${userIds[0].toString()}${userIds[1].toString()}`),
-            newChat(1, `${userIds[1].toString()}${userIds[2].toString()}`),
-            newChat(2, `${userIds[2].toString()}${userIds[3].toString()}`),
-            newChat(3, `${userIds[3].toString()}${userIds[4].toString()}`),
-            newChat(4, `${userIds[4].toString()}${userIds[0].toString()}`),
+            newChat(0, chatIds[0], [
+                { user: userIds[0] },
+                { user: userIds[1] },
+            ]),
+            newChat(1, chatIds[1], [
+                { user: userIds[1] },
+                { user: userIds[2] },
+            ]),
+            newChat(2, chatIds[2], [
+                { user: userIds[2] },
+                { user: userIds[3] },
+            ]),
+            newChat(3, chatIds[3], [
+                { user: userIds[3] },
+                { user: userIds[4] },
+            ]),
+            newChat(4, chatIds[4], [
+                { user: userIds[4] },
+                { user: userIds[0] },
+            ]),
         ]);
     };
 
