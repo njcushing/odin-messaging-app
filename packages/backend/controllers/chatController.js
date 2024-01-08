@@ -179,6 +179,7 @@ export const chatPost = [
             session.startTransaction();
 
             const chat = new Chat({
+                type: "group",
                 participants: req.body.participants.map((participant) => {
                     return { user: participant };
                 }),
