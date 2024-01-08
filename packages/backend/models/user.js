@@ -46,10 +46,14 @@ const UserSchema = new Schema({
     account_creation_date: { type: Date, default: Date.now },
     friends: [
         {
-            _id: { type: Schema.Types.ObjectId, ref: "User", required: true },
+            user: {
+                type: Schema.Types.ObjectId,
+                ref: "User",
+                required: true,
+            },
             chat: { type: Schema.Types.ObjectId, ref: "Chat", default: null },
             becameFriendsDate: { type: Date, default: Date.now },
-            status: {
+            friendStatus: {
                 type: String,
                 enum: ["normal", "unfriended"],
                 default: "normal",
