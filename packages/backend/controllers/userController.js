@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 import User from "../models/user.js";
+import Chat from "../models/chat.js";
 
 import sendResponse from "../utils/sendResponse.js";
 import checkRequestValidationError from "../utils/checkRequestValidationError.js";
@@ -202,26 +203,27 @@ export const userSelf = [
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
+
         let user = await User.findById(req.user._id).select("username").exec();
-        if (user === null) {
-            return userNotFound(res, next, req.user._id);
-        }
+        if (user === null) return userNotFound(res, next, req.user._id);
+
         const token = await generateToken(req.user.username, req.user.password);
+
         if (user.username === req.params.username) {
-            sendResponse(
+            return sendResponse(
                 res,
                 200,
                 "Specified user is the currently logged-in user.",
                 { token: token }
             );
-        } else {
-            sendResponse(
-                res,
-                400,
-                "Specified user is not the currently logged-in user.",
-                { token: token }
-            );
         }
+
+        sendResponse(
+            res,
+            400,
+            "Specified user is not the currently logged-in user.",
+            { token: token }
+        );
     }),
 ];
 
@@ -234,26 +236,34 @@ export const friendGet = [
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let friend = await User.findOne({
-            username: req.params.username,
-        }).exec();
-        if (friend === null) {
-            return userNotFound(res, next, req.params.username);
-        }
-        let user = await User.findById(req.user._id)
-            .select("friends")
-            .populate({
-                path: "friends",
-                select: "_id",
-                match: { _id: friend._id },
-            })
-            .exec();
-        if (user === null) {
-            return userNotFound(res, next, req.user._id);
-        }
+
+        const username = req.params.username;
+
+        const friend = await User.findOne({ username: username }).exec();
+        if (friend === null) return userNotFound(res, next, username);
+
+        const user = await User.findOne(
+            {
+                _id: req.user._id,
+            },
+            {
+                friends: {
+                    $elemMatch: {
+                        user: {
+                            $in: [friend._id],
+                        },
+                    },
+                },
+            }
+        );
+        if (user === null) return userNotFound(res, next, req.user._id);
+
+        await User.populate(user, { path: "friends.user" });
+
         const token = await generateToken(req.user.username, req.user.password);
+
         if (user.friends.length === 0) {
-            sendResponse(
+            return sendResponse(
                 res,
                 400,
                 "User found, but is not a friend of the currently logged-in user.",
@@ -262,12 +272,38 @@ export const friendGet = [
                     token: token,
                 }
             );
-        } else {
-            sendResponse(res, 200, "Friend found.", {
-                friend: friend,
-                token: token,
-            });
         }
+
+        await User.populate(user, {
+            path: "friends.user",
+            select: `
+                _id
+                username
+                preferences.displayName
+                preferences.tagLine
+                preferences.setStatus
+                email
+                status
+            `,
+        });
+
+        const friendInfo = user.friends[0];
+        const friendReduced = {
+            _id: friendInfo.user._id,
+            username: friendInfo.user.username,
+            email: friendInfo.user.email,
+            displayName: friendInfo.user.preferences.displayName,
+            tagLine: friendInfo.user.preferences.tagLine,
+            status: friendInfo.user.status,
+            setStatus: friendInfo.user.preferences.setStatus,
+            chat: friendInfo.user.chat,
+            friendStatus: friendInfo.user.friendStatus,
+            becameFriendsDate: friendInfo.user.becameFriendsDate,
+        };
+        return sendResponse(res, 200, "Friend found.", {
+            friend: friendReduced,
+            token: token,
+        });
     }),
 ];
 
@@ -280,7 +316,10 @@ export const friendCanBeAdded = [
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let friend = await User.findOne({ username: req.params.username })
+
+        const username = req.params.username;
+
+        let friend = await User.findOne({ username: username })
             .select("_id username friendRequests")
             .populate({
                 path: "friendRequests",
@@ -288,23 +327,18 @@ export const friendCanBeAdded = [
                 match: { _id: req.user._id },
             })
             .exec();
-        if (friend === null) {
-            return userNotFound(res, next, req.params.username);
-        }
+        if (friend === null) return userNotFound(res, next, username);
+
         let user = await User.findById(req.user._id)
-            .select("friends")
-            .populate({
-                path: "friends",
-                select: "_id",
-                match: { _id: friend._id },
-            })
+            .select("friends.user")
             .exec();
-        if (user === null) {
-            return userNotFound(res, next, req.user._id);
-        }
+        if (user === null) return userNotFound(res, next, req.user._id);
+
         const token = await generateToken(req.user.username, req.user.password);
+
+        // User and friend ids are identical
         if (friend._id.toString() === user._id.toString()) {
-            sendResponse(
+            return sendResponse(
                 res,
                 400,
                 "Provided username matches the user currently logged-in.",
@@ -313,9 +347,13 @@ export const friendCanBeAdded = [
                     token: token,
                 }
             );
-        } else if (user.friends.length !== 0) {
-            // User exists within friends list already
-            sendResponse(
+        }
+
+        // User exists within friends list already
+        const friendId = friend._id.toString();
+        const friendIds = user.friends.map((friend) => friend.user.toString());
+        if (friendIds.includes(friendId)) {
+            return sendResponse(
                 res,
                 400,
                 "Provided username already exists in the friends list for the currently logged-in user.",
@@ -324,9 +362,11 @@ export const friendCanBeAdded = [
                     token: token,
                 }
             );
-        } else if (friend.friendRequests.length !== 0) {
-            // User exists within friends' pending friend requests list
-            sendResponse(
+        }
+
+        // User exists within friends' pending friend requests list
+        if (friend.friendRequests.length !== 0) {
+            return sendResponse(
                 res,
                 400,
                 "Friend request already sent to specified username.",
@@ -335,20 +375,15 @@ export const friendCanBeAdded = [
                     token: token,
                 }
             );
-        } else {
-            sendResponse(
-                res,
-                200,
-                `${friend.username} can be added as a friend`,
-                {
-                    friend: {
-                        _id: friend._id,
-                        username: friend.username,
-                    },
-                    token: token,
-                }
-            );
         }
+
+        sendResponse(res, 200, `${friend.username} can be added as a friend`, {
+            friend: {
+                _id: friend._id,
+                username: friend.username,
+            },
+            token: token,
+        });
     }),
 ];
 
@@ -356,10 +391,11 @@ export const friendsGet = [
     protectedRouteJWT,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
+
         let user = await User.findById(req.user._id)
             .select("friends")
             .populate({
-                path: "friends",
+                path: "friends.user",
                 select: `
                     _id
                     username
@@ -367,21 +403,30 @@ export const friendsGet = [
                     preferences.tagLine
                     preferences.setStatus
                     email
+                    status
                 `,
             })
             .exec();
-        if (user === null) {
-            userNotFound(res, next, req.user._id);
-        } else {
-            const token = await generateToken(
-                req.user.username,
-                req.user.password
-            );
-            sendResponse(res, 200, "Friends found.", {
-                friends: [...user.friends],
-                token: token,
-            });
-        }
+        if (user === null) return userNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        const friends = user.friends.map((friend) => ({
+            _id: friend.user._id,
+            username: friend.user.username,
+            email: friend.user.email,
+            displayName: friend.user.preferences.displayName,
+            tagLine: friend.user.preferences.tagLine,
+            status: friend.user.status,
+            setStatus: friend.user.preferences.setStatus,
+            chat: friend.user.chat,
+            friendStatus: friend.user.friendStatus,
+            becameFriendsDate: friend.user.becameFriendsDate,
+        }));
+        sendResponse(res, 200, "Friends found.", {
+            friends: friends,
+            token: token,
+        });
     }),
 ];
 
@@ -394,75 +439,96 @@ export const friendsPost = [
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
+
         let friend = await User.findOne({ username: req.body.username })
             .select("_id username")
             .exec();
         if (friend === null) {
             return userNotFound(res, next, req.body.username);
         }
+
         let user = await User.findById(req.user._id)
-            .select("friends")
-            .populate({
-                path: "friends",
-                select: "_id",
-                match: { _id: friend._id },
-            })
+            .select("friends.user")
             .populate({
                 path: "friendRequests",
                 select: "_id",
                 match: { _id: friend._id },
             })
             .exec();
-        if (user === null) {
-            return userNotFound(res, next, req.user._id);
-        }
+        if (user === null) return userNotFound(res, next, req.user._id);
+
         const token = await generateToken(req.user.username, req.user.password);
+
+        // User and friend ids are identical
         if (friend._id.toString() === user._id.toString()) {
-            sendResponse(
+            return sendResponse(
                 res,
                 400,
                 "Provided username matches the user currently logged-in.",
                 { token: token }
             );
-        } else if (user.friends.length !== 0) {
-            // User exists within friends list already
-            sendResponse(
+        }
+
+        // User exists within friends list already
+        const friendId = friend._id.toString();
+        const friendIds = user.friends.map((friend) => friend.user.toString());
+        if (friendIds.includes(friendId)) {
+            return sendResponse(
                 res,
                 400,
                 "Provided username already exists in the friends list for the currently logged-in user.",
                 { token: token }
             );
-        } else if (user.friendRequests.length !== 0) {
-            // Potential friend exists within currently logged-in user's pending friend requests list
-            const updatedFriend = await User.findByIdAndUpdate(friend._id, {
-                $push: { friends: user._id },
-            });
-            if (updatedFriend === null) {
+        }
+
+        // User _id exists within currently logged-in user's friendRequests array
+        if (user.friendRequests.length !== 0) {
+            const session = await mongoose.startSession();
+            try {
+                session.startTransaction();
+
+                const updatedFriend = await User.findByIdAndUpdate(friend._id, {
+                    $push: { friends: user._id },
+                });
+                if (updatedFriend === null) {
+                    const error = new Error(
+                        `User not found in database: ${friend._id}.`
+                    );
+                    error.status = 404;
+                    throw error;
+                }
+
+                const updatedUser = await User.findByIdAndUpdate(user._id, {
+                    $push: { friends: friend._id },
+                    $pull: { friendRequests: friend._id },
+                });
+                if (updatedUser === null) {
+                    const error = new Error(
+                        `User not found in database: ${user._id}.`
+                    );
+                    error.status = 401;
+                    throw error;
+                }
+
+                session.commitTransaction();
+
                 return sendResponse(
                     res,
-                    404,
-                    `User not found in database: ${friend._id}.`,
+                    201,
+                    `${friend.username} successfully added as a friend.`,
                     { token: token }
                 );
-            }
-            const updatedUser = await User.findByIdAndUpdate(user._id, {
-                $push: { friends: friend._id },
-                $pull: { friendRequests: friend._id },
-            });
-            if (updatedUser === null) {
+            } catch (error) {
                 return sendResponse(
                     res,
-                    401,
-                    `User not found in database: ${user._id}.`,
-                    { token: token }
+                    error.status,
+                    error.message,
+                    { token: token },
+                    error
                 );
+            } finally {
+                session.endSession();
             }
-            sendResponse(
-                res,
-                201,
-                `${friend.username} successfully added as a friend.`,
-                { token: token }
-            );
         } else {
             // Add currently logged-in user's _id to friend's pending friendRequest array
             const updatedFriend = await User.findByIdAndUpdate(friend._id, {
@@ -480,7 +546,9 @@ export const friendsPost = [
                 res,
                 201,
                 `Friend request sent to ${friend.username}.`,
-                { token: token }
+                {
+                    token: token,
+                }
             );
         }
     }),
@@ -525,62 +593,99 @@ export const friendRequestsAccept = [
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let friend = await User.findOne({ username: req.params.username })
+
+        const username = req.params.username;
+
+        let friend = await User.findOne({ username: username })
             .select("_id username")
             .exec();
-        if (friend === null) {
-            return userNotFound(res, next, req.params.username);
-        }
+        if (friend === null) return userNotFound(res, next, username);
+
         let user = await User.findById(req.user._id)
-            .select("friends")
             .populate({
                 path: "friendRequests",
                 select: "_id",
                 match: { _id: friend._id },
             })
             .exec();
-        if (user === null) {
-            return userNotFound(res, next, req.user._id);
-        }
+        if (user === null) return userNotFound(res, next, req.user._id);
+
         const token = await generateToken(req.user.username, req.user.password);
+
         if (user.friendRequests.length === 0) {
-            sendResponse(
+            return sendResponse(
                 res,
                 404,
                 `${friend.username} does not exist within the currently
                 logged-in user's friend requests.`,
                 { token: token }
             );
-        } else {
+        }
+
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+
+            const chat = new Chat({
+                type: "individual",
+                participants: [{ user: user._id }, { user: friend._id }],
+            });
+            await chat.save().catch((error) => {
+                error.message = "Unable to create Chat.";
+                error.status = 500;
+                throw error;
+            });
+
             const updatedFriend = await User.findByIdAndUpdate(friend._id, {
-                $push: { friends: user._id },
+                $push: {
+                    friends: {
+                        user: user._id,
+                        chat: chat._id,
+                    },
+                },
             });
             if (updatedFriend === null) {
-                return sendResponse(
-                    res,
-                    404,
-                    `User not found in database: ${friend._id}.`,
-                    { token: token }
+                const error = new Error(
+                    `User not found in database: ${friend._id}.`
                 );
+                error.status = 404;
+                throw error;
             }
             const updatedUser = await User.findByIdAndUpdate(user._id, {
-                $push: { friends: friend._id },
+                $push: {
+                    friends: {
+                        user: friend._id,
+                        chat: chat._id,
+                    },
+                },
                 $pull: { friendRequests: friend._id },
             });
             if (updatedUser === null) {
-                return sendResponse(
-                    res,
-                    401,
-                    `User not found in database: ${user._id}.`,
-                    { token: token }
+                const error = new Error(
+                    `User not found in database: ${user._id}.`
                 );
+                error.status = 401;
+                throw error;
             }
-            sendResponse(
+
+            session.commitTransaction();
+
+            return sendResponse(
                 res,
                 200,
                 `${friend.username} successfully accepted as a friend.`,
                 { token: token }
             );
+        } catch (error) {
+            return sendResponse(
+                res,
+                error.status,
+                error.message,
+                { token: token },
+                error
+            );
+        } finally {
+            session.endSession();
         }
     }),
 ];
@@ -594,54 +699,51 @@ export const friendRequestsDecline = [
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let friend = await User.findOne({ username: req.params.username })
+
+        const username = req.params.username;
+
+        let friend = await User.findOne({ username: username })
             .select("_id username")
             .exec();
-        if (friend === null) {
-            return userNotFound(res, next, req.params.username);
-        }
+        if (friend === null) return userNotFound(res, next, username);
+
         let user = await User.findById(req.user._id)
-            .select("friends")
             .populate({
                 path: "friendRequests",
                 select: "_id",
                 match: { _id: friend._id },
             })
             .exec();
-        if (user === null) {
-            return userNotFound(res, next, req.user._id);
-        }
+        if (user === null) return userNotFound(res, next, req.user._id);
+
         const token = await generateToken(req.user.username, req.user.password);
+
         if (user.friendRequests.length === 0) {
-            sendResponse(
+            return sendResponse(
                 res,
                 404,
                 `${friend.username} does not exist within the currently
                 logged-in user's friend requests.`,
                 { token: token }
             );
-        } else {
-            const token = await generateToken(
-                req.user.username,
-                req.user.password
-            );
-            const updatedUser = await User.findByIdAndUpdate(user._id, {
-                $pull: { friendRequests: friend._id },
-            });
-            if (updatedUser === null) {
-                return sendResponse(
-                    res,
-                    401,
-                    `User not found in database: ${user._id}.`,
-                    { token: token }
-                );
-            }
-            sendResponse(
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(user._id, {
+            $pull: { friendRequests: friend._id },
+        });
+        if (updatedUser === null) {
+            return sendResponse(
                 res,
-                200,
-                `${friend.username} successfully declined as a friend.`,
+                401,
+                `User not found in database: ${user._id}.`,
                 { token: token }
             );
         }
+        sendResponse(
+            res,
+            200,
+            `${friend.username} successfully declined as a friend.`,
+            { token: token }
+        );
     }),
 ];
