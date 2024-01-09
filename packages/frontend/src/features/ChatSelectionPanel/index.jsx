@@ -277,11 +277,7 @@ const ChatSelectionPanel = ({
                                 ><ChatOption
                                     name={chat.username}
                                     tagLine={chat.tagLine}
-                                    status={
-                                        chat.setStatus !== null ?
-                                        chat.setStatus :
-                                        chat.status
-                                    }
+                                    status={chat.status}
                                     imageSrc={chat.imageSrc}
                                     imageAlt={chat.imageAlt}
                                     onClickHandler={() => {}}

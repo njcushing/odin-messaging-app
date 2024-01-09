@@ -11,9 +11,12 @@ import MessageBox from "../MessageBox";
 import getChatFromAPI from "./utils/getChatFromAPI";
 import combineParticipantNames from "./utils/combineParticipantNames";
 
-const ChatPanel = () => {
+const ChatPanel = ({
+    chatId,
+}) => {
     const [addingFriendsToChat, setAddingFriendsToChat] = useState(false);
     const [chat, setChat] = useState(null);
+    const [getChatAC, setGetChatAC] = useState(null);
     const [messageSubmissionErrors, setMessageSubmissionErrors] = useState([]);
 
     useEffect(() => {
