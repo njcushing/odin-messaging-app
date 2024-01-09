@@ -136,7 +136,7 @@ export const userPost = [
                         jwt.sign(
                             {
                                 username: user.username,
-                                password: user.password,
+                                password: req.body.password,
                             },
                             process.env.AUTH_SECRET_KEY,
                             { expiresIn: "7d" },
@@ -423,6 +423,7 @@ export const friendsGet = [
             friendStatus: friend.user.friendStatus,
             becameFriendsDate: friend.user.becameFriendsDate,
         }));
+
         sendResponse(res, 200, "Friends found.", {
             friends: friends,
             token: token,
