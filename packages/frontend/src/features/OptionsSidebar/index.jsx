@@ -17,16 +17,10 @@ const OptionsSidebar = ({
                     onClickHandler={() => onOptionSelect("friends")}
                 />
                 <OptionButton
-                    text="groups"
-                    tooltipText="Groups"
+                    text="chat"
+                    tooltipText="Chats"
                     tooltipPosition="right"
-                    onClickHandler={() => onOptionSelect("groups")}
-                />
-                <OptionButton
-                    text="communities"
-                    tooltipText="Communities"
-                    tooltipPosition="right"
-                    onClickHandler={() => onOptionSelect("communities")}
+                    onClickHandler={() => onOptionSelect("chats")}
                 />
             </div>
             <div className={styles["settings-options"]}>
