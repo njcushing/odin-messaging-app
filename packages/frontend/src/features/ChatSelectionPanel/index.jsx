@@ -27,6 +27,7 @@ const ChatSelectionPanel = ({
     const [viewingFriendRequests, setViewingFriendRequests] = useState(false);
     const [friendRequests, setFriendRequests] = useState([]);
     const [friendRequestsAC, setFriendRequestsAC] = useState(null);
+    const [chat, setChat] = useState(null);
 
     useEffect(() => {
         if (chatTypeAC) chatTypeAC.abort;
@@ -113,7 +114,9 @@ const ChatSelectionPanel = ({
     } else {
         rightPanelContent = (
             <div className={styles["chat-panel"]}>
-                <ChatPanel />
+                <ChatPanel
+                    userId={chat}
+                />
             </div>
         );
     }
@@ -270,10 +273,10 @@ const ChatSelectionPanel = ({
                                     key={chat._id}
                                 ><ChatOption
                                     name={chat.username}
-                                    tagLine={chat.preferences.tagLine}
+                                    tagLine={chat.tagLine}
                                     status={
-                                        chat.preferences.setStatus !== null ?
-                                        chat.preferences.setStatus :
+                                        chat.setStatus !== null ?
+                                        chat.setStatus :
                                         chat.status
                                     }
                                     imageSrc={chat.imageSrc}

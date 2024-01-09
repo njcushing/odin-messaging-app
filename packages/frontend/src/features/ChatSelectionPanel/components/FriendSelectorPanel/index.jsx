@@ -81,8 +81,8 @@ const FriendSelectorPanel = ({
                                                     className={styles["friend-selected-name"]}
                                                     aria-label="friend-selected-name"
                                                 >{
-                                                    friend.preferences.displayName !== "" ?
-                                                    friend.preferences.displayName :
+                                                    friend.displayName !== "" ?
+                                                    friend.displayName :
                                                     friend.username
                                                 }</h5>
                                                 <button
@@ -129,8 +129,8 @@ const FriendSelectorPanel = ({
                                                 className={styles["friend-name"]}
                                                 aria-label="friend-name"
                                             >{
-                                                friend.preferences.displayName !== "" ?
-                                                friend.preferences.displayName :
+                                                friend.displayName !== "" ?
+                                                friend.displayName :
                                                 friend.username
                                             }</h5>
                                             <button
