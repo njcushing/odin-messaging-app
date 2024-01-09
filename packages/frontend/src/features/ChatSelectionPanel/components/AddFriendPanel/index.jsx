@@ -10,6 +10,7 @@ import addFriend from "./utils/addFriend";
 
 const AddFriendPanel = ({
     onCloseHandler,
+    onSuccessHandler,
 }) => {
     const [searchUsername, setSearchUsername] = useState("");
     const [abortController, setAbortController] = useState(null);
@@ -41,7 +42,10 @@ const AddFriendPanel = ({
         if (addingFriend) {
             (async () => {
                 const response = await addFriend(searchUsername);
-                if (response.status < 400) setResultFound(null);
+                if (response.status < 400) {
+                    onSuccessHandler(searchUsername);
+                    setResultFound(null);
+                }
                 setResponseMessage(response.message);
                 setAddingFriend(false);
             })();
@@ -148,10 +152,12 @@ const AddFriendPanel = ({
 
 AddFriendPanel.propTypes = {
     onCloseHandler: PropTypes.func,
+    onSuccessHandler: PropTypes.func,
 }
 
 AddFriendPanel.defaultProps = {
     onCloseHandler: () => {},
+    onSuccessHandler: () => {},
 }
 
 export default AddFriendPanel;
