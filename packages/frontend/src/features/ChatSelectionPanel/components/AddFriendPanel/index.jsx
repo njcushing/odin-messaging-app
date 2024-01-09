@@ -148,14 +148,10 @@ const AddFriendPanel = ({
 
 AddFriendPanel.propTypes = {
     onCloseHandler: PropTypes.func,
-    addFriendHandler: PropTypes.func,
-    addFriendSubmissionErrors: PropTypes.arrayOf(PropTypes.string),
 }
 
 AddFriendPanel.defaultProps = {
     onCloseHandler: () => {},
-    addFriendHandler: () => {},
-    addFriendSubmissionErrors: [],
 }
 
 export default AddFriendPanel;
