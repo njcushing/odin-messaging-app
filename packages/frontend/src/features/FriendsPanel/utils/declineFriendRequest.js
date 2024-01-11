@@ -28,14 +28,12 @@ const declineFriendRequest = async (username, abortController) => {
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
-                friendRequests: responseJSON.data.friendRequests,
             };
         })
         .catch((error) => {
             return {
                 status: 500,
                 message: "Declining friend request failed",
-                friendRequests: [],
             };
         });
     return data;
