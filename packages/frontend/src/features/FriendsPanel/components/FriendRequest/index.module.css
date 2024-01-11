@@ -173,3 +173,18 @@
 
     animation: spin 1.2s linear infinite;
 }
+
+.response-message {
+    grid-area: 1 / 1 / -1 / -1;
+
+    align-self: center;
+
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.0rem;
+    font-family: Gabarito;
+    text-align: center;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0.15s 1 normal forwards fade-in;
+}
