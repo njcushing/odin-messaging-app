@@ -7,7 +7,21 @@ import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
 import ChatPanel from './index.jsx'
 
-const renderComponent = async () => { act(() => render(<ChatPanel />)); }
+import mongoose from "mongoose";
+
+// For 'Not implemented: navigation' error 
+let assignMock = vi.fn();
+delete window.location;
+window.location = { assign: assignMock };
+afterEach(() => { assignMock.mockClear(); });
+
+const renderComponent = async (
+    chatId = new mongoose.Types.ObjectId(),
+) => {
+    act(() => render(<ChatPanel
+        chatId={chatId}
+    />));
+}
 
 vi.mock('@/components/ProfileImage', () => ({ 
     default: ({
@@ -34,7 +48,7 @@ vi.mock('@/components/OptionButton', () => ({
     }
 }));
 
-vi.mock('@/components/Message', () => ({ 
+vi.mock('../../components/Message', () => ({ 
     default: ({
         text,
         name,
@@ -47,7 +61,7 @@ vi.mock('@/components/Message', () => ({
     }
 }));
 
-vi.mock('@/components/MessageBox', () => ({ 
+vi.mock('../../components/MessageBox', () => ({ 
     default: ({
         text,
         placeholder,
@@ -111,19 +125,25 @@ const messages = [
     },
 ];
 const chat = {
-    participants: [...participants],
-    chatName: "",
+    participants: participants,
+    name: "",
     imageSrc: "",
     imageAlt: "",
-    messages: [...messages],
+    messages: messages,
 }
-const getChatFromAPI = vi.fn(() => chat);
-vi.mock('./utils/getChatFromAPI', async () => ({
-    default: () => getChatFromAPI(),
+const getChat = vi.fn(() => {
+    return {
+        status: 200,
+        message: "Chat found.",
+        chat: chat,
+    };
+});
+vi.mock('./utils/getChat', async () => ({
+    default: () => getChat(),
 }));
 
 const combineParticipantNames = vi.fn(() => "Combined");
-vi.mock('./utils/combineParticipantNames', async () => ({
+vi.mock('../../utils/combineParticipantNames', async () => ({
     default: () => combineParticipantNames(),
 }));
 
@@ -136,18 +156,26 @@ describe("UI/DOM Testing...", () => {
             expect(chatName).toBeNull();
         });
         test(`Should be present in the document if a custom chat name is set`, async () => {
-            getChatFromAPI.mockReturnValueOnce({
-                ...chat,
-                chatName: "Custom Chat Name",
+            getChat.mockReturnValueOnce({
+                status: 200,
+                message: "Chat found.",
+                chat: {
+                    ...chat,
+                    name: "Custom Chat Name",
+                },
             });
             await act(() => renderComponent());
             const chatName = screen.getByRole("heading", { name: "chat-name" });
             expect(chatName).toBeInTheDocument();
         });
-        test(`Should display the custom chat name`, async () => {
-            getChatFromAPI.mockReturnValueOnce({
-                ...chat,
-                chatName: "Custom Chat Name",
+        test(`Should have textContent equal to the custom chat name`, async () => {
+            getChat.mockReturnValueOnce({
+                status: 200,
+                message: "Chat found.",
+                chat: {
+                    ...chat,
+                    name: "Custom Chat Name",
+                },
             });
             await act(() => renderComponent());
             const chatName = screen.getByRole("heading", { name: "chat-name" });
@@ -157,9 +185,13 @@ describe("UI/DOM Testing...", () => {
     describe("The heading element displaying the participants' names...", () => {
         test(`Should not be present in the document if a custom chat name is
          set`, async () => {
-            getChatFromAPI.mockReturnValueOnce({
-                ...chat,
-                chatName: "Custom Chat Name",
+            getChat.mockReturnValueOnce({
+                status: 200,
+                message: "Chat found.",
+                chat: {
+                    ...chat,
+                    name: "Custom Chat Name",
+                },
             });
             await act(() => renderComponent());
             const chatParticipants = screen.queryByRole("heading", { name: "chat-participants" });
@@ -170,7 +202,8 @@ describe("UI/DOM Testing...", () => {
             const chatParticipants = screen.getByRole("heading", { name: "chat-participants" });
             expect(chatParticipants).toBeInTheDocument();
         });
-        test(`Should display the custom chat name`, async () => {
+        test(`Should have textContent equal to that returned by the
+         'combineParticipantNames' function`, async () => {
             await act(() => renderComponent());
             const chatParticipants = screen.getByRole("heading", { name: "chat-participants" });
             expect(chatParticipants.textContent).toBe("Combined");
@@ -190,16 +223,20 @@ describe("UI/DOM Testing...", () => {
             expect(chatMessageList).toBeInTheDocument();
         });
         test(`Should have the same number of children as messages returned from
-         the 'getChatFromAPI' function (if there is at least 1 message)`, async () => {
+         the 'getChat' function (if there is at least 1 message)`, async () => {
             await act(() => renderComponent());
             const chatMessages = screen.getAllByRole("listitem", { name: "chat-message" });
             expect(chatMessages.length).toBe(3);
         });
         test(`Should display information about there being no messages sent in
          the chat yet (if there are no messages)`, async () => {
-            getChatFromAPI.mockReturnValueOnce({
-                ...chat,
-                messages: [],
+            getChat.mockReturnValueOnce({
+                status: 200,
+                message: "Chat found.",
+                chat: {
+                    ...chat,
+                    messages: [],
+                },
             });
             await act(() => renderComponent());
             const emptyChatText = screen.getByLabelText("empty-chat-text");
@@ -207,14 +244,18 @@ describe("UI/DOM Testing...", () => {
         });
     });
     describe("A 'no chat' message...", () => {
-        test(`Should be present if the chat returned by the 'getChatFromAPI'
-         function is null`, async () => {
-            getChatFromAPI.mockReturnValueOnce(null);
+        test(`Should be present if the chat returned by the 'getChat' function
+         is null`, async () => {
+            getChat.mockReturnValueOnce({
+                status: 404,
+                message: "Chat not found.",
+                chat: null,
+            });
             await act(() => renderComponent());
             const emptyChatMessage = screen.getByLabelText("no-chat-here");
             expect(emptyChatMessage).toBeInTheDocument();
         });
-        test(`Should not be present if the chat returned by the 'getChatFromAPI'
+        test(`Should not be present if the chat returned by the 'getChat'
          function is not null`, async () => {
             await act(() => renderComponent());
             const emptyChatMessage = screen.queryByLabelText("no-chat-here");

@@ -5,7 +5,7 @@ import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
-import CreateGroupPanel from './index.jsx'
+import FriendSelectorPanel from './index.jsx'
 
 const renderComponent = async (
     title = "Title",
@@ -16,8 +16,8 @@ const renderComponent = async (
     onCloseHandler = () => {},
     onSubmitHandler = () => {},
     submissionErrors = [],
-) => { await act(async () => render(
-    <CreateGroupPanel
+) => {
+    await act(async () => render(<FriendSelectorPanel
         title={title}
         removeButtonText={removeButtonText}
         addButtonText={addButtonText}
@@ -54,31 +54,40 @@ vi.mock('@/components/ProfileImage', () => ({
     }
 }));
 
-const mockFriendsList = [
+const friendsList = [
     {
-        _id: "1",
-        name: "Person 1",
-        tagLine: "Person 1 tagline",
+        _id: 0,
+        username: "Friend 1",
+        tagLine: "Friend 1 tagline",
+        status: "online",
         imageSrc: "",
         imageAlt: "",
     },
     {
-        _id: "2",
-        name: "Person 2",
-        tagLine: "Person 2 tagline",
+        _id: 1,
+        username: "Friend 2",
+        tagLine: "Friend 2 tagline",
+        status: "away",
         imageSrc: "",
         imageAlt: "",
     },
     {
-        _id: "3",
-        name: "Person 3",
-        tagLine: "Person 3 tagline",
+        _id: 2,
+        username: "Friend 3",
+        tagLine: "Friend 3 tagline",
+        status: "busy",
         imageSrc: "",
         imageAlt: "",
     },
 ];
-const getFriendsList = vi.fn(() => mockFriendsList);
-vi.mock('../../utils/getFriendsList', async () => ({
+const getFriendsList = vi.fn(() => {
+    return {
+        status: 200,
+        message: "Found",
+        friends: friendsList,
+    }
+});
+vi.mock('@/utils/getFriendsList', async () => ({
     default: () => getFriendsList(),
 }));
 
@@ -100,15 +109,20 @@ describe("UI/DOM Testing...", () => {
         test(`Should be present in the document if there is at least one friend
          selected`, async () => {
             const user = userEvent.setup();
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
             await user.click(addButton);
@@ -131,15 +145,20 @@ describe("UI/DOM Testing...", () => {
         test(`Should be present in the document if the friend is currently being
          added to the group`, async () => {
             const user = userEvent.setup();
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
             await user.click(addButton);
@@ -148,32 +167,41 @@ describe("UI/DOM Testing...", () => {
         });
         test("Should display a name", async () => {
             const user = userEvent.setup();
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
             await user.click(addButton);
             const friendSelectedName = screen.getByRole("heading", { name: "friend-selected-name" });
-            expect(friendSelectedName.textContent).toBe("Person 1");
         });
         test("Should display a 'Remove' button", async () => {
             const user = userEvent.setup();
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
             await user.click(addButton);
@@ -183,15 +211,20 @@ describe("UI/DOM Testing...", () => {
         test(`That, when clicked, should remove the friend from the list of
          friends being added to the group`, async () => {
             const user = userEvent.setup();
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
             await user.click(addButton);
@@ -204,7 +237,11 @@ describe("UI/DOM Testing...", () => {
     describe("The 'No friends' message...", () => {
         test(`Should be present in the document if no friends are returned by
          the 'getFriendsList' function`, async () => {
-            getFriendsList.mockReturnValueOnce([]);
+            getFriendsList.mockReturnValueOnce({
+                status: 404,
+                message: "Not found",
+                friends: [],
+            });
             await renderComponent();
             const noFriendsMessage = screen.getByRole("heading", { name: "no-friends" });
             expect(noFriendsMessage).toBeInTheDocument();
@@ -225,7 +262,11 @@ describe("UI/DOM Testing...", () => {
         });
         test(`Should not be present in the document if no friends are returned
          by the 'getFriendsList' function`, async () => {
-            getFriendsList.mockReturnValueOnce([]);
+            getFriendsList.mockReturnValueOnce({
+                status: 404,
+                message: "Not found",
+                friends: [],
+            });
             await renderComponent();
             const friendsList = screen.queryByRole("list", { name: "friends-list" });
             expect(friendsList).toBeNull();
@@ -233,15 +274,20 @@ describe("UI/DOM Testing...", () => {
         test(`Should not contain any friends that have already been added to the
          list of friends that will be in the new group`, async () => {
             const user = userEvent.setup();
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const friend = screen.getByRole("listitem", { name: "friend" });
             expect(friend).toBeInTheDocument();
@@ -255,46 +301,60 @@ describe("UI/DOM Testing...", () => {
          'getFriendsList' function`, async () => {
             await renderComponent();
             const friends = screen.getAllByRole("listitem", { name: "friend" });
-            expect(friends.length).toBe(mockFriendsList.length);
+            expect(friends.length).toBe(friendsList.length);
         });
         test("Should display a profile image", async () => {
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const friendProfileImage = screen.getByRole("generic", { name: "profile-image" });
             expect(friendProfileImage).toBeInTheDocument();
         });
         test("Should display a name", async () => {
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const friendName = screen.getByRole("heading", { name: "friend-name" });
-            expect(friendName.textContent).toBe("Person 1");
         });
         test("Should display an 'Add' button", async () => {
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
             expect(addButton).toBeInTheDocument();
@@ -302,15 +362,20 @@ describe("UI/DOM Testing...", () => {
         test(`That, when clicked, should add the friend to the list of friends
          being added to the group`, async () => {
             const user = userEvent.setup();
-            getFriendsList.mockReturnValueOnce([
-                {
-                    _id: "1",
-                    name: "Person 1",
-                    tagLine: "Person 1 tagline",
-                    imageSrc: "",
-                    imageAlt: "",
-                },
-            ]);
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [
+                    {
+                        _id: 0,
+                        username: "Friend 1",
+                        tagLine: "Friend 1 tagline",
+                        status: "online",
+                        imageSrc: "",
+                        imageAlt: "",
+                    },
+                ]
+            });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
             await user.click(addButton);

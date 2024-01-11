@@ -7,11 +7,21 @@ import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
 import AddFriendPanel from './index.jsx'
 
+import * as addFriend from "./utils/addFriend.js";
+
+// For 'Not implemented: navigation' error 
+let assignMock = vi.fn();
+delete window.location;
+window.location = { assign: assignMock };
+afterEach(() => { assignMock.mockClear(); });
+
 const renderComponent = async (
     onCloseHandler = () => {},
+    onSuccessHandler = () => {},
 ) => { act(() => render(
     <AddFriendPanel
         onCloseHandler={onCloseHandler}
+        onSuccessHandler={onSuccessHandler}
     />
 )); }
 
@@ -40,16 +50,32 @@ vi.mock('@/components/ProfileImage', () => ({
     }
 }));
 
-const mockUser = {
+const friend = {
     _id: "1",
-    name: "Person 1",
-    tagLine: "Person 1 tagline",
+    username: "Friend 1",
+    tagLine: "Friend 1 tagline",
     imageSrc: "",
     imageAlt: "",
 }
-const findUser = vi.fn(() => mockUser);
-vi.mock('./utils/findUser', async () => ({
-    default: () => findUser(),
+const getFriendCanBeAdded = vi.fn(() => {
+    return {
+        status: 200,
+        message: "Friend can be added.",
+        friend: friend,
+    };
+});
+vi.mock('./utils/getFriendCanBeAdded', async () => ({
+    default: () => getFriendCanBeAdded(),
+}));
+
+const addFriendMock = vi.fn(() => {
+    return {
+        status: 200,
+        message: "Friend successfully added.",
+    }
+});
+vi.mock('./utils/addFriend', async () => ({
+    default: () => addFriendMock(),
 }));
 
 describe("UI/DOM Testing...", () => {
@@ -118,6 +144,47 @@ describe("UI/DOM Testing...", () => {
             await user.type(nameInput, "a");
             const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
             expect(addFriendButton).toBeInTheDocument();
+        });
+    });
+    describe("The 'Add Friend' button...", () => {
+        test("When clicked, should invoke the 'addFriend' API function", async () => {
+            const user = userEvent.setup();
+            const addFriendSpy = vi.spyOn(addFriend, "default");
+            await renderComponent();
+            const nameInput = screen.getByRole("textbox", { name: "friend-name-input" });
+            await user.type(nameInput, "a");
+            const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
+            await user.click(addFriendButton);
+            expect(addFriendSpy).toHaveBeenCalled();
+        });
+        test(`When clicked, if an OK response status code is returned by the
+         'addFriend' API function, should invoke the 'onSuccessHandler' callback
+         function`, async () => {
+            const user = userEvent.setup();
+            const callback = vi.fn(() => {});
+            await renderComponent(
+                () => {},
+                callback,
+            );
+            const nameInput = screen.getByRole("textbox", { name: "friend-name-input" });
+            await user.type(nameInput, "a");
+            const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
+            await user.click(addFriendButton);
+            expect(callback).toHaveBeenCalled();
+        });
+    });
+    describe("The response message...", () => {
+        test(`Should be displayed if after the 'Add Friend' button has been
+         clicked and therefore the 'addFriend' API function has been invoked and
+         has returned the response`, async () => {
+            const user = userEvent.setup();
+            await renderComponent();
+            const nameInput = screen.getByRole("textbox", { name: "friend-name-input" });
+            await user.type(nameInput, "a");
+            const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
+            await user.click(addFriendButton);
+            const responseMessage = screen.getByRole("heading", { name: "response-message" });
+            expect(responseMessage).toBeInTheDocument();
         });
     });
 });

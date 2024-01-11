@@ -776,3 +776,25 @@ export const friendRequestsDecline = [
         );
     }),
 ];
+
+export const chatsGet = [
+    protectedRouteJWT,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        let user = await User.findById(req.user._id).exec();
+        if (user === null) return userNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        if (!userAuthorised) {
+            return sendResponse(
+                res,
+                401,
+                "User is not authorised to view this chat.",
+                { chat: null, token: token }
+            );
+        }
+
+        sendResponse(res, 200, "Chat found.", { chat: chat, token: token });
+    }),
+];

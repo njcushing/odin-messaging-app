@@ -19,10 +19,14 @@ vi.mock('@/components/OptionsSidebar', () => ({
     }
 }));
 
-vi.mock('@/components/ChatSelectionPanel', () => ({ 
-    default: ({
-        chatType,
-    }) => {
+vi.mock('@/components/FriendsPanel', () => ({ 
+    default: () => {
+        return (<></>);
+    }
+}));
+
+vi.mock('@/components/ChatsPanel', () => ({ 
+    default: () => {
         return (<></>);
     }
 }));

@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
-import propTypes from "prop-types";
+import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
 import ProfileImage from "@/components/ProfileImage";
 import OptionButton from "@/components/OptionButton";
 import FriendSelectorPanel from "../FriendSelectorPanel";
-import Message from "../Message"
-import MessageBox from "../MessageBox";
+import Message from "./components/Message"
+import MessageBox from "./components/MessageBox";
 
-import getChatFromAPI from "./utils/getChatFromAPI";
-import combineParticipantNames from "./utils/combineParticipantNames";
+import getChat from "./utils/getChat";
+import combineParticipantNames from "../../utils/combineParticipantNames";
+
+import mongoose from "mongoose";
 
 const ChatPanel = ({
     chatId,
@@ -20,11 +22,26 @@ const ChatPanel = ({
     const [messageSubmissionErrors, setMessageSubmissionErrors] = useState([]);
 
     useEffect(() => {
+        if (mongoose.Types.ObjectId.isValid(chatId)) {
+            reloadChat();
+        } else {
+            setChat(null);
+        }
+
+        return () => {
+            if (getChatAC) getChatAC.abort;
+        }
+    }, [chatId]);
+
+    const reloadChat = () => {
+        if (getChatAC) getChatAC.abort;
+        const getChatACNew = new AbortController();
+        setGetChatAC(getChatACNew);
         (async () => {
-            const chatNew = await getChatFromAPI();
-            setChat(chatNew);
+            const chatNew = await getChat(getChatACNew);
+            setChat(chatNew.chat);
         })();
-    }, []);
+    };
 
     return (
         <div className={styles["wrapper"]}>
@@ -39,11 +56,11 @@ const ChatPanel = ({
                         alt={""}
                         sizePx={50}
                     />
-                    {chat.chatName !== ""
+                    {chat.name.length > 0
                     ?   <h3
                             className={styles["chat-name-custom"]}
                             aria-label="chat-name"
-                        >{chat.chatName}</h3>
+                        >{chat.name}</h3>
                     :   <h3
                             className={styles["chat-name-participants"]}
                             aria-label="chat-participants"
@@ -144,5 +161,9 @@ const ChatPanel = ({
         </div>
     );
 };
+
+ChatPanel.defaultProps = {
+    chatId: null,
+}
 
 export default ChatPanel;

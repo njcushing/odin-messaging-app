@@ -7,7 +7,7 @@ import Friend from "./components/Friend";
 import FriendRequest from "./components/FriendRequest";
 import AddFriendPanel from "./components/AddFriendPanel";
 
-import getFriendsList from "./utils/getFriendsList.js";
+import getFriendsList from "@/utils/getFriendsList.js";
 import getFriendRequests from "./utils/getFriendRequests.js";
 
 const FriendsPanel = ({
