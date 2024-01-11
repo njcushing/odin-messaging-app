@@ -189,7 +189,7 @@ const FriendsPanel = ({
                         setFriendRequests(reducedFriendRequestsArray);
                     }}
                 />
-            :   null}
+            :   <div className={styles["right-side-content"]}></div>}
         </div>
         </div>
     );
