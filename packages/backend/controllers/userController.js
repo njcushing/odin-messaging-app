@@ -242,20 +242,6 @@ export const friendGet = [
         const friend = await User.findOne({ username: username }).exec();
         if (friend === null) return userNotFound(res, next, username);
 
-        const user = await User.findOne(
-            {
-                _id: req.user._id,
-            },
-            {
-                friends: {
-                    $elemMatch: {
-                        user: {
-                            $in: [friend._id],
-                        },
-                    },
-                },
-            }
-        );
         if (user === null) return userNotFound(res, next, req.user._id);
 
         await User.populate(user, { path: "friends.user" });
@@ -445,12 +431,12 @@ export const friendsPost = [
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
-        let friend = await User.findOne({ username: req.body.username })
+        const username = req.body.username;
+
+        let friend = await User.findOne({ username: username })
             .select("_id username")
             .exec();
-        if (friend === null) {
-            return userNotFound(res, next, req.body.username);
-        }
+        if (friend === null) return userNotFound(res, next, username);
 
         let user = await User.findById(req.user._id)
             .select("friends.user")
@@ -545,7 +531,7 @@ export const friendsPost = [
         } else {
             // Add currently logged-in user's _id to friend's pending friendRequest array
             const updatedFriend = await User.findByIdAndUpdate(friend._id, {
-                $push: { friendRequests: user._id },
+                $addToSet: { friendRequests: user._id },
             });
             if (updatedFriend === null) {
                 return sendResponse(
