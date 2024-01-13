@@ -4,6 +4,7 @@ import { body, param } from "express-validator";
 
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
+import Message from "../models/message.js";
 
 import sendResponse from "../utils/sendResponse.js";
 import checkRequestValidationError from "../utils/checkRequestValidationError.js";
@@ -71,8 +72,31 @@ export const chatGet = [
         validateUserId(res, next, req.user._id);
 
         validateChatId(res, next, req.params.chatId);
-        let chat = await Chat.findById(req.params.chatId).exec();
+        let chat = await Chat.findOne(
+            { _id: req.params.chatId },
+            { messages: { $slice: [-50, 50] } }
+        )
+            .select("-createdAt -updatedAt")
+            .populate([
+                {
+                    path: "participants",
+                    populate: {
+                        path: "user",
+                        select: `
+                            username
+                            preferences.displayName
+                            preferences.tagLine
+                            preferences.image
+                            status
+                        `,
+                    },
+                },
+                { path: "messages" },
+            ])
+            .exec();
         if (chat === null) return chatNotFound(res, next, req.params.chatId);
+
+        const token = await generateToken(req.user.username, req.user.password);
 
         let user = await User.findById(req.user._id)
             .select("chats")
@@ -82,9 +106,14 @@ export const chatGet = [
                 match: { _id: chat._id },
             })
             .exec();
-        if (user === null) return selfNotFound(res, next, req.user._id);
-
-        const token = await generateToken(req.user.username, req.user.password);
+        if (user === null) {
+            return sendResponse(
+                res,
+                404,
+                "Currently logged-in user either not found in the database or the chat requested cannot be found in the user's chats",
+                { chat: null, token: token }
+            );
+        }
 
         sendResponse(res, 200, "Chat found.", { chat: chat, token: token });
     }),
