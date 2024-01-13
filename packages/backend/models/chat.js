@@ -23,6 +23,7 @@ const ChatSchema = new Schema({
     name: { type: String, trim: true, default: "" },
     image: { type: Schema.Types.ObjectId, ref: "Image" },
     messages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
+    lastActivity: { type: Date, default: Date.now },
 });
 
 export default mongoose.model("Chat", ChatSchema);
