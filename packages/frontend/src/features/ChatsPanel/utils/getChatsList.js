@@ -10,10 +10,10 @@ const calculateChatStatusesAndParticipantsNames = async (chatsList) => {
     let status = "offline";
     for (let i = 0; i < chatsList.length; i++) {
         for (let j = 0; j < chatsList[i].participants.length; j++) {
-            const user = chatsList[i].participants[j];
+            const user = chatsList[i].participants[j].user;
             if (user.status > statusHeirarchy[status]) status = user.status;
-            chatsList[i].participants[j] = user.displayName
-                ? user.displayName
+            chatsList[i].participants[j] = user.preferences.displayName
+                ? user.preferences.displayName
                 : user.username;
         }
     }
