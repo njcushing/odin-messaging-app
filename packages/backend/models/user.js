@@ -68,7 +68,6 @@ const UserSchema = new Schema(
         friendRequests: [{ type: Schema.Types.ObjectId, ref: "User" }],
         chats: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
         communities: [{ type: Schema.Types.ObjectId, ref: "Community" }],
-        lastActivity: { type: Date, default: Date.now },
         preferences: {
             displayName: {
                 type: String,
@@ -92,6 +91,7 @@ const UserSchema = new Schema(
     },
     {
         getters: true,
+        timestamps: true,
     }
 );
 
@@ -99,7 +99,7 @@ UserSchema.virtual("status").get(function () {
     if (this.preferences.setStatus !== null) return this.preferences.setStatus;
     const currentTime = Date.now();
     const secondsSinceLastActivity =
-        Math.floor(currentTime - this.lastActivity) / 1000;
+        Math.floor(currentTime - this.updatedAt) / 1000;
     if (secondsSinceLastActivity < 300) return "online";
     return "away";
 });
