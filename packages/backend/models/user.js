@@ -44,7 +44,6 @@ const UserSchema = new Schema(
             required: true,
             default: false,
         },
-        account_creation_date: { type: Date, default: Date.now },
         friends: [
             {
                 user: {
