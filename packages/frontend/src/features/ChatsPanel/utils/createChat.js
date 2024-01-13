@@ -11,7 +11,9 @@ const createChat = async (participants, abortController) => {
                 "odin-messaging-app-auth-token"
             ),
         },
-        body: JSON.stringify(participants),
+        body: JSON.stringify({
+            participants: participants,
+        }),
     })
         .then(async (response) => {
             const responseJSON = await response.json();
@@ -39,7 +41,7 @@ const createChat = async (participants, abortController) => {
         .catch((error) => {
             return {
                 status: 500,
-                message: "Accepting friend request failed",
+                message: "Chat creation failed",
                 chatId: null,
             };
         });
