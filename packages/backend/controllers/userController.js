@@ -741,6 +741,7 @@ export const chatsGet = [
             { _id: { $in: user.chats } },
             { messages: { $slice: -1 } }
         )
+            .sort({ updatedAt: -1 })
             .populate([
                 {
                     path: "participants",
