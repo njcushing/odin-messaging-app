@@ -1,3 +1,5 @@
+import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+
 const calculateChatStatusesAndParticipantsNames = async (chatsList) => {
     let statusHeirarchy = {
         online: 3,
@@ -46,7 +48,7 @@ const getChatsList = async (abortController) => {
                 typeof responseJSON.data === "object" &&
                 "chats" in responseJSON.data
             ) {
-                chats = responseJSON.data.chatId;
+                chats = responseJSON.data.chats;
             }
 
             await calculateChatStatusesAndParticipantsNames(
@@ -63,38 +65,10 @@ const getChatsList = async (abortController) => {
             return {
                 status: 500,
                 message: "Accepting friend request failed",
-                chats: null,
+                chats: [],
             };
         });
     return data;
-
-    /*
-    _id: "1",
-    name: "",
-    participants: [
-        {
-            username: "Elizabeth",
-            displayName: "eliza",
-            status: "online",
-        },
-        {
-            username: "William",
-            displayName: "will",
-            status: "away",
-        },
-        {
-            username: "Jennifer",
-            displayName: "jen",
-            status: "offline",
-        },
-    ],
-    recentMessage: {
-        author: "Elizabeth",
-        message: "Hello guys! Nice to finally speak to you all.",
-    },
-    imageSrc: "",
-    imageAlt: "",
-    */
 };
 
 export default getChatsList;
