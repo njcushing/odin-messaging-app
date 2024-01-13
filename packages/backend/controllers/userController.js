@@ -745,7 +745,6 @@ export const chatsGet = [
             .populate([
                 {
                     path: "participants",
-                    select: { user: 1 },
                     populate: {
                         path: "user",
                         select: "username preferences.displayName status",
