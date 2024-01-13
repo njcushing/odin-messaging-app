@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
+import Message from "../models/message.js";
 
 import sendResponse from "../utils/sendResponse.js";
 import checkRequestValidationError from "../utils/checkRequestValidationError.js";
@@ -24,7 +25,11 @@ const validateUserId = (res, next, userId) => {
     }
 };
 
-const userNotFound = (res, userId) => {
+const selfNotFound = (res, next, userId) => {
+    return sendResponse(res, 401, "User not found in database.");
+};
+
+const userNotFound = (res, next, userId) => {
     return sendResponse(res, 404, "User not found in database.");
 };
 
@@ -205,7 +210,7 @@ export const userSelf = [
         validateUserId(res, next, req.user._id);
 
         let user = await User.findById(req.user._id).select("username").exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
@@ -242,9 +247,21 @@ export const friendGet = [
         const friend = await User.findOne({ username: username }).exec();
         if (friend === null) return userNotFound(res, next, username);
 
-        if (user === null) return userNotFound(res, next, req.user._id);
-
-        await User.populate(user, { path: "friends.user" });
+        const user = await User.findOne(
+            { _id: req.user._id },
+            { friends: { $elemMatch: { user: friend._id } } }
+        ).populate({
+            path: "friends.user",
+            select: `
+                _id
+                username
+                preferences.displayName
+                preferences.tagLine
+                email
+                status
+            `,
+        });
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
@@ -260,36 +277,8 @@ export const friendGet = [
             );
         }
 
-        await User.populate(user, {
-            path: "friends.user",
-            select: `
-                _id
-                username
-                preferences.displayName
-                preferences.tagLine
-                preferences.setStatus
-                email
-                status
-            `,
-        });
-
-        const friendInfo = user.friends[0];
-        const friendReduced = {
-            _id: friendInfo.user._id,
-            username: friendInfo.user.username,
-            email: friendInfo.user.email,
-            displayName: friendInfo.user.preferences.displayName,
-            tagLine: friendInfo.user.preferences.tagLine,
-            status:
-                friendInfo.user.preferences.setStatus !== null
-                    ? friendInfo.user.preferences.setStatus
-                    : friendInfo.user.status,
-            chat: friendInfo.user.chat,
-            friendStatus: friendInfo.user.friendStatus,
-            becameFriendsDate: friendInfo.user.becameFriendsDate,
-        };
         return sendResponse(res, 200, "Friend found.", {
-            friend: friendReduced,
+            friend: user.friends[0],
             token: token,
         });
     }),
@@ -320,7 +309,7 @@ export const friendCanBeAdded = [
         let user = await User.findById(req.user._id)
             .select("friends.user")
             .exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
@@ -395,7 +384,7 @@ export const friendsGet = [
                 `,
             })
             .exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
@@ -446,7 +435,7 @@ export const friendsPost = [
                 match: { _id: friend._id },
             })
             .exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
@@ -569,7 +558,7 @@ export const friendRequestsGet = [
             })
             .exec();
         if (user === null) {
-            userNotFound(res, next, req.user._id);
+            selfNotFound(res, next, req.user._id);
         } else {
             const token = await generateToken(
                 req.user.username,
@@ -607,7 +596,7 @@ export const friendRequestsAccept = [
                 match: { _id: friend._id },
             })
             .exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
@@ -701,7 +690,7 @@ export const friendRequestsDecline = [
                 match: { _id: friend._id },
             })
             .exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
@@ -739,20 +728,37 @@ export const chatsGet = [
     protectedRouteJWT,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let user = await User.findById(req.user._id).exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+
+        const user = await User.findOne(
+            { _id: req.user._id },
+            { chats: { $slice: [0, 10] } }
+        )
+            .select("chats")
+            .exec();
+        if (user === null) return selfNotFound(res, next, req.user._id);
+
+        const chats = await Chat.find(
+            { _id: { $in: user.chats } },
+            { messages: { $slice: -1 } }
+        )
+            .populate([
+                {
+                    path: "participants",
+                    select: { user: 1 },
+                    populate: {
+                        path: "user",
+                        select: "username preferences.displayName status",
+                    },
+                },
+                { path: "messages" },
+            ])
+            .exec();
 
         const token = await generateToken(req.user.username, req.user.password);
 
-        if (!userAuthorised) {
-            return sendResponse(
-                res,
-                401,
-                "User is not authorised to view this chat.",
-                { chat: null, token: token }
-            );
-        }
-
-        sendResponse(res, 200, "Chat found.", { chat: chat, token: token });
+        sendResponse(res, 200, "Chats found.", {
+            chats: chats,
+            token: token,
+        });
     }),
 ];

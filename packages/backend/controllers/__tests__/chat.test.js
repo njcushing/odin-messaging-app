@@ -73,15 +73,14 @@ describe("Route testing...", () => {
                 .get(`/${new mongoose.Types.ObjectId()}`)
                 .expect(404);
         });
-        test(`Should respond with status code 404 if the currently-logged in
-         user containing the specified chat '_id' in its 'chats' array is not
-         found in the database`, async () => {
+        test(`Should respond with status code 401 if the currently-logged in
+         user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/${chats[0]._id}`).expect(404);
+            await request(app).get(`/${chats[0]._id}`).expect(401);
         });
         test(`Should respond with status code 200 on successful request, with a
          valid token`, async () => {
@@ -138,7 +137,7 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(400);
         });
-        test(`Should respond with status code 404 if the currently-logged in
+        test(`Should respond with status code 401 if the currently-logged in
          user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
@@ -152,7 +151,7 @@ describe("Route testing...", () => {
                 })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(404);
+                .expect(401);
         });
         test(`Should respond with status code 400 if at least one of the other
          participants' _ids does not correspond to a valid user in the database`, async () => {
