@@ -10,11 +10,13 @@ import ProfileImage from './index.jsx'
 const renderComponent = (
     src = "image_src",
     alt = "image alt",
+    status = null,
     sizePx = 50,
 ) => {
     render(<ProfileImage
         src={src}
         alt={alt}
+        status={status}
         sizePx={sizePx}
     />);
 }
@@ -27,6 +29,20 @@ describe("UI/DOM Testing...", () => {
             const image = screen.getByRole("img", { name: "profile-image" });
             expect(image).toBeInTheDocument();
             expect(image.alt).toBe("image alt");
+        });
+    });
+    describe("The status indicator...", () => {
+        test(`Should be present in the document if the value provided to the
+         'status' prop is not equal to 'null'`, () => {
+            renderComponent("image_src", "image alt", "online", 50);
+            const statusIndicator = screen.getByRole("generic", { name: "status-indicator" });
+            expect(statusIndicator).toBeInTheDocument();
+        });
+        test(`Should not be present in the document if the value provided to the
+         'status' prop is equal to 'null'`, () => {
+            renderComponent();
+            const statusIndicator = screen.queryByRole("generic", { name: "status-indicator" });
+            expect(statusIndicator).toBeNull();
         });
     });
 });
