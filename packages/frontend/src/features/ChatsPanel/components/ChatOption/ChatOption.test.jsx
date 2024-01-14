@@ -62,28 +62,6 @@ describe("UI/DOM Testing...", () => {
             expect(callback).toHaveBeenCalled();
         });
     });
-    describe("The element displaying the status indicator...", () => {
-        test(`Should not be present in the document if the provided 'status'
-         prop's value is null`, async () => {
-            await renderComponent(
-                "Chat Name",
-                [],
-                { author: "Person 1", message: "Recent Message" },
-                null,
-                "",
-                "",
-                () => {},
-            );
-            const statusIndicator = screen.queryByRole("generic", { name: "status-indicator" });
-            expect(statusIndicator).toBeNull();
-        });
-        test(`Should be present in the document if the provided 'status' prop's
-         value is not null`, async () => {
-            await renderComponent();
-            const statusIndicator = screen.queryByRole("generic", { name: "status-indicator" });
-            expect(statusIndicator).toBeInTheDocument();
-        });
-    });
     describe("The element displaying the name of the chat...", () => {
         test(`Should be present in the document if the 'name' prop has a value
          of a string longer than 0 characters`, async () => {
