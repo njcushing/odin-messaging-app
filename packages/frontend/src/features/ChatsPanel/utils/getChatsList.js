@@ -9,12 +9,22 @@ const calculateChatStatusesAndParticipantsNames = async (chatsList) => {
     };
     let status = "offline";
     for (let i = 0; i < chatsList.length; i++) {
+        const message =
+            chatsList[i].messages.length > 0 ? chatsList[i].messages[0] : null;
         for (let j = 0; j < chatsList[i].participants.length; j++) {
-            const user = chatsList[i].participants[j].user;
+            const participant = chatsList[i].participants[j];
+            const user = participant.user;
             if (user.status > statusHeirarchy[status]) status = user.status;
-            chatsList[i].participants[j] = user.preferences.displayName
-                ? user.preferences.displayName
-                : user.username;
+            if (participant.nickname.length > 0) {
+                chatsList[i].participants[j] = participant.nickname;
+            } else if (user.preferences.displayName > 0) {
+                chatsList[i].participants[j] = user.preferences.displayName;
+            } else {
+                chatsList[i].participants[j] = user.username;
+            }
+            if (message && message.author.toString() === user._id.toString()) {
+                message.author = chatsList[i].participants[j];
+            }
         }
     }
 };
