@@ -1,5 +1,20 @@
+.container {
+    display: flex;
+    place-content: end;
+
+    position: relative;
+}
+
 .profile-image {
     object-fit: cover;
     border-radius: 50%;
     background-color: #cecece;
+}
+
+.status-indicator {
+    position: absolute;
+    align-self: end;
+
+    border-radius: 9999px;
+    border: none;
 }
