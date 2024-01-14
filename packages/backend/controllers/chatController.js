@@ -71,10 +71,10 @@ const validators = {
         .trim()
         .isLength({ min: 1, max: 1000 })
         .escape(),
-    replyingTo: body("messageReplyingTo")
-        .trim()
+    messageReplyingTo: body("messageReplyingTo")
+        .optional({ nullable: true })
         .custom((value, { req, loc, path }) => {
-            if (value.length > 0 && !mongoose.Types.ObjectId.isValid(value)) {
+            if (value && !mongoose.Types.ObjectId.isValid(value)) {
                 throw new Error(
                     `'messageReplyingTo' field (String), when not empty, must be
                     a valid MongoDB ObjectId.`
@@ -348,7 +348,7 @@ export const chatPost = [
 export const messagePost = [
     protectedRouteJWT,
     validators.messageText,
-    validators.replyingTo,
+    validators.messageReplyingTo,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
