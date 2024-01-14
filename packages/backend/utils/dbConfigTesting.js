@@ -170,7 +170,7 @@ const initialiseMongoServer = async () => {
         await Promise.all([
             newChat(0, chatIds[0], "individual", [
                 { user: userIds[0] },
-                { user: userIds[1] },
+                { user: userIds[1], muted: true },
             ]),
             newChat(1, chatIds[1], "individual", [
                 { user: userIds[1] },
