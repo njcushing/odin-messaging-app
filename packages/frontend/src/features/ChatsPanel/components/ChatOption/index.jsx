@@ -1,18 +1,29 @@
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
 import ProfileImage from "@/components/ProfileImage";
-import combineParticipantNames from "../../utils/combineParticipantNames.js";
+
+import calculateChatOptionProps from "./utils/calculateChatOptionProps";
 
 const ChatOption = ({
-    name,
-    participants,
-    recentMessage,
-    status,
-    imageSrc,
-    imageAlt,
+    chat,
     onClickHandler,
+    userId,
 }) => {
+    const [chatProps, setChatProps] = useState({
+        name: "",
+        recentMessage: null,
+        status: "offline",
+        imageSrc: "",
+        imageAlt: "",
+    })
+
+    useEffect(() => {
+        const chatPropsNew = calculateChatOptionProps(chat, userId);
+        setChatProps(chatPropsNew);
+    }, [chat]);
+
     return (
         <div
             className={styles["container"]}
@@ -29,36 +40,22 @@ const ChatOption = ({
         >   
             <div className={styles["image-container"]}>
                 <ProfileImage
-                    src={imageSrc}
-                    alt={imageAlt}
-                    status={status}
+                    src={chatProps.imageSrc}
+                    alt={chatProps.imageAlt}
+                    status={chatProps.status}
                     sizePx={50}
                 />
             </div>
             <div className={styles["texts"]}>
-                {name.length > 0
-                ?   <h4
-                        className={styles["chat-name"]}
-                        aria-label="chat-name"
-                    >{name}</h4>
-                :   <>
-                    {participants.length > 0
-                    ?   <h4
-                            className={styles["chat-name-participants"]}
-                            aria-label="chat-participants"
-                        >{combineParticipantNames(participants, 2)}</h4>
-                    :   <h4
-                            className={styles["chat-name"]}
-                            aria-label="chat-name"
-                        >Chat</h4>
-                    }
-                    </>
-                }
-                {typeof recentMessage === "object" && recentMessage !== null
+                <h4
+                    className={styles["chat-name"]}
+                    aria-label="chat-name"
+                >{chatProps.name}</h4>
+                {typeof chatProps.recentMessage === "object" && chatProps.recentMessage !== null
                 ?   <h5
                         className={styles["most-recent-message"]}
                         aria-label="most-recent-message"
-                    >{`${recentMessage.author}: ${recentMessage.message}`}</h5>
+                    >{`${chatProps.recentMessage.author}: ${chatProps.recentMessage.message}`}</h5>
                 :   null}
             </div>
         </div>
@@ -66,29 +63,15 @@ const ChatOption = ({
 };
 
 ChatOption.propTypes = {
-    name: PropTypes.string,
-    participants: PropTypes.arrayOf(PropTypes.string),
-    recentMessage: PropTypes.oneOfType([PropTypes.number, PropTypes.shape({
-        author: PropTypes.string,
-        message: PropTypes.string,
-    })]),
-    status: PropTypes.oneOf([null, "online", "away", "busy", "offline"]),
-    imageSrc: PropTypes.string,
-    imageAlt: PropTypes.string,
+    chat: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
     onClickHandler: PropTypes.func,
+    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 ChatOption.defaultProps = {
-    name: "",
-    participants: [],
-    recentMessage: {
-        author: "",
-        message: "",
-    },
-    status: null,
-    imageSrc: "",
-    imageAlt: "",
+    chat: null,
     onClickHandler: () => {},
-}
+    userId: null,
+};
 
 export default ChatOption;

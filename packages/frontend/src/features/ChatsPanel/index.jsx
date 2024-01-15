@@ -12,6 +12,7 @@ import getChatsList from "./utils/getChatsList.js";
 
 const ChatsPanel = ({
     createChatPanelOpenDefault,
+    userId,
 }) => {
     const [chatsList, setChatsList] = useState([]);
     const [gettingChatsList, setGettingChatsList] = useState(false);
@@ -64,6 +65,7 @@ const ChatsPanel = ({
         <div className={styles["chat-panel"]}>
             <ChatPanel
                 chatId={chatSelectedId}
+                userId={userId}
                 key={chatSelectedId}
             />
         </div>
@@ -132,25 +134,14 @@ const ChatsPanel = ({
                                     aria-label="chat-option"
                                     key={chat._id}
                                 ><ChatOption
-                                    name={chat.name}
-                                    participants={chat.participants}
-                                    recentMessage={
-                                        chat.messages.length > 0 ?
-                                        {
-                                            author: chat.messages[0].author,
-                                            message: chat.messages[0].text,
-                                        } :
-                                        null
-                                    }
-                                    status={chat.status}
-                                    imageSrc={chat.imageSrc}
-                                    imageAlt={chat.imageAlt}
+                                    chat={chat}
                                     onClickHandler={() => {
                                         if (!creatingChat) {
                                             setChatSelectedId(chat._id);
                                             setCreateChatPanelOpen(false);
                                         }
                                     }}
+                                    userId={userId}
                                 /></li>
                             );
                         })}
@@ -174,10 +165,12 @@ const ChatsPanel = ({
 
 ChatsPanel.propTypes = {
     createChatPanelOpenDefault: PropTypes.bool,
+    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 }
 
 ChatsPanel.defaultProps = {
     createChatPanelOpenDefault: false,
+    userId: null,
 }
 
 export default ChatsPanel;

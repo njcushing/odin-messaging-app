@@ -8,7 +8,6 @@ import FriendSelectorPanel from "../FriendSelectorPanel";
 import Message from "./components/Message"
 import MessageBox from "./components/MessageBox";
 
-import getSelf from "./utils/getSelf";
 import getChat from "./utils/getChat";
 import combineParticipantNames from "../../utils/combineParticipantNames";
 import sendMessage from "./utils/sendMessage";
@@ -17,9 +16,8 @@ import mongoose from "mongoose";
 
 const ChatPanel = ({
     chatId,
+    userId,
 }) => {
-    const [userInfo, setUserInfo] = useState({});
-    const [getUserInfoAC, setGetUserInfoAC] = useState(null);
     const [addingFriendsToChat, setAddingFriendsToChat] = useState(false);
     const [chat, setChat] = useState(null);
     const [gettingChat, setGettingChat] = useState(false);
@@ -29,21 +27,6 @@ const ChatPanel = ({
     const [currentMessage, setCurrentMessage] = useState("");
     const [replyingTo, setReplyingTo] = useState(null);
     const [messageSubmissionErrors, setMessageSubmissionErrors] = useState([]);
-
-    useEffect(() => {
-        if (getUserInfoAC) getUserInfoAC.abort;
-        const getUserInfoACNew = new AbortController();
-        setGetUserInfoAC(getUserInfoACNew);
-        (async () => {
-            const response = await getSelf(getUserInfoACNew);
-            setUserInfo(response.user);
-            setGetUserInfoAC(null);
-        })();
-
-        return () => {
-            if (getUserInfoAC) getUserInfoAC.abort;
-        }
-    }, []);
 
     useEffect(() => {
         if (mongoose.Types.ObjectId.isValid(chatId)) {
@@ -151,6 +134,7 @@ const ChatPanel = ({
                                     className={styles["chat-name-participants"]}
                                     aria-label="chat-participants"
                                 >{combineParticipantNames(chat.participants.map((participant) => {
+                                    if (userId && participant.user._id.toString() === userId.toString()) return;
                                     if (participant.nickname.length > 0) return participant.nickname;
                                     if (participant.user.preferences.displayName.length > 0) return participant.user.preferences.displayName;
                                     return participant.user.username;
@@ -217,9 +201,8 @@ const ChatPanel = ({
                                                 imageSrc={message.author.imageSrc}
                                                 imageAlt={message.author.imageAlt}
                                                 position={
-                                                    userInfo &&
-                                                    userInfo.hasOwnProperty("_id") &&
-                                                    message.author.toString() === userInfo._id.toString() ?
+                                                    userId &&
+                                                    message.author.toString() === userId.toString() ?
                                                         "right" :
                                                         "left"
                                                 }
@@ -278,8 +261,14 @@ const ChatPanel = ({
     );
 };
 
+ChatPanel.propTypes = {
+    chatId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+}
+
 ChatPanel.defaultProps = {
     chatId: null,
+    userId: null,
 }
 
 export default ChatPanel;
