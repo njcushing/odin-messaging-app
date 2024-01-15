@@ -14,6 +14,7 @@ const renderComponent = (
     imageSrc = "image_src",
     imageAlt = "image alt",
     position = "right",
+    onReplyToHandler = () => {},
 ) => {
     render(<Message
         text={text}
@@ -22,6 +23,7 @@ const renderComponent = (
         imageSrc={imageSrc}
         imageAlt={imageAlt}
         position={position}
+        onReplyToHandler={onReplyToHandler}
     />);
 }
 
