@@ -449,4 +449,162 @@ describe("Route testing...", () => {
                 });
         });
     });
+
+    describe("/chat/:chatId/add-friends POST route...", () => {
+        test(`Should respond with status code 400 if the body object in the
+         request object does not contain the necessary information`, async () => {
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send()
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({ participants: "" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({ participants: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({ participants: [null] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(null, "Person1", "person1*");
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({ participants: [users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 401 if the currently-logged in
+         user is not found in the database`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({ participants: [users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(401);
+        });
+        test(`Should respond with status code 400 if the specified chat is not a
+         valid MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/chatDoesNotExist/add-friends`)
+                .send({ participants: [users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 404 if the specified chat is not
+         found in the database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${new mongoose.Types.ObjectId()}/add-friends`)
+                .send({ participants: [users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(404);
+        });
+        test(`Should respond with status code 400 if at least one of the other
+         participants' _ids does not correspond to a valid user in the database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({
+                    participants: [users[1]._id, new mongoose.Types.ObjectId()],
+                })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 404 if at least one of the other
+         participants' _ids is not in the currently logged-in user's friends
+         list`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({ participants: [users[2]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(404);
+        });
+        test(`Should respond with status code 400 if there is not a single user
+         being added to the chat who is not already in it`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({ participants: [users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 403 if the currently logged-in
+         user is not a participant in the specified chat`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${chats[1]._id}/add-friends`)
+                .send({ participants: [users[4]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(403);
+        });
+        test(`Should respond with status code 403 if the currently logged-in
+         user does not have permission to add users to the chat`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${chats[0]._id}/add-friends`)
+                .send({ participants: [users[4]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(403);
+        });
+        test(`Should respond with status code 500 if, when trying to
+         duplicate an 'individual'-type chat, the save operation fails`, async () => {
+            vi.spyOn(Chat.prototype, "save").mockImplementationOnce(() =>
+                Promise.reject("fail update")
+            );
+            mockProtectedRouteJWT(users[1]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${chats[1]._id}/add-friends`)
+                .send({ participants: [users[0]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(500);
+        });
+        test(`Should respond with status code 201 on successful request, with
+         a valid token`, async () => {
+            mockProtectedRouteJWT(users[1]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .post(`/${chats[1]._id}/add-friends`)
+                .send({ participants: [users[0]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(201)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+    });
 });
