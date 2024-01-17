@@ -173,7 +173,7 @@ const initialiseMongoServer = async () => {
                 { user: userIds[1], muted: true },
             ]),
             newChat(1, chatIds[1], "individual", [
-                { user: userIds[1] },
+                { user: userIds[1], role: "admin" },
                 { user: userIds[2] },
             ]),
             newChat(2, chatIds[2], "individual", [
