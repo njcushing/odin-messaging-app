@@ -505,7 +505,10 @@ export const addFriendsPost = [
                 res,
                 400,
                 "Not all participants are valid users.",
-                { token: token }
+                {
+                    chatId: null,
+                    token: token,
+                }
             );
         }
 
@@ -524,7 +527,10 @@ export const addFriendsPost = [
                     404,
                     `${req.body.participants[i]} is not on the currently
                     logged-in user's friends list`,
-                    { token: token }
+                    {
+                        chatId: null,
+                        token: token,
+                    }
                 );
             }
             if (!participantIds.includes(participantIdString)) {
@@ -536,7 +542,10 @@ export const addFriendsPost = [
                 res,
                 400,
                 "All of the specified users are already in the chat.",
-                { token: token }
+                {
+                    chatId: null,
+                    token: token,
+                }
             );
         }
 
@@ -547,7 +556,10 @@ export const addFriendsPost = [
                 403,
                 `$The currently logged-in user is forbidden from adding friends
                 to this chat.`,
-                { token: token }
+                {
+                    chatId: null,
+                    token: token,
+                }
             );
         }
 
@@ -566,7 +578,10 @@ export const addFriendsPost = [
                     403,
                     `$The currently logged-in user does not have the authority to
                     perform this operation on this chat.`,
-                    { token: token }
+                    {
+                        chatId: null,
+                        token: token,
+                    }
                 );
             }
         }
@@ -652,14 +667,20 @@ export const addFriendsPost = [
                 `Friend${
                     friendsFiltered.length > 1 ? "s" : ""
                 } successfully added to chat at: ${chatId}.`,
-                { token: token }
+                {
+                    chatId: chatId,
+                    token: token,
+                }
             );
         } catch (error) {
             return sendResponse(
                 res,
                 error.status,
                 error.message,
-                { token: token },
+                {
+                    chatId: null,
+                    token: token,
+                },
                 error
             );
         } finally {
