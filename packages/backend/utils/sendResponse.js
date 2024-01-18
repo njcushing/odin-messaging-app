@@ -11,7 +11,7 @@ const sendResponse = (
             statusValue = status;
         } else if (
             err &&
-            typeof err.status !== undefined &&
+            typeof err.status !== "undefined" &&
             Number.isInteger(err.status)
         ) {
             statusValue = err.status;
