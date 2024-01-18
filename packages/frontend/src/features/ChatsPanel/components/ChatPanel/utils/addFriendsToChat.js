@@ -26,15 +26,26 @@ const addFriendsToChat = async (chatId, participants, abortController) => {
                 window.location.href = "/log-in";
             }
 
+            let chatId = null;
+            if (
+                responseJSON.data !== null &&
+                typeof responseJSON.data === "object" &&
+                "chatId" in responseJSON.data
+            ) {
+                chatId = responseJSON.data.chatId;
+            }
+
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
+                chatId: chatId,
             };
         })
         .catch((error) => {
             return {
                 status: 500,
                 message: "Adding friends to chat failed",
+                chatId: null,
             };
         });
     return data;

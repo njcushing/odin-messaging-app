@@ -19,8 +19,7 @@ const ChatPanel = ({
     chatId,
     userId,
     messageSentHandler,
-    updateChatListHandler,
-    switchChatHandler,
+    addedFriendsHandler,
 }) => {
     const [chat, setChat] = useState(null);
     const [gettingChat, setGettingChat] = useState(false);
@@ -133,7 +132,7 @@ const ChatPanel = ({
                     });
                     setCurrentMessage("");
                     setReplyingTo(null);
-                    messageSentHandler();
+                    messageSentHandler(response.newMessage);
                 }
                 setAttemptingSendMessage(false);
                 setSendingMessageAC(null);
@@ -176,8 +175,8 @@ const ChatPanel = ({
                         abortController: null,
                         submissionErrors: []
                     });
-                    setChat()
                     reloadChat();
+                    addedFriendsHandler(response.chatId);
                 }
             })();
         } else {
