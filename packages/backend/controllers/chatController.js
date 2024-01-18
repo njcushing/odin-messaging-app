@@ -220,7 +220,7 @@ export const chatPost = [
                         type: "individual",
                         participants: [
                             { user: user._id },
-                            { user: friend._id },
+                            { user: friend.user },
                         ],
                     });
                     await chat.save().catch((error) => {
