@@ -10,6 +10,7 @@ import MessageBox from "./components/MessageBox";
 
 import getChat from "./utils/getChat";
 import combineParticipantNames from "../../utils/combineParticipantNames";
+import addFriendsToChat from "./utils/addFriendsToChat";
 import sendMessage from "./utils/sendMessage";
 
 import mongoose from "mongoose";
@@ -17,12 +18,23 @@ import mongoose from "mongoose";
 const ChatPanel = ({
     chatId,
     userId,
+    messageSentHandler,
+    updateChatListHandler,
+    switchChatHandler,
 }) => {
-    const [addingFriendsToChat, setAddingFriendsToChat] = useState(false);
     const [chat, setChat] = useState(null);
     const [gettingChat, setGettingChat] = useState(false);
     const [gettingChatAC, setGettingChatAC] = useState(null);
     const [participantInfo, setParticipantInfo] = useState(new Map());
+
+    const [addingFriendsToChat, setAddingFriendsToChat] = useState({
+        panelOpen: false,
+        userIds: [],
+        abortController: null,
+        attempting: false,
+        submissionErrors: [],
+    });
+
     const [sendingMessageAC, setSendingMessageAC] = useState(null);
     const [attemptingSendMessage, setAttemptingSendMessage] = useState(false);
     const [currentMessage, setCurrentMessage] = useState("");
@@ -75,6 +87,30 @@ const ChatPanel = ({
         setAttemptingSendMessage(true);
         setCurrentMessage(formFields.text);
     }, []);
+    
+    const attemptAddingFriendsToChat = (userIds) => {
+        // Client-side validation
+        const invalidUserIds = [];
+        for (let i = 0; i < userIds.length; i++) {
+            if (!mongoose.Types.ObjectId.isValid(userIds[i])) {
+                invalidUserIds.push(userIds[i]);
+            }
+        }
+        if (invalidUserIds.length > 0) {
+            setAddingFriendsToChat({
+                ...addingFriendsToChat,
+                submissionErrors: `Not all of the provided user ids to add to
+                the chat are valid: ${invalidUserIds}`
+            });
+            return;
+        }
+
+        setAddingFriendsToChat({
+            ...addingFriendsToChat,
+            attempting: true,
+            userIds: userIds,
+        });
+    };
 
     useEffect(() => {
         if (sendingMessageAC) sendingMessageAC.abort;
@@ -97,6 +133,7 @@ const ChatPanel = ({
                     });
                     setCurrentMessage("");
                     setReplyingTo(null);
+                    messageSentHandler();
                 }
                 setAttemptingSendMessage(false);
                 setSendingMessageAC(null);
@@ -109,6 +146,51 @@ const ChatPanel = ({
             if (sendingMessageAC) sendingMessageAC.abort;
         }
     }, [attemptingSendMessage]);
+
+    useEffect(() => {
+        if (addingFriendsToChat.abortController) addingFriendsToChat.abortController.abort;
+        const abortControllerNew = new AbortController();
+        if (addingFriendsToChat.attempting) {
+            setAddingFriendsToChat({
+                ...addingFriendsToChat,
+                abortController: abortControllerNew,
+            });
+            (async () => {
+                const response = await addFriendsToChat(
+                    chatId,
+                    Array.from(addingFriendsToChat.userIds),
+                    abortControllerNew
+                );
+                if (response.status >= 400) {
+                    setAddingFriendsToChat({
+                        ...addingFriendsToChat,
+                        attempting: false,
+                        abortController: null,
+                        submissionErrors: [response.message]
+                    });
+                } else {
+                    setAddingFriendsToChat({
+                        ...addingFriendsToChat,
+                        panelOpen: false,
+                        attempting: false,
+                        abortController: null,
+                        submissionErrors: []
+                    });
+                    setChat()
+                    reloadChat();
+                }
+            })();
+        } else {
+            setAddingFriendsToChat({
+                ...addingFriendsToChat,
+                abortController: null,
+            });
+        }
+
+        return () => {
+            if (sendingMessageAC) sendingMessageAC.abort;
+        }
+    }, [addingFriendsToChat.attempting]);
 
     useEffect(() => {
         if (chat && typeof chat === "object" && "participants" in chat) {
@@ -124,6 +206,7 @@ const ChatPanel = ({
                 }
 
                 participantInfoNew.set(participant.user._id, {
+                    _id: participant.user._id,
                     name: participantName,
                 });
             });
@@ -156,12 +239,15 @@ const ChatPanel = ({
                             ?   <h3
                                     className={styles["chat-name-participants"]}
                                     aria-label="chat-participants"
-                                >{combineParticipantNames(chat.participants.map((participant) => {
-                                    if (userId && participant.user._id.toString() === userId.toString()) return;
-                                    if (participant.nickname.length > 0) return participant.nickname;
-                                    if (participant.user.preferences.displayName.length > 0) return participant.user.preferences.displayName;
-                                    return participant.user.username;
-                                }), 3)}</h3>
+                                >{combineParticipantNames((() => {
+                                    const participants = Array.from(participantInfo.values());
+                                    const participantNames = [];
+                                    participants.forEach((participant) => {
+                                        if (userId && participant._id.toString() === userId.toString()) return;
+                                        participantNames.push(participant.name);
+                                    });
+                                    return participantNames;
+                                })(), 3)}</h3>
                             :   <h3
                                     className={styles["chat-name"]}
                                     aria-label="chat-name"
@@ -181,7 +267,14 @@ const ChatPanel = ({
                                 heightPx={44}
                                 fontSizePx={22}
                                 borderStyle="circular"
-                                onClickHandler={() => { setAddingFriendsToChat(!addingFriendsToChat) }}
+                                onClickHandler={() => {
+                                    if (!addingFriendsToChat.attempting) {
+                                        setAddingFriendsToChat({
+                                            ...addingFriendsToChat,
+                                            panelOpen: !addingFriendsToChat.panelOpen,
+                                        });
+                                    }
+                                }}
                             />
                             <OptionButton
                                 text="call"
@@ -205,7 +298,7 @@ const ChatPanel = ({
                             />
                         </ul>
                     </div>
-                    {!addingFriendsToChat
+                    {!addingFriendsToChat.panelOpen
                     ?   <div className={styles["messages-container"]}>
                             <ul
                                 className={styles["message-list"]}
@@ -272,9 +365,18 @@ const ChatPanel = ({
                             addButtonText="Add"
                             submitButtonText="Add Friends"
                             noFriendsText="You have no friends you can add to this chat"
-                            onCloseHandler={() => setAddingFriendsToChat(false)}
-                            onSubmitHandler={() => {}}
-                            submissionErrors={[]}
+                            onCloseHandler={() => {
+                                setAddingFriendsToChat({
+                                    ...addingFriendsToChat,
+                                    panelOpen: false,
+                                });
+                            }}
+                            onSubmitHandler={(participants) => {
+                                if (!addingFriendsToChat.attempting) {
+                                    attemptAddingFriendsToChat(participants);
+                                }
+                            }}
+                            submissionErrors={addingFriendsToChat.submissionErrors}
                         />
                     }
                     {replyingTo
@@ -320,11 +422,17 @@ const ChatPanel = ({
 ChatPanel.propTypes = {
     chatId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    messageSentHandler: PropTypes.func,
+    updateChatListHandler: PropTypes.func,
+    switchChatHandler: PropTypes.func,
 }
 
 ChatPanel.defaultProps = {
     chatId: null,
     userId: null,
+    messageSentHandler: () => {},
+    updateChatListHandler: () => {},
+    switchChatHandler: () => {},
 }
 
 export default ChatPanel;
