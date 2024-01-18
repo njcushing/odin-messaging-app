@@ -28,8 +28,6 @@ const Message = ({
     const profileImageStyleRules = {
         gridArea: position === "left" ? "1 / 1 / -1 / 2" : "1 / 3 / -1 / -1",
     }
-    const messageTextStyleRules = {
-    }
     const replyButtonStyleRules = {
         gridArea: position === "left" ? "1 / 3 / 2 / -1" : "1 / 1 / 2 / 2",
     }
@@ -46,14 +44,16 @@ const Message = ({
         "text" in replyingTo
     ) {
         replyingToElement = (
-            <p
-                className={styles["replying-to-text"]}
-                aria-label="replying-to-text"
-            >{
-                new DOMParser().parseFromString(
-                    `${replyingTo.author}: ${replyingTo.text}`, "text/html"
-                ).body.textContent
-            }</p>
+            <div className={styles["replying-to-text-container"]}>
+                <p
+                    className={styles["replying-to-text"]}
+                    aria-label="replying-to-text"
+                >{
+                    new DOMParser().parseFromString(
+                        `${replyingTo.author}: ${replyingTo.text}`, "text/html"
+                    ).body.textContent
+                }</p>
+            </div>
         );
     }
 
@@ -80,11 +80,10 @@ const Message = ({
                 <p
                     className={styles["message-text"]}
                     aria-label="message-text"
-                    style={{ ...messageTextStyleRules }}
                 >
                     {new DOMParser().parseFromString(text, "text/html").body.textContent}
-                    {replyingToElement}
                 </p>
+                {replyingToElement}
             </div>
             <div
                 className={styles["option-button"]}
