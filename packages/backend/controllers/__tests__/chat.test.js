@@ -567,10 +567,11 @@ describe("Route testing...", () => {
                 .expect(403);
         });
         test(`Should respond with status code 403 if the currently logged-in
-         user does not have permission to add users to the chat`, async () => {
+         user does not have permission to add users to the chat ('group'-type
+         chats only)`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
-                .post(`/${chats[0]._id}/add-friends`)
+                .post(`/${chats[5]._id}/add-friends`)
                 .send({ participants: [users[4]._id] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
