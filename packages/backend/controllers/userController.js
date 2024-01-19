@@ -18,6 +18,12 @@ import {
     validateEmail,
     validatePassword,
 } from "../../../utils/validateCreateAccountFields.js";
+import {
+    validateDisplayName,
+    validateTagLine,
+    validateStatus,
+    validateProfileImage,
+} from "../../../utils/validateUserAccountInformationFields.js";
 
 const validateUserId = (res, next, userId) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -33,8 +39,8 @@ const userNotFound = (res, next, userId) => {
     return sendResponse(res, 404, "User not found in database.");
 };
 
-const userPostValidateFields = [
-    body("username")
+const validators = {
+    username: body("username")
         .trim()
         .custom((value, { req, loc, path }) => {
             const validUsername = validateUsername(value);
@@ -45,35 +51,35 @@ const userPostValidateFields = [
             }
         })
         .escape(),
-    body("email")
+    email: body("email")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const validEmail = validateEmail(value);
-            if (!validEmail.status) {
-                throw new Error(validEmail.message.back);
+            const valid = validateEmail(value);
+            if (!valid.status) {
+                throw new Error(valid.message.back);
             } else {
                 return value;
             }
         })
         .escape()
         .normalizeEmail({ all_lowercase: true }),
-    body("password")
+    password: body("password")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const validPassword = validatePassword(value);
-            if (!validPassword.status) {
-                throw new Error(validPassword.message.back);
+            const valid = validatePassword(value);
+            if (!valid.status) {
+                throw new Error(valid.message.back);
             } else {
                 return value;
             }
         })
         .escape(),
-    body("confirmPassword")
+    confirmPassword: body("confirmPassword")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const validPassword = validatePassword(value, true);
-            if (!validPassword.status) {
-                throw new Error(validPassword.message.back);
+            const valid = validatePassword(value, true);
+            if (!valid.status) {
+                throw new Error(valid.message.back);
             } else {
                 return value;
             }
@@ -88,7 +94,18 @@ const userPostValidateFields = [
             }
         })
         .escape(),
-];
+    displayName: body("displayName")
+        .trim()
+        .custom((value, { req, loc, path }) => {
+            const valid = validateDisplayName(value);
+            if (!valid.status) {
+                throw new Error(valid.message.back);
+            } else {
+                return value;
+            }
+        })
+        .escape(),
+};
 
 export const userGet = [
     param("username", "'username' parameter (String) must not be empty")
@@ -116,7 +133,10 @@ export const userGet = [
 ];
 
 export const userPost = [
-    userPostValidateFields,
+    validators.username,
+    validators.email,
+    validators.password,
+    validators.confirmPassword,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
@@ -777,6 +797,26 @@ export const chatsGet = [
 
         sendResponse(res, 200, "Chats found.", {
             chats: chats,
+            token: token,
+        });
+    }),
+];
+
+export const displayNamePut = [
+    protectedRouteJWT,
+    validators.displayName,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+
+        const updatedUser = await User.findByIdAndUpdate(req.user._id, {
+            $set: { "preferences.displayName": req.body.displayName },
+        });
+        if (updatedUser === null) return selfNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        sendResponse(res, 200, "Display Name successfully updated.", {
             token: token,
         });
     }),

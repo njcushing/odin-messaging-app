@@ -819,4 +819,62 @@ describe("Route testing...", () => {
                 });
         });
     });
+
+    describe("/user/preferences/displayName PUT route...", () => {
+        test(`Should respond with status code 400 if the body object in the
+         request object does not contain the necessary information`, async () => {
+            await request(app)
+                .put(`/preferences/displayName`)
+                .send()
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(null, "Person1", "person1*");
+            await request(app)
+                .put(`/preferences/displayName`)
+                .send({ displayName: "Name" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database and therefore cannot have its fields
+         updated`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app)
+                .put(`/preferences/displayName`)
+                .send({ displayName: "Name" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(401);
+        });
+        test(`Should respond with status code 200 if the user's display name is
+         successfully updated`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .put(`/preferences/displayName`)
+                .send({ displayName: "Name" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (!data.hasOwnProperty("token")) {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+    });
 });
