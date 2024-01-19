@@ -116,6 +116,17 @@ const validators = {
             }
         })
         .escape(),
+    setStatus: body("setStatus")
+        .trim()
+        .custom((value, { req, loc, path }) => {
+            const valid = validateStatus(value);
+            if (!valid.status) {
+                throw new Error(valid.message.back);
+            } else {
+                return value;
+            }
+        })
+        .escape(),
 };
 
 export const userGet = [
@@ -848,6 +859,26 @@ export const tagLinePut = [
         const token = await generateToken(req.user.username, req.user.password);
 
         sendResponse(res, 200, "Tag Line successfully updated.", {
+            token: token,
+        });
+    }),
+];
+
+export const setStatusPut = [
+    protectedRouteJWT,
+    validators.setStatus,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+
+        const updatedUser = await User.findByIdAndUpdate(req.user._id, {
+            $set: { "preferences.setStatus": req.body.setStatus },
+        });
+        if (updatedUser === null) return selfNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        sendResponse(res, 200, "Status successfully updated.", {
             token: token,
         });
     }),
