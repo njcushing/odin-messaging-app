@@ -105,6 +105,17 @@ const validators = {
             }
         })
         .escape(),
+    tagLine: body("tagLine")
+        .trim()
+        .custom((value, { req, loc, path }) => {
+            const valid = validateTagLine(value);
+            if (!valid.status) {
+                throw new Error(valid.message.back);
+            } else {
+                return value;
+            }
+        })
+        .escape(),
 };
 
 export const userGet = [
@@ -817,6 +828,26 @@ export const displayNamePut = [
         const token = await generateToken(req.user.username, req.user.password);
 
         sendResponse(res, 200, "Display Name successfully updated.", {
+            token: token,
+        });
+    }),
+];
+
+export const tagLinePut = [
+    protectedRouteJWT,
+    validators.tagLine,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+
+        const updatedUser = await User.findByIdAndUpdate(req.user._id, {
+            $set: { "preferences.tagLine": req.body.tagLine },
+        });
+        if (updatedUser === null) return selfNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        sendResponse(res, 200, "Tag Line successfully updated.", {
             token: token,
         });
     }),
