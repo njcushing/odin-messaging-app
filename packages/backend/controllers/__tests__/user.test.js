@@ -695,7 +695,7 @@ describe("Route testing...", () => {
                 .expect(404);
         });
         test(`Should respond with status code 401 if the '_id' of the user being
-         added exists within the currently logged-in user's 'friendRequests' array
+         added exists within the currently logged-in user's 'friendRequests'
          array but the currently logged-in user is not found in the database
          when attempting to update its fields`, async () => {
             mockProtectedRouteJWT(users[4]._id, "Person5", "person5*");
@@ -747,7 +747,7 @@ describe("Route testing...", () => {
                 .expect(401);
         });
         test(`Should respond with status code 404 if the '_id' of the user being
-         added does not exist within the currently logged-in user's
+         declined does not exist within the currently logged-in user's
          'friendRequests' array`, async () => {
             mockProtectedRouteJWT(users[3]._id, "Person4", "person4*");
             await request(app)
@@ -755,7 +755,7 @@ describe("Route testing...", () => {
                 .expect(404);
         });
         test(`Should respond with status code 401 if the '_id' of the user being
-         added exists within the currently logged-in user's 'friendRequests' array
+         declined exists within the currently logged-in user's 'friendRequests'
          array but the currently logged-in user is not found in the database
          when attempting to update its fields`, async () => {
             mockProtectedRouteJWT(users[3]._id, "Person4", "person4*");
