@@ -1,4 +1,4 @@
-export const validateUsername = (username) => {
+export const username = (username) => {
     if (username.length === 0) {
         return {
             status: false,
@@ -11,7 +11,7 @@ export const validateUsername = (username) => {
     };
 };
 
-export const validatePassword = (password) => {
+export const password = (password) => {
     if (password.length === 0) {
         return {
             status: false,

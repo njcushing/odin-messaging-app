@@ -4,6 +4,7 @@ import styles from "./index.module.css";
 import OptionsSidebar from "@/features/OptionsSidebar";
 import FriendsPanel from "@/features/FriendsPanel";
 import ChatsPanel from "@/features/ChatsPanel";
+import AccountInformation from "@/features/AccountInformation";
 
 import getSelf from "@/utils/getSelf.js";
 
@@ -45,6 +46,10 @@ const Dashboard = () => {
             )
             break;
         case "account":
+            mainDashboardContent = (
+                <AccountInformation />
+            )
+            break;
         case "settings":
         default:
             mainDashboardContent = null;

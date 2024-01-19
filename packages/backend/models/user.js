@@ -1,16 +1,14 @@
 import mongoose from "mongoose";
 
 import {
-    validateUsername,
-    validateEmail,
-    validatePassword,
-} from "../../../utils/validateCreateAccountFields.js";
-import {
-    validateDisplayName,
-    validateTagLine,
-    validateStatus,
-    validateProfileImage,
-} from "../../../utils/validateUserAccountInformationFields.js";
+    username,
+    email,
+    password,
+    displayName,
+    tagLine,
+    status,
+    profileImage,
+} from "../../../utils/validateUserFields.js";
 
 const Schema = mongoose.Schema;
 
@@ -22,9 +20,9 @@ const UserSchema = new Schema(
             unique: true,
             validate: {
                 validator: function (value) {
-                    return validateUsername(value).status;
+                    return username(value).status;
                 },
-                message: (props) => validateUsername(props.value).message.back,
+                message: (props) => username(props.value).message.back,
             },
             required: [true, "'username' field required"],
         },
@@ -34,15 +32,16 @@ const UserSchema = new Schema(
             unique: true,
             validate: {
                 validator: function (value) {
-                    return validateEmail(value).status;
+                    return email(value).status;
                 },
-                message: (props) => validateEmail(props.value).message.back,
+                message: (props) => email(props.value).message.back,
             },
             required: [true, "'email' field required"],
         },
         password: {
             type: String,
             trim: true,
+            // Not including validator here because the password is hashed
             required: [true, "'password' field required"],
         },
         admin: {
@@ -79,10 +78,9 @@ const UserSchema = new Schema(
                 trim: true,
                 validate: {
                     validator: function (value) {
-                        return validateDisplayName(value).status;
+                        return displayName(value).status;
                     },
-                    message: (props) =>
-                        validateDisplayName(props.value).message.back,
+                    message: (props) => displayName(props.value).message.back,
                 },
                 default: "",
             },
@@ -91,10 +89,9 @@ const UserSchema = new Schema(
                 trim: true,
                 validate: {
                     validator: function (value) {
-                        return validateTagLine(value).status;
+                        return tagLine(value).status;
                     },
-                    message: (props) =>
-                        validateTagLine(props.value).message.back,
+                    message: (props) => tagLine(props.value).message.back,
                 },
                 default: "",
             },
@@ -103,10 +100,9 @@ const UserSchema = new Schema(
                 type: String,
                 validate: {
                     validator: function (value) {
-                        return validateStatus(value).status;
+                        return status(value).status;
                     },
-                    message: (props) =>
-                        validateStatus(props.value).message.back,
+                    message: (props) => status(props.value).message.back,
                 },
                 default: null,
             },

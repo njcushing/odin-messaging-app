@@ -14,16 +14,14 @@ import checkRequestValidationError from "../utils/checkRequestValidationError.js
 import protectedRouteJWT from "../utils/protectedRouteJWT.js";
 import generateToken from "../utils/generateToken.js";
 import {
-    validateUsername,
-    validateEmail,
-    validatePassword,
-} from "../../../utils/validateCreateAccountFields.js";
-import {
-    validateDisplayName,
-    validateTagLine,
-    validateStatus,
-    validateProfileImage,
-} from "../../../utils/validateUserAccountInformationFields.js";
+    username,
+    email,
+    password,
+    displayName,
+    tagLine,
+    status,
+    profileImage,
+} from "../../../utils/validateUserFields.js";
 
 const validateUserId = (res, next, userId) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -43,7 +41,7 @@ const validators = {
     username: body("username")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const validUsername = validateUsername(value);
+            const validUsername = username(value);
             if (!validUsername.status) {
                 throw new Error(validUsername.message.back);
             } else {
@@ -54,7 +52,7 @@ const validators = {
     email: body("email")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const valid = validateEmail(value);
+            const valid = email(value);
             if (!valid.status) {
                 throw new Error(valid.message.back);
             } else {
@@ -66,7 +64,7 @@ const validators = {
     password: body("password")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const valid = validatePassword(value);
+            const valid = password(value);
             if (!valid.status) {
                 throw new Error(valid.message.back);
             } else {
@@ -77,7 +75,7 @@ const validators = {
     confirmPassword: body("confirmPassword")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const valid = validatePassword(value, true);
+            const valid = password(value, true);
             if (!valid.status) {
                 throw new Error(valid.message.back);
             } else {
@@ -97,7 +95,7 @@ const validators = {
     displayName: body("displayName")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const valid = validateDisplayName(value);
+            const valid = displayName(value);
             if (!valid.status) {
                 throw new Error(valid.message.back);
             } else {
@@ -108,7 +106,7 @@ const validators = {
     tagLine: body("tagLine")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const valid = validateTagLine(value);
+            const valid = tagLine(value);
             if (!valid.status) {
                 throw new Error(valid.message.back);
             } else {
@@ -119,7 +117,7 @@ const validators = {
     setStatus: body("setStatus")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const valid = validateStatus(value);
+            const valid = status(value);
             if (!valid.status) {
                 throw new Error(valid.message.back);
             } else {

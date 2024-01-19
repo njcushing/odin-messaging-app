@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./index.module.css";
 
 import createAccountAPI from "./utils/createAccountAPI";
-import { validateUsername, validateEmail, validatePassword } from "../../../../../utils/validateCreateAccountFields";
+import { username, email, password } from "../../../../../utils/validateUserFields";
 
 const CreateAccount = () => {
     const [usernameError, setUsernameError] = useState(null);
@@ -24,10 +24,10 @@ const CreateAccount = () => {
 
         // Client-side validation
         let validCredentials = true;
-        const validUsername = validateUsername(formFields.username);
-        const validEmail = validateEmail(formFields.email);
-        const validPassword = validatePassword(formFields.password);
-        const validConfirmPassword = validatePassword(formFields.confirmPassword);
+        const validUsername = username(formFields.username);
+        const validEmail = email(formFields.email);
+        const validPassword = password(formFields.password);
+        const validConfirmPassword = password(formFields.confirmPassword);
         if (!validUsername.status) {
             validCredentials = false;
             setUsernameError(validUsername.message.front);
@@ -61,8 +61,8 @@ const CreateAccount = () => {
     }, []);
 
     const updatePasswordErrors = () => {
-        const validPassword = validatePassword(passwordInputRef.current.value);
-        const validConfirmPassword = validatePassword(confirmPasswordInputRef.current.value, true);
+        const validPassword = password(passwordInputRef.current.value);
+        const validConfirmPassword = password(confirmPasswordInputRef.current.value, true);
         if (!validPassword.status) {
             setPasswordError(validPassword.message.front);
         } else {
@@ -131,7 +131,7 @@ const CreateAccount = () => {
                                 defaultValue={credentials.username ? credentials.username : ""}
                                 style={{ resize: "none" }}
                                 onChange={(e) => {
-                                    const validUsername = validateUsername(e.target.value);
+                                    const validUsername = username(e.target.value);
                                     if (!validUsername.status) {
                                         setUsernameError(validUsername.message.front);
                                     } else {
@@ -158,7 +158,7 @@ const CreateAccount = () => {
                                 defaultValue={credentials.email ? credentials.email : ""}
                                 style={{ resize: "none" }}
                                 onChange={(e) => {
-                                    const validEmail = validateEmail(e.target.value);
+                                    const validEmail = email(e.target.value);
                                     if (!validEmail.status) {
                                         setEmailError(validEmail.message.front);
                                     } else {

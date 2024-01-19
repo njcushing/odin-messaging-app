@@ -49,7 +49,7 @@ vi.mock('./utils/calculateChatOptionProps.js', async () => ({
 
 describe("UI/DOM Testing...", () => {
     describe("The element...", () => {
-        test.only(`Should be present in the document`, async () => {
+        test(`Should be present in the document`, async () => {
             await renderComponent();
             const container = screen.getByRole("generic", { name: "chat-option" });
             expect(container).toBeInTheDocument();
