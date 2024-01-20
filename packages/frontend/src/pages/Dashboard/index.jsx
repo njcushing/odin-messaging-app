@@ -9,45 +9,88 @@ import AccountInformation from "@/features/AccountInformation";
 import getSelf from "@/utils/getSelf.js";
 
 const Dashboard = () => {
-    const [userInfo, setUserInfo] = useState(null);
-    const [getUserInfoAC, setGetUserInfoAC] = useState(null);
+    const [userInfo, setUserInfo] = useState({
+        value: null,
+        abortController: null,
+        attempting: true,
+    })
     const [optionSelected, setOptionSelected] = useState("friends");
-
+    
     useEffect(() => {
-        if (getUserInfoAC) getUserInfoAC.abort;
-        const getUserInfoACNew = new AbortController();
-        setGetUserInfoAC(getUserInfoACNew);
-        (async () => {
-            const response = await getSelf(getUserInfoACNew);
-            if (!response.user) window.location.href = "/log-in";
-            setUserInfo(response.user);
-            setGetUserInfoAC(null);
-        })();
+        if (userInfo.attempting) {
+            if (userInfo.abortController) userInfo.abortController.abort;
+            const abortControllerNew = new AbortController();
+            setUserInfo({
+                ...userInfo,
+                abortController: abortControllerNew,
+            });
+            (async () => {
+                const response = await getSelf(abortControllerNew);
+                setUserInfo({
+                    ...userInfo,
+                    value: response.user,
+                    abortController: null,
+                    attempting: false,
+                });
+            })();
+        } else {
+            if (userInfo.abortController) userInfo.abortController.abort;
+            setUserInfo({
+                ...userInfo,
+                abortController: null,
+            });
+        }
 
         return () => {
-            if (getUserInfoAC) getUserInfoAC.abort;
+            if (userInfo.abortController) userInfo.abortController.abort;
         }
-    }, []);
+    }, [userInfo.attempting]);
 
     let mainDashboardContent = null;
     switch (optionSelected) {
         case "friends":
             mainDashboardContent = (
                 <FriendsPanel
-                    userId={userInfo ? userInfo._id : null}
+                    userId={userInfo.value ? userInfo.value._id : null}
                 />
             )
             break;
         case "chats":
             mainDashboardContent = (
                 <ChatsPanel
-                    userId={userInfo ? userInfo._id : null}
+                    userId={userInfo.value ? userInfo.value._id : null}
                 />
             )
             break;
         case "account":
             mainDashboardContent = (
-                <AccountInformation />
+                <AccountInformation
+                    userInfo={(() => {
+                        try {
+                            return {
+                                displayName: userInfo.value.preferences.displayName,
+                                tagLine: userInfo.value.preferences.tagLine,
+                                status: userInfo.value.preferences.setStatus,
+                                profileImage: userInfo.value.preferences.image,
+                            }
+                        } catch (error) {
+                            return {
+                                displayName: "",
+                                tagLine: "",
+                                status: null,
+                                profileImage: null,
+                            }
+                        }
+                    })()}
+                    onUpdateHandler={() => {
+                        if (!userInfo.attempting) {
+                            setUserInfo({
+                                ...userInfo,
+                                attempting: true,
+                            })
+                        }
+                    }}
+                />
             )
             break;
         case "settings":
