@@ -114,7 +114,7 @@ export const status = async (value, abortController) => {
         .catch((error) => {
             return {
                 status: 500,
-                message: "Updating tag line failed.",
+                message: "Updating status failed.",
             };
         });
     return data;
@@ -125,4 +125,44 @@ export const profileImage = (value, abortController) => {
         status: 200,
         message: "Done.",
     };
+};
+
+export const theme = async (value, abortController) => {
+    const data = await fetch(
+        `${import.meta.env.VITE_SERVER_DOMAIN}/user/preferences/theme`,
+        {
+            signal: abortController ? abortController.signal : null,
+            method: "PUT",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+                authorization: localStorage.getItem(
+                    "odin-messaging-app-auth-token"
+                ),
+            },
+            body: JSON.stringify({
+                theme: value,
+            }),
+        }
+    )
+        .then(async (response) => {
+            const responseJSON = await response.json();
+            saveTokenFromResponseJSON(responseJSON);
+
+            if (responseJSON.status === 401) {
+                window.location.href = "/log-in";
+            }
+
+            return {
+                status: responseJSON.status,
+                message: responseJSON.message,
+            };
+        })
+        .catch((error) => {
+            return {
+                status: 500,
+                message: "Updating theme failed.",
+            };
+        });
+    return data;
 };
