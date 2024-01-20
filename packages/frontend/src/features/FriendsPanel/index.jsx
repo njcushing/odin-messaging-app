@@ -74,13 +74,17 @@ const FriendsPanel = ({
                         return (
                             <li
                                 aria-label="friend"
-                                key={friend._id}
+                                key={friend.user._id}
                             ><Friend
-                                username={friend.username}
-                                tagLine={friend.tagLine}
-                                status={friend.status}
-                                imageSrc={friend.imageSrc}
-                                imageAlt={friend.imageAlt}
+                                username={
+                                    friend.user.preferences.displayName.length > 0 ?
+                                    friend.user.preferences.displayName :
+                                    friend.user.username
+                                }
+                                tagLine={friend.user.preferences.tagLine}
+                                status={friend.user.status}
+                                imageSrc={friend.user.imageSrc}
+                                imageAlt={friend.user.imageAlt}
                                 onClickHandler={() => {}}
                             /></li>
                         );
