@@ -19,7 +19,13 @@ const MessageSchema = new Schema(
         replyingTo: { type: Schema.Types.ObjectId, ref: "Message" },
         deleted: { type: Boolean, default: false },
     },
-    { timestamps: true }
+    {
+        getters: true,
+        timestamps: true,
+    }
 );
+
+MessageSchema.set("toObject", { virtuals: true });
+MessageSchema.set("toJSON", { virtuals: true });
 
 export default mongoose.model("Message", MessageSchema);
