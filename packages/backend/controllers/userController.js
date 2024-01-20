@@ -21,6 +21,7 @@ import {
     tagLine,
     status,
     profileImage,
+    theme,
 } from "../../../utils/validateUserFields.js";
 
 const validateUserId = (res, next, userId) => {
@@ -122,6 +123,16 @@ const validators = {
                 }
             })
             .optional({ nullable: true }),
+        theme: body("theme")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = theme(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
     },
     param: {
         username: param("username")
@@ -853,6 +864,26 @@ export const setStatusPut = [
         const token = await generateToken(req.user.username, req.user.password);
 
         sendResponse(res, 200, "Status successfully updated.", {
+            token: token,
+        });
+    }),
+];
+
+export const themePut = [
+    protectedRouteJWT,
+    validators.body.theme,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+
+        const updatedUser = await User.findByIdAndUpdate(req.user._id, {
+            $set: { "preferences.theme": req.body.theme },
+        });
+        if (updatedUser === null) return selfNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        sendResponse(res, 200, "Theme successfully updated.", {
             token: token,
         });
     }),

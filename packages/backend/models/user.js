@@ -122,7 +122,6 @@ UserSchema.set("toObject", { virtuals: true });
 UserSchema.set("toJSON", { virtuals: true });
 
 UserSchema.virtual("status").get(function () {
-    console.log(this.preferences);
     if (this.preferences.setStatus !== null) return this.preferences.setStatus;
     const currentTime = Date.now();
     const secondsSinceLastActivity =
