@@ -38,100 +38,106 @@ const userNotFound = (res, next, userId) => {
 };
 
 const validators = {
-    username: body("username")
-        .trim()
-        .custom((value, { req, loc, path }) => {
-            const validUsername = username(value);
-            if (!validUsername.status) {
-                throw new Error(validUsername.message.back);
-            } else {
-                return value;
-            }
-        })
-        .escape(),
-    email: body("email")
-        .trim()
-        .custom((value, { req, loc, path }) => {
-            const valid = email(value);
-            if (!valid.status) {
-                throw new Error(valid.message.back);
-            } else {
-                return value;
-            }
-        })
-        .escape()
-        .normalizeEmail({ all_lowercase: true }),
-    password: body("password")
-        .trim()
-        .custom((value, { req, loc, path }) => {
-            const valid = password(value);
-            if (!valid.status) {
-                throw new Error(valid.message.back);
-            } else {
-                return value;
-            }
-        })
-        .escape(),
-    confirmPassword: body("confirmPassword")
-        .trim()
-        .custom((value, { req, loc, path }) => {
-            const valid = password(value, true);
-            if (!valid.status) {
-                throw new Error(valid.message.back);
-            } else {
-                return value;
-            }
-        })
-        .custom((value, { req, loc, path }) => {
-            if (value !== req.body.password) {
-                throw new Error(
-                    "'password' field (String) and 'confirmPassword' field (String) must match"
-                );
-            } else {
-                return value;
-            }
-        })
-        .escape(),
-    displayName: body("displayName")
-        .trim()
-        .custom((value, { req, loc, path }) => {
-            const valid = displayName(value);
-            if (!valid.status) {
-                throw new Error(valid.message.back);
-            } else {
-                return value;
-            }
-        })
-        .escape(),
-    tagLine: body("tagLine")
-        .trim()
-        .custom((value, { req, loc, path }) => {
-            const valid = tagLine(value);
-            if (!valid.status) {
-                throw new Error(valid.message.back);
-            } else {
-                return value;
-            }
-        })
-        .escape(),
-    setStatus: body("setStatus")
-        .trim()
-        .custom((value, { req, loc, path }) => {
-            const valid = status(value);
-            if (!valid.status) {
-                throw new Error(valid.message.back);
-            } else {
-                return value;
-            }
-        })
-        .escape(),
+    body: {
+        username: body("username")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const validUsername = username(value);
+                if (!validUsername.status) {
+                    throw new Error(validUsername.message.back);
+                } else {
+                    return value;
+                }
+            }),
+        email: body("email")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = email(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            })
+            .normalizeEmail({ all_lowercase: true }),
+        password: body("password")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = password(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
+        confirmPassword: body("confirmPassword")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = password(value, true);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            })
+            .custom((value, { req, loc, path }) => {
+                if (value !== req.body.password) {
+                    throw new Error(
+                        "'password' field (String) and 'confirmPassword' field (String) must match"
+                    );
+                } else {
+                    return value;
+                }
+            }),
+        displayName: body("displayName")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = displayName(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
+        tagLine: body("tagLine")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = tagLine(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
+        setStatus: body("setStatus")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = status(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
+    },
+    param: {
+        username: param("username")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const validUsername = username(value);
+                if (!validUsername.status) {
+                    throw new Error(validUsername.message.back);
+                } else {
+                    return value;
+                }
+            }),
+    },
 };
 
 export const userGet = [
     param("username", "'username' parameter (String) must not be empty")
         .trim()
-        .isLength({ min: 1 })
-        .escape(),
+        .isLength({ min: 1 }),
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         let user = await User.findOne({ username: req.params.username })
@@ -153,10 +159,10 @@ export const userGet = [
 ];
 
 export const userPost = [
-    validators.username,
-    validators.email,
-    validators.password,
-    validators.confirmPassword,
+    validators.body.username,
+    validators.body.email,
+    validators.body.password,
+    validators.body.confirmPassword,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
@@ -241,10 +247,7 @@ export const userPost = [
 
 export const userSelf = [
     protectedRouteJWT,
-    param("username", "'username' parameter (String) must not be empty")
-        .trim()
-        .isLength({ min: 1 })
-        .escape(),
+    validators.param.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -293,10 +296,7 @@ export const getSelf = [
 
 export const friendGet = [
     protectedRouteJWT,
-    param("username", "'username' parameter (String) must not be empty")
-        .trim()
-        .isLength({ min: 1 })
-        .escape(),
+    validators.param.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -345,10 +345,7 @@ export const friendGet = [
 
 export const friendCanBeAdded = [
     protectedRouteJWT,
-    param("username", "'username' parameter (String) must not be empty")
-        .trim()
-        .isLength({ min: 1 })
-        .escape(),
+    validators.param.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -471,10 +468,7 @@ export const friendsGet = [
 
 export const friendsPost = [
     protectedRouteJWT,
-    body("username", "'username' parameter (String) must not be empty")
-        .trim()
-        .isLength({ min: 1 })
-        .escape(),
+    validators.body.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -633,10 +627,7 @@ export const friendRequestsGet = [
 
 export const friendRequestsAccept = [
     protectedRouteJWT,
-    param("username", "'username' parameter (String) must not be empty")
-        .trim()
-        .isLength({ min: 1 })
-        .escape(),
+    validators.param.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -727,10 +718,7 @@ export const friendRequestsAccept = [
 
 export const friendRequestsDecline = [
     protectedRouteJWT,
-    param("username", "'username' parameter (String) must not be empty")
-        .trim()
-        .isLength({ min: 1 })
-        .escape(),
+    validators.param.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -824,7 +812,7 @@ export const chatsGet = [
 
 export const displayNamePut = [
     protectedRouteJWT,
-    validators.displayName,
+    validators.body.displayName,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -844,7 +832,7 @@ export const displayNamePut = [
 
 export const tagLinePut = [
     protectedRouteJWT,
-    validators.tagLine,
+    validators.body.tagLine,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -864,7 +852,7 @@ export const tagLinePut = [
 
 export const setStatusPut = [
     protectedRouteJWT,
-    validators.setStatus,
+    validators.body.setStatus,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);

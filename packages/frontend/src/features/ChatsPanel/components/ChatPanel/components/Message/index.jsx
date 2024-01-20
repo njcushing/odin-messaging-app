@@ -48,11 +48,7 @@ const Message = ({
                 <p
                     className={styles["replying-to-text"]}
                     aria-label="replying-to-text"
-                >{
-                    new DOMParser().parseFromString(
-                        `${replyingTo.author}: ${replyingTo.text}`, "text/html"
-                    ).body.textContent
-                }</p>
+                >{`${replyingTo.author}: ${replyingTo.text}`}</p>
             </div>
         );
     }
@@ -81,7 +77,7 @@ const Message = ({
                     className={styles["message-text"]}
                     aria-label="message-text"
                 >
-                    {new DOMParser().parseFromString(text, "text/html").body.textContent}
+                    {text}
                 </p>
                 {replyingToElement}
             </div>

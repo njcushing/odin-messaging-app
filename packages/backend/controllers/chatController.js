@@ -44,44 +44,49 @@ const chatNotFound = (res, chatId) => {
 };
 
 const validators = {
-    participants: body("participants").custom((value, { req, loc, path }) => {
-        if (!Array.isArray(value)) {
-            throw new Error(
-                `'participants' field must be of type Array, got 
-                ${typeof participants}`
-            );
-        }
-        if (value.length === 0) {
-            throw new Error(`'participants' field (Array) must not be empty`);
-        }
-        for (let i = 0; i < value.length; i++) {
-            if (!mongoose.Types.ObjectId.isValid(value[i])) {
-                throw new Error(
-                    `'participants' field (Array) must only contain valid
-                    MongoDB ObjectId's, got ${value[i]} at index ${i}`
-                );
+    body: {
+        participants: body("participants").custom(
+            (value, { req, loc, path }) => {
+                if (!Array.isArray(value)) {
+                    throw new Error(
+                        `'participants' field must be of type Array, got 
+                    ${typeof participants}`
+                    );
+                }
+                if (value.length === 0) {
+                    throw new Error(
+                        `'participants' field (Array) must not be empty`
+                    );
+                }
+                for (let i = 0; i < value.length; i++) {
+                    if (!mongoose.Types.ObjectId.isValid(value[i])) {
+                        throw new Error(
+                            `'participants' field (Array) must only contain valid
+                        MongoDB ObjectId's, got ${value[i]} at index ${i}`
+                        );
+                    }
+                }
+                return value;
             }
-        }
-        return value;
-    }),
-    messageText: body(
-        "messageText",
-        "'messageText' field (String) must not be empty"
-    )
-        .trim()
-        .isLength({ min: 1, max: 1000 })
-        .escape(),
-    messageReplyingTo: body("messageReplyingTo")
-        .optional({ nullable: true })
-        .custom((value, { req, loc, path }) => {
-            if (value && !mongoose.Types.ObjectId.isValid(value)) {
-                throw new Error(
-                    `'messageReplyingTo' field (String), when not empty, must be
-                    a valid MongoDB ObjectId.`
-                );
-            }
-            return value;
-        }),
+        ),
+        messageText: body(
+            "messageText",
+            "'messageText' field (String) must not be empty"
+        )
+            .trim()
+            .isLength({ min: 1, max: 1000 }),
+        messageReplyingTo: body("messageReplyingTo")
+            .optional({ nullable: true })
+            .custom((value, { req, loc, path }) => {
+                if (value && !mongoose.Types.ObjectId.isValid(value)) {
+                    throw new Error(
+                        `'messageReplyingTo' field (String), when not empty, must be
+                        a valid MongoDB ObjectId.`
+                    );
+                }
+                return value;
+            }),
+    },
 };
 
 export const chatGet = [
@@ -148,7 +153,7 @@ export const chatGet = [
 
 export const chatPost = [
     protectedRouteJWT,
-    validators.participants,
+    validators.body.participants,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -356,8 +361,8 @@ export const chatPost = [
 
 export const messagePost = [
     protectedRouteJWT,
-    validators.messageText,
-    validators.messageReplyingTo,
+    validators.body.messageText,
+    validators.body.messageReplyingTo,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -468,7 +473,7 @@ export const messagePost = [
 
 export const addFriendsPost = [
     protectedRouteJWT,
-    validators.participants,
+    validators.body.participants,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
