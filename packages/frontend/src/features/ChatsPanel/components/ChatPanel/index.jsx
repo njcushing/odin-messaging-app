@@ -198,7 +198,7 @@ const ChatPanel = ({
                 let participantName = "User";
                 if (participant.nickname.length > 0) {
                     participantName = participant.nickname;
-                } else if (participant.user.preferences.displayName > 0) {
+                } else if (participant.user.preferences.displayName.length > 0) {
                     participantName = participant.user.preferences.displayName;
                 } else {
                     participantName = participant.user.username;
