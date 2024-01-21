@@ -191,18 +191,22 @@ export const profileImage = (value) => {
     };
 };
 
-export const theme = (value) => {
-    const themes = [
-        "default",
-        "red",
-        "orange",
-        "green",
-        "blue",
-        "purple",
-        "light",
-        "dark",
+export const themeOptions = () => {
+    return [
+        { name: "default", colour: "#d5ebec" },
+        { name: "red", colour: "#e42929" },
+        { name: "orange", colour: "#e47d29" },
+        { name: "green", colour: "#25a106" },
+        { name: "blue", colour: "#063ca1" },
+        { name: "purple", colour: "#580886" },
+        { name: "light", colour: "#fff" },
+        { name: "dark", colour: "#242424" },
     ];
-    if (!value in themes) {
+};
+
+export const theme = (value) => {
+    const themeNames = themeOptions().map((theme) => theme.name);
+    if (!value in themeNames) {
         return {
             status: false,
             message: {
