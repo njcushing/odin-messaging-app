@@ -10,54 +10,95 @@ import ChatPanel from "./components/ChatPanel";
 import createChat from "./utils/createChat.js";
 import getChatsList from "./utils/getChatsList.js";
 
+const isScrollbarAtBottom = (e) => {
+    return e.target.scrollHeight === Math.ceil(e.target.scrollTop + e.target.getBoundingClientRect().height);
+}
+
 const ChatsPanel = ({
     createChatPanelOpenDefault,
     userId,
 }) => {
-    const [chatsList, setChatsList] = useState([]);
-    const [gettingChatsList, setGettingChatsList] = useState(!createChatPanelOpenDefault);
-    const [chatsListAC, setChatsListAC] = useState(null);
-    const [createChatPanelOpen, setCreateChatPanelOpen] = useState(createChatPanelOpenDefault);
-    const [creatingChatParticipants, setCreatingChatParticipants] = useState([]);
-    const [creatingChat, setCreatingChat] = useState(false);
-    const [creatingChatSubmissionErrors, setCreatingChatSubmissionErrors] = useState([]);
+    const [chatsList, setChatsList] = useState({
+        currentValue: [],
+        abortController: null,
+        attempting: !createChatPanelOpenDefault,
+        appending: false,
+        page: 1,
+    });
+    const [creatingChat, setCreatingChat] = useState({
+        panelOpen: createChatPanelOpenDefault,
+        currentValue: [],
+        abortController: null,
+        attempting: false,
+        submissionErrors: [],
+    });
     const [chatSelectedId, setChatSelectedId] = useState(null);
-    const [page, setPage] = useState(1);
 
     useEffect(() => {
-        if (chatsListAC) chatsListAC.abort;
-        const chatsListACNew = new AbortController();
-        if (gettingChatsList) {
-            setChatsListAC(chatsListACNew);
+        if (chatsList.abortController) chatsList.abortController.abort;
+        const abortControllerNew = new AbortController();
+        if (chatsList.attempting || chatsList.appending) {
+            setChatsList({
+                ...chatsList,
+                abortController: abortControllerNew,
+            });
             (async () => {
-                const response = await getChatsList(chatsListACNew);
-                setChatsList(response.chats);
-                setGettingChatsList(false);
+                const response = await getChatsList(chatsList.page, abortControllerNew);
+                let chatsListNew = [];
+                if (chatsList.attempting) {
+                    chatsListNew = response.chats;
+                } else {
+                    chatsListNew = [...chatsList.currentValue, ...response.chats];
+                }
+                setChatsList({
+                    ...chatsList,
+                    currentValue: chatsListNew,
+                    abortController: null,
+                    attempting: false,
+                    appending: false,
+                });
             })();
         }
 
         return () => {
-            if (chatsListAC) chatsListAC.abort;
+            if (chatsList.abortController) chatsList.abortController.abort;
         }
-    }, [gettingChatsList]);
+    }, [chatsList.attempting, chatsList.appending]);
 
     useEffect(() => {
-        if (creatingChat) {
+        setChatsList({
+            ...chatsList,
+            appending: true,
+        });
+    }, [chatsList.page]);
+
+    useEffect(() => {
+        if (creatingChat.abortController) creatingChat.abortController.abort;
+        const abortControllerNew = new AbortController();
+        if (creatingChat.attempting) {
+            setCreatingChat({
+                ...creatingChat,
+                abortController: abortControllerNew,
+            });
             (async () => {
-                const chatNew = await createChat(Array.from(creatingChatParticipants));
+                const chatNew = await createChat(Array.from(creatingChat.currentValue), abortControllerNew);
+                setCreatingChat({
+                    panelOpen: false,
+                    currentValue: [],
+                    abortController: null,
+                    attempting: false,
+                    submissionErrors: chatNew.status >= 400 ? [chatNew.message] : []
+                });
                 if (chatNew.status < 400) {
+                    setChatsList({
+                        ...chatsList,
+                        attempting: true,
+                    })
                     setChatSelectedId(chatNew.chatId);
-                    setCreateChatPanelOpen(false);
-                    setCreatingChatSubmissionErrors([]);
-                    setGettingChatsList(true);
-                } else {
-                    setCreatingChatSubmissionErrors([chatNew.message]);
                 }
             })();
-            setCreatingChatParticipants([]);
-            setCreatingChat(false);
         }
-    }, [creatingChat]);
+    }, [creatingChat.attempting]);
 
     const chatPanelElement = (
         <div className={styles["chat-panel"]}>
@@ -65,7 +106,7 @@ const ChatsPanel = ({
                 chatId={chatSelectedId}
                 userId={userId}
                 messageSentHandler={(message) => {
-                    const chatsListNew = [...chatsList];
+                    const chatsListNew = [...chatsList.currentValue];
                     const chatOptionToUpdate = chatsListNew.find((chat) => {
                         return chat._id.toString() === chatSelectedId.toString()
                     });
@@ -75,7 +116,10 @@ const ChatsPanel = ({
                     if (typeof chatOptionToUpdate !== "undefined") {
                         chatOptionToUpdate.messages[0] = message;
                         chatsListOptionRemoved.unshift(chatOptionToUpdate);
-                        setChatsList(chatsListOptionRemoved);
+                        setChatsList({
+                            ...chatsList,
+                            currentValue: chatsListOptionRemoved,
+                        });
                     }
                 }}
                 addedFriendsHandler={(chatId) => {
@@ -94,14 +138,20 @@ const ChatsPanel = ({
             addButtonText="Add"
             submitButtonText="Create Chat"
             noFriendsText="You have no friends with whom you can create a chat"
-            onCloseHandler={() => setCreateChatPanelOpen(false)}
+            onCloseHandler={() => setCreatingChat({
+                ...creatingChat,
+                panelOpen: false,
+            })}
             onSubmitHandler={(participants) => {
-                if (!creatingChat) {
-                    setCreatingChatParticipants(participants);
-                    setCreatingChat(true);
+                if (!creatingChat.attempting) {
+                    setCreatingChat({
+                        ...creatingChat,
+                        currentValue: participants,
+                        attempting: true,
+                    })
                 }
             }}
-            submissionErrors={creatingChatSubmissionErrors}
+            submissionErrors={creatingChat.submissionErrors}
         />
     );
 
@@ -130,21 +180,32 @@ const ChatsPanel = ({
                             fontSizePx={24}
                             borderStyle="circular"
                             onClickHandler={() => {
-                                if (!creatingChat) {
-                                    setCreateChatPanelOpen(!createChatPanelOpen);
-                                    setCreatingChatSubmissionErrors([]);
+                                if (!creatingChat.attempting) {
+                                    setCreatingChat({
+                                        ...creatingChat,
+                                        panelOpen: !creatingChat.panelOpen,
+                                        submissionErrors: [],
+                                    });
                                 }
                             }}
                         />
                     </li>
                 </ul>
-                {!gettingChatsList
+                {!chatsList.attempting
                 ?   <ul
                         className={styles["chat-options-list"]}
                         aria-label="chat-options-list"
                         key={"chat-options-list"}
+                        onScroll={(e) => {
+                            if (isScrollbarAtBottom(e)) {
+                                setChatsList({
+                                    ...chatsList,
+                                    page: chatsList.page + 1,
+                                });
+                            }
+                        }}
                     >
-                        {chatsList.map((chat) => {
+                        {chatsList.currentValue.map((chat) => {
                             return (
                                 <li
                                     aria-label="chat-option"
@@ -152,9 +213,12 @@ const ChatsPanel = ({
                                 ><ChatOption
                                     chat={{...chat}}
                                     onClickHandler={() => {
-                                        if (!creatingChat) {
+                                        if (!creatingChat.attempting) {
                                             setChatSelectedId(chat._id);
-                                            setCreateChatPanelOpen(false);
+                                            setCreatingChat({
+                                                ...creatingChat,
+                                                panelOpen: false,
+                                            });
                                         }
                                     }}
                                     userId={userId}
@@ -170,7 +234,7 @@ const ChatsPanel = ({
                     </div>
                 }
             </div>
-            {createChatPanelOpen
+            {creatingChat.panelOpen
             ?   friendSelectorPanelElement   
             :   chatPanelElement
             }

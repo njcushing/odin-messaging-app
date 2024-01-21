@@ -8,6 +8,7 @@ import AccountInformation from "@/features/AccountInformation";
 import Settings from "@/features/Settings";
 
 import getSelf from "@/utils/getSelf.js";
+import { trusted } from "mongoose";
 
 const Dashboard = () => {
     const [userInfo, setUserInfo] = useState({
