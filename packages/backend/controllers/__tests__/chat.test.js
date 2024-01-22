@@ -60,18 +60,24 @@ describe("Route testing...", () => {
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
-            await request(app).get(`/${chats[0]._id}`).expect(400);
+            await request(app)
+                .get(`/${chats[0]._id}?firstMessage=0&lastMessage=1`)
+                .expect(400);
         });
         test(`Should respond with status code 400 if the chatId from the request
          parameters is not a valid MongoDB ObjectId`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
-            await request(app).get(`/${null}`).expect(400);
+            await request(app)
+                .get(`/${null}?firstMessage=0&lastMessage=1`)
+                .expect(400);
         });
         test(`Should respond with status code 404 if the chat is not found in
          the database`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
-                .get(`/${new mongoose.Types.ObjectId()}`)
+                .get(
+                    `/${new mongoose.Types.ObjectId()}?firstMessage=0&lastMessage=1`
+                )
                 .expect(404);
         });
         test(`Should respond with status code 404 if the currently-logged in
@@ -82,14 +88,16 @@ describe("Route testing...", () => {
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/${chats[0]._id}`).expect(404);
+            await request(app)
+                .get(`/${chats[0]._id}?firstMessage=0&lastMessage=1`)
+                .expect(404);
         });
         test(`Should respond with status code 200 on successful request, with a
          valid token`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
-                .get(`/${chats[0]._id}`)
+                .get(`/${chats[0]._id}?firstMessage=0&lastMessage=1`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
