@@ -300,7 +300,7 @@ describe("Route testing...", () => {
         });
     });
 
-    describe("/user/friends/:username GET route...", () => {
+    describe("/user/friend/:username GET route...", () => {
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -356,7 +356,7 @@ describe("Route testing...", () => {
         });
     });
 
-    describe("/user/friends/can-be-added/:username GET route...", () => {
+    describe("/user/friend/can-be-added/:username GET route...", () => {
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -418,7 +418,7 @@ describe("Route testing...", () => {
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
-            await request(app).get(`/friends`).expect(400);
+            await request(app).get(`/friend?first=0&last=1`).expect(400);
         });
         test(`Should respond with status code 401 if the currently logged-in
          user is not found in the database`, async () => {
@@ -427,15 +427,15 @@ describe("Route testing...", () => {
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/friends`).expect(401);
+            await request(app).get(`/friend?first=0&last=1`).expect(401);
         });
         test(`Should respond with status code 200 if the user is found in
          the database`, async () => {
-            await request(app).get(`/friends`).expect(200);
+            await request(app).get(`/friend?first=0&last=1`).expect(200);
         });
         test(`Should respond with an array of friends`, async () => {
             await request(app)
-                .get(`/friends`)
+                .get(`/friend?first=0&last=1`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
@@ -454,7 +454,7 @@ describe("Route testing...", () => {
         test(`Should respond with a new token`, async () => {
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
-                .get(`/friends`)
+                .get(`/friend?first=0&last=1`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
@@ -470,7 +470,9 @@ describe("Route testing...", () => {
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
-            await request(app).get(`/friend-requests`).expect(400);
+            await request(app)
+                .get(`/friend-requests?first=0&last=1`)
+                .expect(400);
         });
         test(`Should respond with status code 401 if the currently logged-in
          user is not found in the database`, async () => {
@@ -479,15 +481,19 @@ describe("Route testing...", () => {
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/friend-requests`).expect(401);
+            await request(app)
+                .get(`/friend-requests?first=0&last=1`)
+                .expect(401);
         });
         test(`Should respond with status code 200 if the user is found in
          the database`, async () => {
-            await request(app).get(`/friend-requests`).expect(200);
+            await request(app)
+                .get(`/friend-requests?first=0&last=1`)
+                .expect(200);
         });
         test(`Should respond with an array of friends`, async () => {
             await request(app)
-                .get(`/friend-requests`)
+                .get(`/friend-requests?first=0&last=1`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
@@ -506,7 +512,7 @@ describe("Route testing...", () => {
         test(`Should respond with a new token`, async () => {
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
-                .get(`/friend-requests`)
+                .get(`/friend-requests?first=0&last=1`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
@@ -782,7 +788,7 @@ describe("Route testing...", () => {
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
-            await request(app).get(`/chats`).expect(400);
+            await request(app).get(`/chats?first=0&last=1`).expect(400);
         });
         test(`Should respond with status code 401 if the currently logged-in
          user is not found in the database`, async () => {
@@ -791,14 +797,14 @@ describe("Route testing...", () => {
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/chats`).expect(401);
+            await request(app).get(`/chats?first=0&last=1`).expect(401);
         });
         test(`Should respond with status code 200 if the chats are found in
          the database, with an array of chats and a new token`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
-                .get(`/chats`)
+                .get(`/chats?first=0&last=1`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
