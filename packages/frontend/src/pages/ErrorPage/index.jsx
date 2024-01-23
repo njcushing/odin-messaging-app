@@ -12,7 +12,7 @@ const ErrorPage = () => {
             </h1>
             <div className={styles["navigation-button"]}>
                 <NavigationButton
-                    link="/"
+                    link="/dashboard"
                     text="Go Back"
                 />
             </div>
