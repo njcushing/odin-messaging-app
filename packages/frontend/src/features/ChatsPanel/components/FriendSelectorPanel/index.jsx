@@ -17,15 +17,42 @@ const FriendSelectorPanel = ({
     onSubmitHandler,
     submissionErrors,
 }) => {
-    const [friendsList, setFriendsList] = useState([]);
+    const [friendsList, setFriendsList] = useState({
+        currentValue: [],
+        abortController: null,
+        attempting: true,
+        appending: false,
+    });
+
     const [friendsSelected, setFriendsSelected] = useState(new Set());
 
     useEffect(() => {
-        (async () => {
-            const response = await getFriendsList();
-            setFriendsList(response.friends);
-        })();
-    }, []);
+        if (friendsList.abortController) friendsList.abortController.abort;
+        const abortControllerNew = new AbortController();
+        if (friendsList.attempting || friendsList.appending) {
+            setFriendsList({
+                ...friendsList,
+                abortController: abortControllerNew,
+            });
+            (async () => {
+                const response = await getFriendsList([
+                    friendsList.currentValue.length,
+                    friendsList.currentValue.length + 20
+                ], abortControllerNew);
+                setFriendsList({
+                    ...friendsList,
+                    currentValue: [...friendsList.currentValue, ...response.friends],
+                    abortController: null,
+                    attempting: false,
+                    appending: false,
+                });
+            })();
+        }
+
+        return () => {
+            if (friendsList.abortController) friendsList.abortController.abort;
+        }
+    }, [friendsList.attempting, friendsList.appending]);
 
     const addToSelectedList = (_id) => {
         const friendsSelectedNew = new Set(friendsSelected);
@@ -65,7 +92,7 @@ const FriendSelectorPanel = ({
                                 className={styles["friends-selected-list"]}
                                 aria-label="friends-selected-list"
                             >
-                                {friendsList.map((friend) => {
+                                {friendsList.currentValue.map((friend) => {
                                     const user = friend.user;
                                     if (friendsSelected.has(user._id)) {
                                         return(
@@ -102,12 +129,12 @@ const FriendSelectorPanel = ({
                         </div>
                     :   null}
                 <div className={styles["friends-list-container"]}>
-                    {friendsList.length > 0
+                    {friendsList.currentValue.length > 0
                     ?   <ul
                             className={styles["friends-list"]}
                             aria-label="friends-list"
                         >
-                            {friendsList.map((friend) => {
+                            {friendsList.currentValue.map((friend) => {
                                 const user = friend.user;
                                 if (!friendsSelected.has(user._id)) {
                                     return(
@@ -147,6 +174,31 @@ const FriendSelectorPanel = ({
                                     );
                                 }
                             })}
+                            <button
+                                className={styles["load-more-button"]}
+                                aria-label="load-more"
+                                onClick={(e) => {
+                                    if (!friendsList.appending) {
+                                        setFriendsList({
+                                            ...friendsList,
+                                            appending: true,
+                                        });
+                                    }
+                                    e.currentTarget.blur();
+                                    e.preventDefault();
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.blur();
+                                }}
+                            >{!friendsList.appending
+                            ?   "Load More"
+                            :   <div className={styles["load-more-button-waiting-wheel-container"]}>
+                                    <div
+                                        className={styles["load-more-button-waiting-wheel"]}
+                                        aria-label="waiting"
+                                    ></div>
+                                </div>
+                            }</button>
                         </ul>
                     :   <h5
                             className={styles["no-friends"]}

@@ -1,8 +1,10 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
 
-const getChatsList = async (page, abortController) => {
+const getChatsList = async ([first, last], abortController) => {
     const data = await fetch(
-        `${import.meta.env.VITE_SERVER_DOMAIN}/user/chats/${page}`,
+        `${
+            import.meta.env.VITE_SERVER_DOMAIN
+        }/user/chats/?first=${first}&last=${last}`,
         {
             signal: abortController ? abortController.signal : null,
             method: "GET",

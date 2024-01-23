@@ -10,10 +10,6 @@ import ChatPanel from "./components/ChatPanel";
 import createChat from "./utils/createChat.js";
 import getChatsList from "./utils/getChatsList.js";
 
-const isScrollbarAtBottom = (e) => {
-    return e.target.scrollHeight === Math.ceil(e.target.scrollTop + e.target.getBoundingClientRect().height);
-}
-
 const ChatsPanel = ({
     createChatPanelOpenDefault,
     userId,
@@ -23,7 +19,6 @@ const ChatsPanel = ({
         abortController: null,
         attempting: !createChatPanelOpenDefault,
         appending: false,
-        page: 1,
     });
     const [creatingChat, setCreatingChat] = useState({
         panelOpen: createChatPanelOpenDefault,
@@ -43,16 +38,13 @@ const ChatsPanel = ({
                 abortController: abortControllerNew,
             });
             (async () => {
-                const response = await getChatsList(chatsList.page, abortControllerNew);
-                let chatsListNew = [];
-                if (chatsList.attempting) {
-                    chatsListNew = response.chats;
-                } else {
-                    chatsListNew = [...chatsList.currentValue, ...response.chats];
-                }
+                const response = await getChatsList([
+                    chatsList.currentValue.length,
+                    chatsList.currentValue.length + 20
+                ], abortControllerNew);
                 setChatsList({
                     ...chatsList,
-                    currentValue: chatsListNew,
+                    currentValue: [...chatsList.currentValue, ...response.chats],
                     abortController: null,
                     attempting: false,
                     appending: false,
@@ -64,13 +56,6 @@ const ChatsPanel = ({
             if (chatsList.abortController) chatsList.abortController.abort;
         }
     }, [chatsList.attempting, chatsList.appending]);
-
-    useEffect(() => {
-        setChatsList({
-            ...chatsList,
-            appending: true,
-        });
-    }, [chatsList.page]);
 
     useEffect(() => {
         if (creatingChat.abortController) creatingChat.abortController.abort;
@@ -123,7 +108,10 @@ const ChatsPanel = ({
                     }
                 }}
                 addedFriendsHandler={(chatId) => {
-                    setGettingChatsList(true);
+                    setChatsList({
+                        ...chatsList,
+                        attempting: true,
+                    })
                     setChatSelectedId(chatId);
                 }}
                 key={chatSelectedId}
@@ -196,14 +184,6 @@ const ChatsPanel = ({
                         className={styles["chat-options-list"]}
                         aria-label="chat-options-list"
                         key={"chat-options-list"}
-                        onScroll={(e) => {
-                            if (isScrollbarAtBottom(e)) {
-                                setChatsList({
-                                    ...chatsList,
-                                    page: chatsList.page + 1,
-                                });
-                            }
-                        }}
                     >
                         {chatsList.currentValue.map((chat) => {
                             return (
@@ -225,6 +205,31 @@ const ChatsPanel = ({
                                 /></li>
                             );
                         })}
+                        <button
+                            className={styles["load-more-button"]}
+                            aria-label="load-more"
+                            onClick={(e) => {
+                                if (!chatsList.appending) {
+                                    setChatsList({
+                                        ...chatsList,
+                                        appending: true,
+                                    });
+                                }
+                                e.currentTarget.blur();
+                                e.preventDefault();
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.blur();
+                            }}
+                        >{!chatsList.appending
+                        ?   "Load More"
+                        :   <div className={styles["load-more-button-waiting-wheel-container"]}>
+                                <div
+                                    className={styles["load-more-button-waiting-wheel"]}
+                                    aria-label="waiting"
+                                ></div>
+                            </div>
+                        }</button>
                     </ul>
                 :   <div className={styles["waiting-wheel-container"]}>
                         <div

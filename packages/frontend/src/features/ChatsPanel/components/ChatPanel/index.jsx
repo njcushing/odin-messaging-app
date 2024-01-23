@@ -21,9 +21,14 @@ const ChatPanel = ({
     messageSentHandler,
     addedFriendsHandler,
 }) => {
-    const [chat, setChat] = useState(null);
-    const [gettingChat, setGettingChat] = useState(false);
-    const [gettingChatAC, setGettingChatAC] = useState(null);
+    const [chat, setChat] = useState({
+        currentValue: null,
+        abortController: null,
+        attempting: false,
+        appending: false,
+        page: 1,
+    });
+
     const [participantInfo, setParticipantInfo] = useState(new Map());
 
     const [addingFriendsToChat, setAddingFriendsToChat] = useState({
@@ -41,28 +46,54 @@ const ChatPanel = ({
     const [messageSubmissionErrors, setMessageSubmissionErrors] = useState([]);
 
     useEffect(() => {
-        if (mongoose.Types.ObjectId.isValid(chatId)) {
-            setGettingChat(true);
-            reloadChat();
-        } else {
-            setChat(null);
+        if (chat.abortController) chat.abortController.abort;
+        const abortControllerNew = new AbortController();
+        if (chat.attempting || chat.appending) {
+            setChat({
+                ...chat,
+                abortController: abortControllerNew,
+            });
+            (async () => {
+                let messageQuantity = chat.currentValue ? chat.currentValue.messages.length : 0;
+                const response = await getChat(chatId, [
+                    messageQuantity,
+                    messageQuantity + 20
+                ], abortControllerNew);
+                setChat({
+                    ...chat,
+                    currentValue: response.chat,
+                    abortController: null,
+                    attempting: false,
+                    appending: false,
+                });
+            })();
         }
 
         return () => {
-            if (gettingChatAC) gettingChatAC.abort;
+            if (chat.abortController) chat.abortController.abort;
+        }
+    }, [chat.attempting, chat.appending]);
+
+    useEffect(() => {
+        setChat({
+            ...chat,
+            appending: true,
+        });
+    }, [chat.page]);
+
+    useEffect(() => {
+        if (mongoose.Types.ObjectId.isValid(chatId)) {
+            setChat({
+                ...chat,
+                attempting: true,
+            })
+        } else {
+            setChat({
+                ...chat,
+                currentValue: null,
+            });
         }
     }, [chatId]);
-
-    const reloadChat = () => {
-        if (gettingChatAC) gettingChatAC.abort;
-        const gettingChatACNew = new AbortController();
-        setGettingChatAC(gettingChatACNew);
-        (async () => {
-            const chatNew = await getChat(chatId, gettingChatACNew);
-            setChat(chatNew.chat);
-            setGettingChat(false);
-        })();
-    };
     
     const attemptSendMessage = useCallback(async (form) => {
         const formData = new FormData(form);
@@ -124,11 +155,14 @@ const ChatPanel = ({
                 if (response.status >= 400) {
                     setMessageSubmissionErrors([response.message]);
                 } else {
-                    const messages = [...chat.messages];
+                    const messages = [...chat.currentValue.messages];
                     messages.push(response.newMessage);
                     setChat({
                         ...chat,
-                        messages: messages,
+                        currentValue: {
+                            ...chat.currentValue,
+                            messages: messages,
+                        }
                     });
                     setCurrentMessage("");
                     setReplyingTo(null);
@@ -175,7 +209,10 @@ const ChatPanel = ({
                         abortController: null,
                         submissionErrors: []
                     });
-                    reloadChat();
+                    setChat({
+                        ...chat,
+                        attempting: true,
+                    })
                     addedFriendsHandler(response.chatId);
                 }
             })();
@@ -192,9 +229,9 @@ const ChatPanel = ({
     }, [addingFriendsToChat.attempting]);
 
     useEffect(() => {
-        if (chat && typeof chat === "object" && "participants" in chat) {
+        if (chat.currentValue && typeof chat.currentValue === "object" && "participants" in chat.currentValue) {
             const participantInfoNew = new Map();
-            chat.participants.forEach((participant) => {
+            chat.currentValue.participants.forEach((participant) => {
                 let participantName = "User";
                 if (participant.nickname.length > 0) {
                     participantName = participant.nickname;
@@ -211,14 +248,14 @@ const ChatPanel = ({
             });
             setParticipantInfo(participantInfoNew);
         }
-    }, [chat]);
+    }, [chat.currentValue]);
 
     return (
         <div className={styles["wrapper"]}>
         <div className={styles["container"]}>
-            {!gettingChat
+            {!chat.attempting
             ?   <>
-                {chat !== null
+                {chat.currentValue !== null
                 ?   <>
                     <div
                         className={styles["top-bar"]}
@@ -228,13 +265,13 @@ const ChatPanel = ({
                             alt={""}
                             sizePx={50}
                         />
-                        {chat.name.length > 0
+                        {chat.currentValue.name.length > 0
                         ?   <h3
                                 className={styles["chat-name-custom"]}
                                 aria-label="chat-name"
-                            >{chat.name}</h3>
+                            >{chat.currentValue.name}</h3>
                         :   <>
-                            {chat.participants.length > 0
+                            {chat.currentValue.participants.length > 0
                             ?   <h3
                                     className={styles["chat-name-participants"]}
                                     aria-label="chat-participants"
@@ -303,8 +340,8 @@ const ChatPanel = ({
                                 className={styles["message-list"]}
                                 aria-label="chat-message-list"
                             >
-                                {chat.messages && Array.isArray(chat.messages) && chat.messages.length > 0
-                                ?   chat.messages.toReversed().map((message) => {
+                                {chat.currentValue.messages && Array.isArray(chat.currentValue.messages) && chat.currentValue.messages.length > 0
+                                ?   chat.currentValue.messages.toReversed().map((message) => {
                                         return (
                                             <li
                                                 aria-label="chat-message"

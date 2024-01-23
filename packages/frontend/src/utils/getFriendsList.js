@@ -1,8 +1,10 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
 
-const getFriendsList = async (abortController) => {
+const getFriendsList = async ([first, last], abortController) => {
     const data = await fetch(
-        `${import.meta.env.VITE_SERVER_DOMAIN}/user/friends`,
+        `${
+            import.meta.env.VITE_SERVER_DOMAIN
+        }/user/friends?first=${first}&last=${last}`,
         {
             signal: abortController ? abortController.signal : null,
             method: "GET",
