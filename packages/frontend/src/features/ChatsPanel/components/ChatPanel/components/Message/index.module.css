@@ -72,7 +72,7 @@
 .name-and-date-string {
     display: flex;
 
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--color-text-secondary);
     font-size: 0.7rem;
     font-family: Gabarito;
 

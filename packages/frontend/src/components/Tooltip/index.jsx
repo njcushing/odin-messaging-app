@@ -34,7 +34,7 @@ const Tooltip = ({
             arrowSides = {
                 borderLeft: `${Math.min(12, elementSize[0] / 4)}px solid transparent`,
                 borderRight: `${Math.min(12, elementSize[0] / 4)}px solid transparent`,
-                borderTop: `12px solid white`,
+                borderTop: `12px solid var(--color-background-tooltip)`,
             }
             break;
         case "right":
@@ -44,7 +44,7 @@ const Tooltip = ({
             arrowSides = {
                 borderBottom: `${Math.min(12, elementSize[1] / 4)}px solid transparent`,
                 borderTop: `${Math.min(12, elementSize[1] / 4)}px solid transparent`,
-                borderRight: `12px solid white`,
+                borderRight: `12px solid var(--color-background-tooltip)`,
             }
             break;
         case "left":
@@ -54,7 +54,7 @@ const Tooltip = ({
             arrowSides = {
                 borderBottom: `${Math.min(12, elementSize[1] / 4)}px solid transparent`,
                 borderTop: `${Math.min(12, elementSize[1] / 4)}px solid transparent`,
-                borderLeft: `12px solid white`,
+                borderLeft: `12px solid var(--color-background-tooltip)`,
             }
             break;
         case "bottom":
@@ -65,7 +65,7 @@ const Tooltip = ({
             arrowSides = {
                 borderLeft: `${Math.min(12, elementSize[0] / 4)}px solid transparent`,
                 borderRight: `${Math.min(12, elementSize[0] / 4)}px solid transparent`,
-                borderBottom: `12px solid white`,
+                borderBottom: `12px solid var(--color-background-tooltip)`,
             }
     }
 

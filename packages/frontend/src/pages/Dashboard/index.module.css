@@ -24,7 +24,7 @@
     grid-template-columns: auto 1fr;
     gap: 0.75rem;
 
-    background-color: rgb(44, 44, 44);
+    background-color: var(--color-background-base);
     
     width: calc(100% - (0.6rem * 2));
     height: calc(100% - (0.6rem * 2));

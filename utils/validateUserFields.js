@@ -1,3 +1,5 @@
+import * as themes from "../packages/frontend/src/themes/index.js";
+
 export const username = (value) => {
     const pattern = /^[a-zA-Z0-9]*$/;
     if (value.length === 0) {
@@ -191,22 +193,8 @@ export const profileImage = (value) => {
     };
 };
 
-export const themeOptions = () => {
-    return [
-        { name: "default", colour: "#d5ebec" },
-        { name: "red", colour: "#e42929" },
-        { name: "orange", colour: "#e47d29" },
-        { name: "green", colour: "#25a106" },
-        { name: "blue", colour: "#063ca1" },
-        { name: "purple", colour: "#580886" },
-        { name: "light", colour: "#fff" },
-        { name: "dark", colour: "#242424" },
-    ];
-};
-
 export const theme = (value) => {
-    const themeNames = themeOptions().map((theme) => theme.name);
-    if (!value in themeNames) {
+    if (!themes.optionNames().includes(value)) {
         return {
             status: false,
             message: {

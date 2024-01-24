@@ -36,7 +36,9 @@
 
     background-color: transparent;
     border: none;
-    outline: 1px solid rgba(255, 255, 255, 0.92);
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
     border-radius: 1px;
 
     padding: 0.4rem;
@@ -49,7 +51,7 @@
     .container:hover {
         background-color: rgba(255, 255, 255, 0.12);
 
-        outline: 2px solid rgba(255, 255, 255, 0.92);
+        outline-width: 2px;
         cursor: pointer;
     }
 }
@@ -69,12 +71,12 @@
 }
 
 .friend-request-username {
+    color: var(--color-text-primary);
     font-family: Gabarito;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 
-    color: rgba(255, 255, 255, 0.87);
     font-size: 1.2rem;
 
     padding: 0rem;

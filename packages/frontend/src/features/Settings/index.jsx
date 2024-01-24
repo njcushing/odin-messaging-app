@@ -4,6 +4,7 @@ import styles from "./index.module.css";
 
 import FieldUpdater from "@/components/FieldUpdater";
 
+import * as themes from "@/themes";
 import * as validateUserFields from '../../../../../utils/validateUserFields.js'
 import * as updateUserFields from '../../utils/updateUserFields.js'
 
@@ -28,7 +29,7 @@ const Settings = ({
                         apiFunction={updateUserFields.theme}
                         context={{
                             type: "circles",
-                            options: validateUserFields.themeOptions().map((theme) => {
+                            options: themes.options().map((theme) => {
                                 return {
                                     name: theme.name,
                                     colour: theme.colour,

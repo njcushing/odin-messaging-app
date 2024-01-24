@@ -14,7 +14,9 @@
 
     background-color: transparent;
     border: none;
-    outline: 1px solid rgba(255, 255, 255, 0.92);
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
     border-radius: 1px;
 
     padding: 0.4rem;
@@ -30,7 +32,7 @@
     .container:hover {
         background-color: rgba(255, 255, 255, 0.12);
 
-        outline: 2px solid rgba(255, 255, 255, 0.92);
+        outline-width: 2px;
         cursor: pointer;
     }
 }
@@ -38,7 +40,7 @@
 .container:focus {
     background-color: rgba(255, 255, 255, 0.06);
 
-    outline: 2px solid rgba(255, 255, 255, 0.92);
+    outline-width: 2px;
     cursor: pointer;
 }
 
@@ -62,6 +64,7 @@
 
 .chat-name,
 .most-recent-message {
+    color: var(--color-text-primary);
     font-family: Gabarito;
     white-space: nowrap;
     overflow: hidden;
@@ -72,11 +75,9 @@
 }
 
 .chat-name {
-    color: rgba(255, 255, 255, 0.87);
     font-size: 1.2rem;
 }
 
 .most-recent-message {
-    color: rgba(220, 220, 220, 0.87);
     font-size: 0.85rem;
 }
