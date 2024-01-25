@@ -885,10 +885,11 @@ export const chatsGet = [
                 },
             },
         ]);
+        if (user.length === 0) selfNotFound(res, next, req.user._id);
 
         const chats = await Chat.find(
             { _id: { $in: user[0].chatsInfo } },
-            { messages: { $slice: -1 } }
+            { messages: { $slice: 1 } }
         )
             .sort({ updatedAt: -1 })
             .populate([
