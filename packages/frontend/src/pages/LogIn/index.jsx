@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./index.module.css";
 
 import logInAPI from "./utils/logInAPI";
-import { username, password } from "./utils/validateFields";
+import * as validate from "../../../../../utils/validateUserFields.js";
 
 const LogIn = () => {
     const [usernameError, setUsernameError] = useState(null);
@@ -19,10 +19,10 @@ const LogIn = () => {
         const formFields = Object.fromEntries(formData);
 
         // Client-side validation
-        const validUsername = username(formFields.username);
-        const validPassword = password(formFields.password);
-        if (!validUsername.status) setUsernameError(validUsername.message);
-        if (!validPassword.status) setPasswordError(validPassword.message);
+        const validUsername = validate.username(formFields.username);
+        const validPassword = validate.password(formFields.password);
+        if (!validUsername.status) setUsernameError(validUsername.message.front);
+        if (!validPassword.status) setPasswordError(validPassword.message.front);
 
         if (!validUsername.status || !validPassword.status) return;
 
@@ -70,9 +70,9 @@ const LogIn = () => {
                                 defaultValue={credentials.username ? credentials.username : ""}
                                 style={{ resize: "none" }}
                                 onChange={(e) => {
-                                    const validUsername = username(e.target.value);
+                                    const validUsername = validate.username(e.target.value);
                                     if (!validUsername.status) {
-                                        setUsernameError(validUsername.message);
+                                        setUsernameError(validUsername.message.front);
                                     } else {
                                         setUsernameError(null);
                                     }
@@ -97,9 +97,9 @@ const LogIn = () => {
                                 required
                                 style={{ resize: "none" }}
                                 onChange={(e) => {
-                                    const validPassword = password(e.target.value);
+                                    const validPassword = validate.password(e.target.value);
                                     if (!validPassword.status) {
-                                        setPasswordError(validPassword.message);
+                                        setPasswordError(validPassword.message.front);
                                     } else {
                                         setPasswordError(null);
                                     }
