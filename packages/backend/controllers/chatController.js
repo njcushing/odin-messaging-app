@@ -684,7 +684,6 @@ export const addFriendsPost = [
                     _id: newChatId,
                     type: "group",
                     participants: [...chat.participants],
-                    messages: [...chat.messages],
                 });
 
                 // Set currently logged-in user as admin of new chat
