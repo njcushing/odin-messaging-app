@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
 import Message from "../models/message.js";
+import Image from "../models/image.js";
 
 import sendResponse from "../utils/sendResponse.js";
 import checkRequestValidationError from "../utils/checkRequestValidationError.js";
@@ -112,6 +113,16 @@ const validators = {
                 }
             })
             .optional({ values: "falsy" }),
+        profileImage: body("profileImage")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = profileImage(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
         setStatus: body("setStatus")
             .trim()
             .custom((value, { req, loc, path }) => {
@@ -395,6 +406,7 @@ export const friendGet = [
                 username
                 preferences.displayName
                 preferences.tagLine
+                preferences.profileImage
                 email
                 status
             `,
@@ -523,6 +535,7 @@ export const friendsGet = [
                     email
                     preferences.displayName
                     preferences.tagLine
+                    preferences.profileImage
                     preferences.setStatus
                     status
                 `, // Have to include 'setStatus' so the 'status' virtual property will populate
@@ -691,6 +704,7 @@ export const friendRequestsGet = [
                 _id
                 username
                 preferences.tagLine
+                preferences.profileImage
             `,
             })
             .exec();
@@ -949,6 +963,68 @@ export const tagLinePut = [
         sendResponse(res, 200, "Tag Line successfully updated.", {
             token: token,
         });
+    }),
+];
+
+export const profileImagePut = [
+    protectedRouteJWT,
+    validators.body.profileImage,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+
+        const user = await User.findById(req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+
+            if (user.preferences.profileImage) {
+                const deletedProfileImage = await Image.findByIdAndDelete(
+                    user.preferences.profileImage
+                ).catch((error) => {
+                    error.message = "Unable to delete existing profile image.";
+                    throw error;
+                });
+            }
+
+            const profileImage = new Image({
+                img: req.body.profileImage,
+            });
+            await profileImage.save().catch((error) => {
+                error.message = "Unable to save new profile image.";
+                throw error;
+            });
+
+            const updatedUser = await User.findByIdAndUpdate(req.user._id, {
+                $set: { "preferences.profileImage": profileImage._id },
+            });
+            if (updatedUser === null) {
+                return selfNotFound(res, next, req.user._id);
+            }
+
+            session.commitTransaction();
+
+            return sendResponse(
+                res,
+                200,
+                "Profile Image successfully updated.",
+                { token: token }
+            );
+        } catch (error) {
+            return sendResponse(
+                res,
+                error.status,
+                error.message,
+                { token: token },
+                error
+            );
+        } finally {
+            session.endSession();
+        }
     }),
 ];
 
