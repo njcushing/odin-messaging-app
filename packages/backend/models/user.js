@@ -95,7 +95,10 @@ const UserSchema = new Schema(
                 },
                 default: "",
             },
-            image: { type: Schema.Types.ObjectId, ref: "Image" },
+            profileImage: {
+                type: Schema.Types.ObjectId,
+                ref: "Image",
+            },
             setStatus: {
                 type: String,
                 validate: {
