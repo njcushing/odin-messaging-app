@@ -6,6 +6,7 @@ import OptionButton from "@/components/OptionButton";
 import ProfileImage from "@/components/ProfileImage";
 
 import getFriendsList from "@/utils/getFriendsList";
+import * as extractImage from "@/utils/extractImage";
 
 const FriendSelectorPanel = ({
     title,
@@ -137,6 +138,7 @@ const FriendSelectorPanel = ({
                             {friendsList.currentValue.map((friend) => {
                                 const user = friend.user;
                                 if (!friendsSelected.has(user._id)) {
+                                    const profileImage = extractImage.fromUser(user).image;
                                     return(
                                         <li
                                             className={styles["friend"]}
@@ -145,8 +147,9 @@ const FriendSelectorPanel = ({
                                         >
                                             <div className={styles["profile-image"]}>
                                                 <ProfileImage
-                                                    src={""}
-                                                    alt={""}
+                                                    src={profileImage.src}
+                                                    alt={profileImage.alt}
+                                                    status={profileImage.status}
                                                     sizePx={60}
                                                 />
                                             </div>

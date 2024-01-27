@@ -180,6 +180,7 @@ export const chatGet = [
         )
             .select("-createdAt -updatedAt")
             .populate([
+                { path: "image" },
                 {
                     path: "participants",
                     populate: {

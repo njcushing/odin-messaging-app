@@ -7,6 +7,7 @@ import ProfileImage from "@/components/ProfileImage";
 
 import getFriendCanBeAdded from "./utils/getFriendCanBeAdded.js";
 import addFriend from "./utils/addFriend";
+import * as extractImage from "@/utils/extractImage";
 
 const AddFriendPanel = ({
     onCloseHandler,
@@ -51,6 +52,8 @@ const AddFriendPanel = ({
             })();
         }
     }, [addingFriend]);
+
+    const profileImage = extractImage.fromUser(resultFound).image;
 
     return (
         <div className={styles["wrapper"]}>
@@ -100,8 +103,9 @@ const AddFriendPanel = ({
                             >
                                 <div className={styles["profile-image"]}>
                                     <ProfileImage
-                                        src={""}
-                                        alt={""}
+                                        src={profileImage.src}
+                                        alt={profileImage.alt}
+                                        status={null}
                                         sizePx={60}
                                     />
                                 </div>

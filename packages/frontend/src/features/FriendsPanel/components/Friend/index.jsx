@@ -7,8 +7,7 @@ const Friend = ({
     username,
     tagLine,
     status,
-    imageSrc,
-    imageAlt,
+    profileImage,
     onClickHandler,
 }) => {
     return (
@@ -27,9 +26,9 @@ const Friend = ({
         >   
             <div className={styles["image-container"]}>
                 <ProfileImage
-                    src={imageSrc}
-                    alt={imageAlt}
-                    status={status}
+                    src={profileImage.src}
+                    alt={profileImage.alt}
+                    status={profileImage.status}
                     sizePx={50}
                 />
             </div>
@@ -53,16 +52,14 @@ Friend.propTypes = {
     username: PropTypes.string.isRequired,
     tagLine: PropTypes.string,
     status: PropTypes.oneOf([null, "online", "away", "busy", "offline"]),
-    imageSrc: PropTypes.string,
-    imageAlt: PropTypes.string,
+    profileImage: PropTypes.shape({ ...ProfileImage.propTypes }),
     onClickHandler: PropTypes.func,
 };
 
 Friend.defaultProps = {
     tagLine: "",
     status: null,
-    imageSrc: "",
-    imageAlt: "",
+    profileImage: { ...ProfileImage.defaultProps },
     onClickHandler: () => {},
 }
 

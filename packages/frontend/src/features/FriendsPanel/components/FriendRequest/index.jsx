@@ -9,8 +9,7 @@ import declineFriendRequest from "../../utils/declineFriendRequest";
 
 const FriendRequest = ({
     username,
-    imageSrc,
-    imageAlt,
+    profileImage,
     onSuccessHandler,
 }) => {
     const [requesting, setRequesting] = useState("");
@@ -69,8 +68,9 @@ const FriendRequest = ({
                 ?   <>
                     <div className={styles["profile-image"]}>
                         <ProfileImage
-                            src={imageSrc}
-                            alt={imageAlt}
+                            src={profileImage.src}
+                            alt={profileImage.alt}
+                            status={profileImage.status}
                             sizePx={50}
                         />
                     </div>
@@ -126,14 +126,12 @@ const FriendRequest = ({
 
 FriendRequest.propTypes = {
     username: PropTypes.string.isRequired,
-    imageSrc: PropTypes.string,
-    imageAlt: PropTypes.string,
+    profileImage: PropTypes.shape({ ...ProfileImage.propTypes }),
     onSuccessHandler: PropTypes.func,
 };
 
 FriendRequest.defaultProps = {
-    imageSrc: "",
-    imageAlt: "",
+    profileImage: { ...ProfileImage.defaultProps },
     onSuccessHandler: () => {}
 }
 
