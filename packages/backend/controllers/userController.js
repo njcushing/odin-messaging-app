@@ -372,6 +372,7 @@ export const getSelf = [
 
         let user = await User.findById(req.user._id)
             .select("-password -admin -createdAt -updatedAt")
+            .populate("preferences.profileImage")
             .exec();
         if (user === null) return selfNotFound(res, next, req.user._id);
 
@@ -410,6 +411,9 @@ export const friendGet = [
                 email
                 status
             `,
+            populate: {
+                path: "preferences.profileImage",
+            },
         });
         if (user === null) return selfNotFound(res, next, req.user._id);
 
@@ -983,7 +987,7 @@ export const profileImagePut = [
             session.startTransaction();
 
             if (user.preferences.profileImage) {
-                const deletedProfileImage = await Image.findByIdAndDelete(
+                await Image.findByIdAndDelete(
                     user.preferences.profileImage
                 ).catch((error) => {
                     error.message = "Unable to delete existing profile image.";
@@ -992,7 +996,8 @@ export const profileImagePut = [
             }
 
             const profileImage = new Image({
-                img: req.body.profileImage,
+                "img.data": req.body.profileImage,
+                "img.contentType": "image/png",
             });
             await profileImage.save().catch((error) => {
                 error.message = "Unable to save new profile image.";

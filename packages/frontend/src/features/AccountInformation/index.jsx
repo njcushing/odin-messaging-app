@@ -46,6 +46,15 @@ const AccountInformation = ({
                     context={{ type: "select", options: ["online", "away", "busy", "offline", null] }}
                     onUpdateHandler={() => onUpdateHandler()}
                 />
+                <FieldUpdater
+                    labelText="Profile Image"
+                    fieldName="profileImage"
+                    initialValue={userInfo.profileImage}
+                    validator={validateUserFields.profileImage}
+                    apiFunction={updateUserFields.profileImage}
+                    context={{ type: "image" }}
+                    onUpdateHandler={() => onUpdateHandler()}
+                />
             </div>
         </div>
         </div>

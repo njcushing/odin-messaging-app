@@ -184,22 +184,21 @@ export const status = (value) => {
 };
 
 export const profileImage = (value) => {
-    if (!value instanceof ArrayBuffer) {
-        console.log(typeof value);
+    if (!Array.isArray(value)) {
         return {
             status: false,
             message: {
-                front: `Your Profile Image must be an ArrayBuffer.`,
-                back: `'profileImage' field must be an ArrayBuffer.`,
+                front: `Your Profile Image must be an Array.`,
+                back: `'profileImage' field must be an Array.`,
             },
         };
     }
-    if (value.byteLength > 5000000) {
+    if (value.length > 5000000) {
         return {
             status: false,
             message: {
                 front: `Your Profile Image must be smaller than 5MB.`,
-                back: `'profileImage' field (ArrayBuffer) must be smaller than 5MB.`,
+                back: `'profileImage' field (Array) must be smaller than 5MB.`,
             },
         };
     }
@@ -207,7 +206,7 @@ export const profileImage = (value) => {
         status: true,
         message: {
             front: `Valid Profile Image.`,
-            back: `'profileImage' field (Image) is valid`,
+            back: `'profileImage' field (Array) is valid`,
         },
     };
 };

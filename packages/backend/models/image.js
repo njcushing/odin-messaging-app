@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 
 const ImageSchema = new Schema(
     {
-        name: { type: String },
-        alt: { type: String },
+        name: { type: String, default: "" },
+        alt: { type: String, default: "" },
         img: {
             data: Buffer,
             contentType: String,

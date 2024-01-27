@@ -74,7 +74,7 @@ const Dashboard = () => {
                                 displayName: userInfo.currentValue.preferences.displayName,
                                 tagLine: userInfo.currentValue.preferences.tagLine,
                                 status: userInfo.currentValue.preferences.setStatus,
-                                profileImage: userInfo.currentValue.preferences.image,
+                                profileImage: userInfo.currentValue.preferences.profileImage.img.data.data,
                             }
                         } catch (error) {
                             return {

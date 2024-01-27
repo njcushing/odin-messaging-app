@@ -50,6 +50,14 @@ label,
     color: var(--color-text-primary);
     font-size: 1.2rem;
     font-family: Gabarito;
+
+    padding: 0rem;
+    margin: 0rem;
+}
+
+label input[type="file"] {
+    position: absolute;
+    top: -99999px;
 }
 
 .text-input-and-button-container {
@@ -66,7 +74,7 @@ label,
     border-radius: 2px;
     outline-width: 2px;
     outline-style: solid;
-    outline-color: var(--color-outline-primary);
+    outline-color: var(--color-outline-input);
 
     width: calc(360px - 4px);
     height: 2.0rem;
@@ -104,7 +112,7 @@ label,
     border-top-right-radius: 2px;
     outline-width: 2px;
     outline-style: solid;
-    outline-color: var(--color-outline-primary);
+    outline-color: var(--color-outline-input);
     text-align: center;
 
     min-width: calc(160px - 4px);
@@ -172,6 +180,20 @@ label,
     cursor: pointer;
 }
 
+.image-container {
+    position: relative;
+
+    display: flex;
+    place-content: end;
+
+    object-fit: cover;
+    border-radius: 50%;
+    background-color: #cecece;
+
+    width: 100px;
+    height: 100px;
+}
+
 .error {
     color: rgba(255, 0, 0, 1.0);
     font-size: 0.7rem;
@@ -182,7 +204,8 @@ label,
 }
 
 .update-button,
-.update-button-waiting {
+.update-button-waiting,
+.browse-button {
     align-self: center;
 
     color: var(--color-text-primary);
@@ -210,7 +233,8 @@ label,
 }
 
 @media (hover: hover) {
-    .update-button:hover {
+    .update-button:hover,
+    .browse-button:hover {
         border-radius: 8px;
         transform: scale(92%);
     
@@ -222,7 +246,8 @@ label,
     background-color: rgb(12, 189, 12);
 }
 
-.update-button:focus {
+.update-button:focus,
+.browse-button:focus {
     border-radius: 8px;
     transform: scale(84%);
     
@@ -251,4 +276,22 @@ label,
     height: 0.8rem;
 
     animation: spin 1.2s linear infinite;
+}
+
+.browse-button {
+    display: flex;
+    align-items: center;
+
+    background-color: rgb(197, 112, 0);
+
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+}
+
+.browse-button:hover {
+    background-color: rgb(223, 129, 6);
+}
+
+.browse-button:focus {
+    background-color: rgb(172, 98, 1);
 }
