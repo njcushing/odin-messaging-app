@@ -23,12 +23,15 @@ const ProfileImage = ({
             break;
     }
 
+    const blob = new Blob([Buffer.from(src)], { type: "image/png" });
+    const imgSrc = URL.createObjectURL(blob);
+
     return (
         <div className={styles["container"]}>
         <img
             className={styles["profile-image"]}
             aria-label="profile-image"
-            src={src}
+            src={imgSrc}
             alt={alt}
             style={{
                 height: `${sizePx}px`,
@@ -53,16 +56,24 @@ const ProfileImage = ({
 };
 
 ProfileImage.propTypes = {
-    src: PropTypes.string,
+    src: function(props, propName, componentName) {
+        const propValue = props[propName]
+        if (!ArrayBuffer.isView(propValue) || propValue instanceof DataView) {
+            return new Error(`${componentName} needs to be a Typed Array
+            (e.g. - Uint8Array); got ${typeof propValue}`);
+        }
+        return;
+    },
     alt: PropTypes.string,
     status: PropTypes.oneOf([null, "online", "away", "busy", "offline"]),
-    sizePx: PropTypes.number.isRequired,
+    sizePx: PropTypes.number,
 };
 
 ProfileImage.defaultProps = {
-    src: "",
-    alt: "",
+    src: new Uint8Array(),
+    alt: "image",
     status: null,
+    sizePx: 50,
 }
 
 export default ProfileImage;

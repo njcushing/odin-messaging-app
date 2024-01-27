@@ -185,12 +185,16 @@ export const chatGet = [
                     populate: {
                         path: "user",
                         select: `
-                        username
-                        preferences.displayName
-                        preferences.tagLine
-                        preferences.image
-                        status
-                    `,
+                            username
+                            preferences.displayName
+                            preferences.tagLine
+                            preferences.profileImage
+                            preferences.setStatus
+                            status
+                        `,
+                        populate: {
+                            path: "preferences.profileImage",
+                        },
                     },
                 },
                 {
