@@ -149,7 +149,6 @@ label input[type="file"] {
 .circle,
 .circle-selected {
     border-radius: 9999px;
-    background-color: #580886;
 
     border: none;
     outline-width: 1px;

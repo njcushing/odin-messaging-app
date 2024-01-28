@@ -6,7 +6,6 @@ import ProfileImage from "@/components/ProfileImage";
 const Friend = ({
     username,
     tagLine,
-    status,
     profileImage,
     onClickHandler,
 }) => {
@@ -51,14 +50,12 @@ const Friend = ({
 Friend.propTypes = {
     username: PropTypes.string.isRequired,
     tagLine: PropTypes.string,
-    status: PropTypes.oneOf([null, "online", "away", "busy", "offline"]),
     profileImage: PropTypes.shape({ ...ProfileImage.propTypes }),
     onClickHandler: PropTypes.func,
 };
 
 Friend.defaultProps = {
     tagLine: "",
-    status: null,
     profileImage: { ...ProfileImage.defaultProps },
     onClickHandler: () => {},
 }

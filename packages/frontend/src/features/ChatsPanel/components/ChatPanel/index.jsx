@@ -4,6 +4,7 @@ import styles from "./index.module.css";
 
 import ProfileImage from "@/components/ProfileImage";
 import OptionButton from "@/components/OptionButton";
+import FieldUpdater from "@/components/FieldUpdater";
 import FriendSelectorPanel from "../FriendSelectorPanel";
 import Message from "./components/Message"
 import MessageBox from "./components/MessageBox";
@@ -11,8 +12,10 @@ import MessageBox from "./components/MessageBox";
 import getChat from "./utils/getChat";
 import combineParticipantNames from "../../utils/combineParticipantNames";
 import addFriendsToChat from "./utils/addFriendsToChat";
+import updateChatImage from "./utils/updateChatImage";
 import * as sendMessage from "./utils/sendMessage.js";
 import * as extractImage from "@/utils/extractImage";
+import * as validateChat from "../../../../../../../utils/validateChatFields.js";
 import * as validateMessage from "../../../../../../../utils/validateMessageFields.js";
 
 import mongoose from "mongoose";
@@ -22,7 +25,11 @@ const ChatPanel = ({
     userId,
     messageSentHandler,
     addedFriendsHandler,
+    updatedChatImageHandler,
 }) => {
+    const [panel, setPanel] = useState("chat");
+    const [midSectionContent, setMidSectionContent] = useState(null);
+
     const [chat, setChat] = useState({
         currentValue: null,
         abortController: null,
@@ -33,7 +40,6 @@ const ChatPanel = ({
     const [participantInfo, setParticipantInfo] = useState(new Map());
 
     const [addingFriendsToChat, setAddingFriendsToChat] = useState({
-        panelOpen: false,
         userIds: [],
         abortController: null,
         attempting: false,
@@ -49,6 +55,25 @@ const ChatPanel = ({
         attempting: false,
         submissionErrors: [],
     });
+
+    const checkIfWaiting = () => {
+        return (
+            chat.attempting ||
+            chat.appending ||
+            addingFriendsToChat.attempting ||
+            sendingMessage.attempting
+        );
+    }
+
+    const switchPanel = (desiredPanel) => {
+        if (!checkIfWaiting()) {
+            if (panel === desiredPanel) {
+                setPanel("chat");
+            } else {
+                setPanel(desiredPanel);
+            }
+        }
+    }
 
     useEffect(() => {
         if (chat.abortController) chat.abortController.abort;
@@ -85,6 +110,7 @@ const ChatPanel = ({
 
     useEffect(() => {
         if (mongoose.Types.ObjectId.isValid(chatId)) {
+            setPanel("chat");
             setChat({
                 ...chat,
                 attempting: true,
@@ -274,7 +300,7 @@ const ChatPanel = ({
                     setChat({
                         ...chat,
                         attempting: true,
-                    })
+                    });
                     addedFriendsHandler(response.chatId);
                 }
             })();
@@ -315,6 +341,174 @@ const ChatPanel = ({
 
     const chatImage = extractImage.fromChat(chat.currentValue).image;
 
+    useEffect(() => {
+        switch (panel) {
+            case "chat":
+                if (!chat.currentValue) {
+                    setMidSectionContent(null);
+                    break;
+                }
+                setMidSectionContent((
+                    <div className={styles["messages-container"]}>
+                        <ul
+                            className={styles["message-list"]}
+                            aria-label="chat-message-list"
+                        >
+                            {chat.currentValue.messages && Array.isArray(chat.currentValue.messages) && chat.currentValue.messages.length > 0
+                            ?   <>
+                                {chat.currentValue.messages.map((message, i) => {
+                                    return (
+                                        <li
+                                            aria-label="chat-message"
+                                            key={message._id}
+                                        ><Message
+                                            text={message.text}
+                                            image={
+                                                typeof message.image !== "undefined"
+                                                    ? extractImage.fromMessage(message).image
+                                                    : null
+                                            }
+                                            name={
+                                                participantInfo.get(message.author) ?
+                                                participantInfo.get(message.author).name :
+                                                "user"
+                                            }
+                                            dateSent={message.createdAt}
+                                            profileImage={
+                                                participantInfo.get(message.author) ?
+                                                participantInfo.get(message.author).profileImage :
+                                                { ...ProfileImage.defaultProps }
+                                            }
+                                            position={
+                                                userId &&
+                                                message.author.toString() === userId.toString() ?
+                                                    "right" :
+                                                    "left"
+                                            }
+                                            replyingTo={message.replyingTo ?
+                                            {
+                                                author:
+                                                    participantInfo.get(message.replyingTo.author._id) ?
+                                                    participantInfo.get(message.replyingTo.author._id).name :
+                                                    "User",
+                                                text: message.replyingTo.text,
+                                                image: typeof message.replyingTo.image !== "undefined"
+                                                    ? extractImage.fromMessage(message.replyingTo).image
+                                                    : null,
+                                            }
+                                            : null}
+                                            onReplyToHandler={(e) => {
+                                                if (!sendMessage.attempting) {
+                                                    if (sendingMessage.replyingTo && sendingMessage.replyingTo._id.toString() === message._id.toString()) {
+                                                        setSendingMessage({
+                                                            ...sendingMessage,
+                                                            replyingTo: null,
+                                                        });
+                                                    } else {
+                                                        setSendingMessage({
+                                                            ...sendingMessage,
+                                                            replyingTo: {
+                                                                _id: message._id,
+                                                                authorId: message.author,
+                                                                authorName:
+                                                                    participantInfo.get(message.author) ?
+                                                                    participantInfo.get(message.author).name :
+                                                                    "user",
+                                                                text: message.text
+                                                            },
+                                                        });
+                                                    }
+                                                }
+                                            }}
+                                        /></li>
+                                    )
+                                })}
+                                <button
+                                    className={styles["load-more-button"]}
+                                    aria-label="load-more"
+                                    onClick={(e) => {
+                                        if (!checkIfWaiting()) {
+                                            setChat({
+                                                ...chat,
+                                                appending: true,
+                                            });
+                                        }
+                                        e.currentTarget.blur();
+                                        e.preventDefault();
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.blur();
+                                    }}
+                                >{!chat.appending
+                                ?   "Load More"
+                                :   <div className={styles["load-more-button-waiting-wheel-container"]}>
+                                        <div
+                                            className={styles["load-more-button-waiting-wheel"]}
+                                            aria-label="waiting"
+                                        ></div>
+                                    </div>
+                                }</button>
+                                </>
+                            :   <p
+                                    className={styles["empty-chat-text"]}
+                                    aria-label="empty-chat-text"
+                                >There are no messages in this chat yet!</p>
+                            }
+                        </ul>
+                    </div>
+                ));
+                break;
+            case "addingFriends":
+                setMidSectionContent((
+                    <FriendSelectorPanel
+                        title="Add Friends to Chat"
+                        removeButtonText="Remove"
+                        addButtonText="Add"
+                        submitButtonText="Add Friends"
+                        noFriendsText="You have no friends you can add to this chat"
+                        onCloseHandler={() => switchPanel("chat")}
+                        onSubmitHandler={(participants) => {
+                            if (!checkIfWaiting()) {
+                                attemptAddingFriendsToChat(participants);
+                            }
+                        }}
+                        submissionErrors={addingFriendsToChat.submissionErrors}
+                    />
+                ));
+                break;
+            case "updatingChatImage":
+                setMidSectionContent((
+                    <div
+                        className={styles["update-chat-image-container"]}
+                        key="update-chat-image-container"
+                    >
+                        <FieldUpdater
+                            labelText="Set a New Chat Image"
+                            fieldName="image"
+                            initialValue={extractImage.fromChat(chat.currentValue).image.src}
+                            validator={validateChat.image}
+                            apiFunction={{
+                                func: updateChatImage,
+                                args: [chatId],
+                            }}
+                            context={{ type: "image" }}
+                            onUpdateHandler={() => {
+                                switchPanel("chat");
+                                if (!checkIfWaiting()) {
+                                    setChat({
+                                        ...chat,
+                                        attempting: true,
+                                    });
+                                }
+                                updatedChatImageHandler();
+                            }}
+                        />
+                    </div>
+                ));
+                break;
+        };
+    }, [panel, chat]);
+
     return (
         <div className={styles["wrapper"]}>
         <div className={styles["container"]}>
@@ -323,12 +517,25 @@ const ChatPanel = ({
                 {chat.currentValue !== null
                 ?   <>
                     <div className={styles["top-bar"]}>
-                        <ProfileImage
-                            src={chatImage.src}
-                            alt={chatImage.alt}
-                            status={null}
-                            sizePx={50}
-                        />
+                        <button
+                            className={styles["chat-image"]}
+                            aria-label="chat-image"
+                            onClick={(e) => {
+                                switchPanel("updatingChatImage")
+                                e.currentTarget.blur();
+                                e.preventDefault();
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.blur();
+                            }}
+                        >
+                            <ProfileImage
+                                src={chatImage.src}
+                                alt={chatImage.alt}
+                                status={null}
+                                sizePx={50}
+                            />
+                        </button>
                         {chat.currentValue.name.length > 0
                         ?   <h3
                                 className={styles["chat-name-custom"]}
@@ -367,14 +574,7 @@ const ChatPanel = ({
                                 heightPx={44}
                                 fontSizePx={22}
                                 borderStyle="circular"
-                                onClickHandler={() => {
-                                    if (!addingFriendsToChat.attempting) {
-                                        setAddingFriendsToChat({
-                                            ...addingFriendsToChat,
-                                            panelOpen: !addingFriendsToChat.panelOpen,
-                                        });
-                                    }
-                                }}
+                                onClickHandler={() => switchPanel("addingFriends")}
                             />
                             <OptionButton
                                 text="call"
@@ -398,134 +598,7 @@ const ChatPanel = ({
                             />
                         </ul>
                     </div>
-                    {!addingFriendsToChat.panelOpen
-                    ?   <div className={styles["messages-container"]}>
-                            <ul
-                                className={styles["message-list"]}
-                                aria-label="chat-message-list"
-                            >
-                                {chat.currentValue.messages && Array.isArray(chat.currentValue.messages) && chat.currentValue.messages.length > 0
-                                ?   <>
-                                    {chat.currentValue.messages.map((message, i) => {
-                                        return (
-                                            <li
-                                                aria-label="chat-message"
-                                                key={message._id}
-                                            ><Message
-                                                text={message.text}
-                                                image={
-                                                    typeof message.image !== "undefined"
-                                                        ? extractImage.fromMessage(message).image
-                                                        : null
-                                                }
-                                                name={
-                                                    participantInfo.get(message.author) ?
-                                                    participantInfo.get(message.author).name :
-                                                    "user"
-                                                }
-                                                dateSent={message.createdAt}
-                                                profileImage={
-                                                    participantInfo.get(message.author) ?
-                                                    participantInfo.get(message.author).profileImage :
-                                                    { ...ProfileImage.defaultProps }
-                                                }
-                                                position={
-                                                    userId &&
-                                                    message.author.toString() === userId.toString() ?
-                                                        "right" :
-                                                        "left"
-                                                }
-                                                replyingTo={message.replyingTo ?
-                                                {
-                                                    author:
-                                                        participantInfo.get(message.replyingTo.author._id) ?
-                                                        participantInfo.get(message.replyingTo.author._id).name :
-                                                        "User",
-                                                    text: message.replyingTo.text,
-                                                    image: typeof message.replyingTo.image !== "undefined"
-                                                        ? extractImage.fromMessage(message.replyingTo).image
-                                                        : null,
-                                                }
-                                                : null}
-                                                onReplyToHandler={(e) => {
-                                                    if (!sendMessage.attempting) {
-                                                        if (sendingMessage.replyingTo && sendingMessage.replyingTo._id.toString() === message._id.toString()) {
-                                                            setSendingMessage({
-                                                                ...sendingMessage,
-                                                                replyingTo: null,
-                                                            });
-                                                        } else {
-                                                            setSendingMessage({
-                                                                ...sendingMessage,
-                                                                replyingTo: {
-                                                                    _id: message._id,
-                                                                    authorId: message.author,
-                                                                    authorName:
-                                                                        participantInfo.get(message.author) ?
-                                                                        participantInfo.get(message.author).name :
-                                                                        "user",
-                                                                    text: message.text
-                                                                },
-                                                            });
-                                                        }
-                                                    }
-                                                }}
-                                            /></li>
-                                        )
-                                    })}
-                                    <button
-                                        className={styles["load-more-button"]}
-                                        aria-label="load-more"
-                                        onClick={(e) => {
-                                            if (!chat.appending) {
-                                                setChat({
-                                                    ...chat,
-                                                    appending: true,
-                                                });
-                                            }
-                                            e.currentTarget.blur();
-                                            e.preventDefault();
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.blur();
-                                        }}
-                                    >{!chat.appending
-                                    ?   "Load More"
-                                    :   <div className={styles["load-more-button-waiting-wheel-container"]}>
-                                            <div
-                                                className={styles["load-more-button-waiting-wheel"]}
-                                                aria-label="waiting"
-                                            ></div>
-                                        </div>
-                                    }</button>
-                                    </>
-                                :   <p
-                                        className={styles["empty-chat-text"]}
-                                        aria-label="empty-chat-text"
-                                    >There are no messages in this chat yet!</p>
-                                }
-                            </ul>
-                        </div>
-                    :   <FriendSelectorPanel
-                            title="Add Friends to Chat"
-                            removeButtonText="Remove"
-                            addButtonText="Add"
-                            submitButtonText="Add Friends"
-                            noFriendsText="You have no friends you can add to this chat"
-                            onCloseHandler={() => {
-                                setAddingFriendsToChat({
-                                    ...addingFriendsToChat,
-                                    panelOpen: false,
-                                });
-                            }}
-                            onSubmitHandler={(participants) => {
-                                if (!addingFriendsToChat.attempting) {
-                                    attemptAddingFriendsToChat(participants);
-                                }
-                            }}
-                            submissionErrors={addingFriendsToChat.submissionErrors}
-                        />
-                    }
+                    {midSectionContent}
                     {sendingMessage.replyingTo
                     ?   <div className={styles["replying-to-container"]}>
                             {`Replying to ${sendingMessage.replyingTo.authorName}...`}
@@ -538,7 +611,7 @@ const ChatPanel = ({
                             text={sendingMessage.currentText}
                             submissionErrors={sendingMessage.submissionErrors}
                             onSubmitHandler={(info) => {
-                                if (!sendingMessage.attempting) {
+                                if (!checkIfWaiting()) {
                                     attemptSendMessage(info);
                                 }
                             }}
