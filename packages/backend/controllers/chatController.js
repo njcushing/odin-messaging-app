@@ -11,6 +11,7 @@ import sendResponse from "../utils/sendResponse.js";
 import checkRequestValidationError from "../utils/checkRequestValidationError.js";
 import protectedRouteJWT from "../utils/protectedRouteJWT.js";
 import generateToken from "../utils/generateToken.js";
+import * as validateChat from "../../../utils/validateChatFields.js";
 import * as validateMessage from "../../../utils/validateMessageFields.js";
 
 const validateUserId = (res, next, userId) => {
@@ -33,7 +34,7 @@ const validateChatId = (res, next, chatId) => {
     }
 };
 
-const checkUserAuthorisedToPostMessage = (res, user, chat, token) => {
+const checkUserAuthorisedInChat = (res, user, chat, token) => {
     const userIdString = user._id.toString();
     for (let i = 0; i < chat.participants.length; i++) {
         if (chat.participants[i].user._id.toString() === userIdString) {
@@ -78,6 +79,16 @@ const chatNotFound = (res, chatId) => {
 
 const validators = {
     body: {
+        image: body("image")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = validateChat.image(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
         participants: body("participants").custom(
             (value, { req, loc, path }) => {
                 if (!Array.isArray(value)) {
@@ -500,6 +511,70 @@ export const chatPost = [
     }),
 ];
 
+export const imagePut = [
+    protectedRouteJWT,
+    validators.body.image,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        const user = await User.findById(req.user._id).exec();
+        if (user === null) return selfNotFound(res, next, req.user._id);
+
+        validateChatId(res, next, req.params.chatId);
+        const chat = await Chat.findById(req.params.chatId).exec();
+        if (chat === null) return chatNotFound(res, next, req.params.chatId);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        checkUserAuthorisedInChat(res, user, chat, token);
+
+        // Create and save new image
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+
+            if (chat.image) {
+                await Image.findByIdAndDelete(chat.image).catch((error) => {
+                    error.message = "Unable to delete existing chat image.";
+                    throw error;
+                });
+            }
+
+            const image = new Image({
+                "img.data": req.body.image,
+                "img.contentType": "image/png",
+            });
+            await image.save().catch((error) => {
+                error.message = "Unable to save new chat image.";
+                throw error;
+            });
+
+            const updatedChat = await Chat.findByIdAndUpdate(chat._id, {
+                $set: { image: image._id },
+            });
+            if (updatedChat === null) {
+                return chatNotFound(res, next, req.user._id);
+            }
+
+            session.commitTransaction();
+
+            return sendResponse(res, 200, "Chat Image successfully updated.", {
+                token: token,
+            });
+        } catch (error) {
+            return sendResponse(
+                res,
+                error.status,
+                error.message,
+                { token: token },
+                error
+            );
+        } finally {
+            session.endSession();
+        }
+    }),
+];
+
 export const messageTextPost = [
     protectedRouteJWT,
     validators.body.messageText,
@@ -516,7 +591,7 @@ export const messageTextPost = [
 
         const token = await generateToken(req.user.username, req.user.password);
 
-        checkUserAuthorisedToPostMessage(res, user, chat, token);
+        checkUserAuthorisedInChat(res, user, chat, token);
 
         // Create and save new message
         const session = await mongoose.startSession();
@@ -604,7 +679,7 @@ export const messageImagePost = [
 
         const token = await generateToken(req.user.username, req.user.password);
 
-        checkUserAuthorisedToPostMessage(res, user, chat, token);
+        checkUserAuthorisedInChat(res, user, chat, token);
 
         // Create and save new message
         const session = await mongoose.startSession();
