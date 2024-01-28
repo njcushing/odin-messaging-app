@@ -50,3 +50,23 @@ export const fromChat = (chat) => {
     }
     return { found: found, image: imageExtracted };
 };
+
+export const fromMessage = (message) => {
+    const imageExtracted = { ...ProfileImage.defaultProps };
+    let found = false;
+    if (message && message.constructor === Object) {
+        if ("image" in message) {
+            const image = message.image;
+            if (image.constructor === Object) {
+                if ("img" in image) {
+                    imageExtracted.src = image.img.data.data;
+                    found = true;
+                }
+                if ("alt" in image) {
+                    imageExtracted.alt = image.alt;
+                }
+            }
+        }
+    }
+    return { found: found, image: imageExtracted };
+};

@@ -939,7 +939,12 @@ export const chatsGet = [
                         `,
                     },
                 },
-                { path: "messages" },
+                {
+                    path: "messages",
+                    populate: {
+                        path: "image",
+                    },
+                },
             ])
             .exec();
 

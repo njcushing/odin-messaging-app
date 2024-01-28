@@ -1,14 +1,6 @@
 import mongoose from "mongoose";
 
-import {
-    username,
-    email,
-    password,
-    displayName,
-    tagLine,
-    status,
-    profileImage,
-} from "../../../utils/validateUserFields.js";
+import * as validate from "../../../utils/validateUserFields.js";
 
 const Schema = mongoose.Schema;
 
@@ -20,9 +12,9 @@ const UserSchema = new Schema(
             unique: true,
             validate: {
                 validator: function (value) {
-                    return username(value).status;
+                    return validate.username(value).status;
                 },
-                message: (props) => username(props.value).message.back,
+                message: (props) => validate.username(props.value).message.back,
             },
             required: [true, "'username' field required"],
         },
@@ -32,9 +24,9 @@ const UserSchema = new Schema(
             unique: true,
             validate: {
                 validator: function (value) {
-                    return email(value).status;
+                    return validate.email(value).status;
                 },
-                message: (props) => email(props.value).message.back,
+                message: (props) => validate.email(props.value).message.back,
             },
             required: [true, "'email' field required"],
         },
@@ -78,9 +70,10 @@ const UserSchema = new Schema(
                 trim: true,
                 validate: {
                     validator: function (value) {
-                        return displayName(value).status;
+                        return validate.displayName(value).status;
                     },
-                    message: (props) => displayName(props.value).message.back,
+                    message: (props) =>
+                        validate.displayName(props.value).message.back,
                 },
                 default: "",
             },
@@ -89,9 +82,10 @@ const UserSchema = new Schema(
                 trim: true,
                 validate: {
                     validator: function (value) {
-                        return tagLine(value).status;
+                        return validate.tagLine(value).status;
                     },
-                    message: (props) => tagLine(props.value).message.back,
+                    message: (props) =>
+                        validate.tagLine(props.value).message.back,
                 },
                 default: "",
             },
@@ -103,9 +97,10 @@ const UserSchema = new Schema(
                 type: String,
                 validate: {
                     validator: function (value) {
-                        return status(value).status;
+                        return validate.status(value).status;
                     },
-                    message: (props) => status(props.value).message.back,
+                    message: (props) =>
+                        validate.status(props.value).message.back,
                 },
                 default: null,
             },

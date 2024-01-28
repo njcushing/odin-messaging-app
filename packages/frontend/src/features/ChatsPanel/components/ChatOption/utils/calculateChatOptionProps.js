@@ -51,9 +51,20 @@ export const calculateProps = (chat, userId) => {
         }
 
         if (message && message.author.toString() === user._id.toString()) {
+            let recentMessageText = "...";
+            if (
+                typeof message.text !== "undefined" &&
+                message.text.length > 0
+            ) {
+                recentMessageText = message.text;
+            } else {
+                if (extractImage.fromMessage(message).found) {
+                    recentMessageText = "Image";
+                }
+            }
             chatProps.recentMessage = {
                 author: name,
-                message: message.text,
+                message: recentMessageText,
             };
         }
     }

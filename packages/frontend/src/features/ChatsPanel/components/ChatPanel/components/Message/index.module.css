@@ -18,14 +18,16 @@
     margin-bottom: 0.3rem;
 }
 
-.message-text-container {
+.message-container {
     display: flex;
     flex-direction: column-reverse;
+    gap: 0.4rem;
 
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
 
-    max-width: 100%;
+    max-width: calc(100% - (2 * 0.3rem));
+    padding: 0.4rem;
 }
 
 .message-text {
@@ -40,29 +42,63 @@
 
     max-width: 100%;
     min-height: 1rem;
-    padding: 0.5rem;
+    padding: 0.1rem 0.3rem;
     margin: 0rem;
 }
 
-.replying-to-text-container {
-    display: flex;
-    flex-direction: start;
-
-    padding: 0.4rem 0.4rem 0rem 0.4rem;
+.message-image-container,
+.replying-to-message-image-container {
+    padding: 0rem;
+    margin: 0rem;
 }
 
-.replying-to-text {
+.message-image,
+.replying-to-message-image {
+    display: flex;
+    place-content: end;
+
+    position: relative;
+
+    object-fit: cover;
+    background-color: #cecece;
+    border-radius: 10px;
+}
+
+.message-image {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.replying-to-message-container {
+    align-self: start;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    gap: 0.2rem;
+
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.8);
+
+    padding: 0.4rem;
+}
+
+.replying-to-message-text {
     align-self: start;
 
     color: rgba(0, 0, 0);
     font-size: 0.8rem;
     font-family: Gabarito;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
     line-height: 1.1rem;
 
-    padding: 0.2rem 0.4rem;
+    padding: 0rem;
     margin: 0rem;
+}
+
+.replying-to-message-image {
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .option-button {
