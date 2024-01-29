@@ -80,7 +80,7 @@ describe("UI/DOM Testing...", () => {
         });
         test(`On change, should invoke the username function`, async () => {
             const user = userEvent.setup();
-            const usernameSpy = vi.spyOn(validateCreateAccountFields, "username");
+            const usernameSpy = vi.spyOn(validateUserFields, "username");
             await renderComponent();
             const usernameInput = screen.getByRole("textbox", { name: "username-input" });
             await user.type(usernameInput, "a");
@@ -123,7 +123,7 @@ describe("UI/DOM Testing...", () => {
         });
         test(`On change, should invoke the password function`, async () => {
             const user = userEvent.setup();
-            const passwordSpy = vi.spyOn(validateCreateAccountFields, "password");
+            const passwordSpy = vi.spyOn(validateUserFields, "password");
             await renderComponent();
             const passwordInput = screen.getByLabelText("password-input");
             await user.type(passwordInput, "a");
@@ -183,7 +183,7 @@ describe("UI/DOM Testing...", () => {
         });
         test(`On change, should invoke the password function`, async () => {
             const user = userEvent.setup();
-            const passwordSpy = vi.spyOn(validateCreateAccountFields, "password");
+            const passwordSpy = vi.spyOn(validateUserFields, "password");
             await renderComponent();
             const confirmPasswordInput = screen.getByLabelText("confirm-password-input");
             await user.type(confirmPasswordInput, "a");

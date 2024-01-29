@@ -85,17 +85,21 @@ const ChatPanel = ({
             });
             (async () => {
                 const messageQuantity = chat.currentValue ? chat.currentValue.messages.length : 0;
-                const existingMessages = chat.currentValue ? chat.currentValue.messages : [];
                 const response = await getChat(chatId, [
                     messageQuantity,
                     messageQuantity + 20
                 ], abortControllerNew);
+                const existingMessages = chat.currentValue ? chat.currentValue.messages : [];
+                const newMessages = response.chat ? response.chat.messages : [];
                 setChat({
                     ...chat,
-                    currentValue: {
-                        ...response.chat,
-                        messages: [...existingMessages, ...response.chat.messages],
-                    },
+                    currentValue:
+                        response.chat ?
+                        {
+                            ...response.chat,
+                            messages: [...existingMessages, ...newMessages],
+                        } :
+                        null,
                     abortController: null,
                     attempting: false,
                     appending: false,
@@ -507,7 +511,7 @@ const ChatPanel = ({
                 ));
                 break;
         };
-    }, [panel, chat]);
+    }, [panel, chat, participantInfo]);
 
     return (
         <div className={styles["wrapper"]}>
@@ -639,9 +643,19 @@ const ChatPanel = ({
     );
 };
 
+const validateMongoDBObjectId = (props, propName, componentName) => {
+    const propValue = props[propName];
+    if (propValue === null) return;
+    if (!mongoose.Types.ObjectId.isValid(propValue)) {
+        return new Error(`'${propName}' prop in ${componentName} needs to be a
+        valid MongoDB ObjectId or null; got ${propValue}`);
+    }
+    return;
+}
+
 ChatPanel.propTypes = {
-    chatId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    chatId: validateMongoDBObjectId,
+    userId: validateMongoDBObjectId,
     messageSentHandler: PropTypes.func,
     updateChatListHandler: PropTypes.func,
     switchChatHandler: PropTypes.func,

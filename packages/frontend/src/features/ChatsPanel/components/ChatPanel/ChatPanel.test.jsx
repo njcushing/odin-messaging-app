@@ -17,9 +17,17 @@ afterEach(() => { assignMock.mockClear(); });
 
 const renderComponent = async (
     chatId = new mongoose.Types.ObjectId(),
+    userId = new mongoose.Types.ObjectId(),
+    messageSentHandler = () => {},
+    addedFriendsHandler = () => {},
+    updatedChatImageHandler = () => {},
 ) => {
     act(() => render(<ChatPanel
         chatId={chatId}
+        userId={userId}
+        messageSentHandler={messageSentHandler}
+        addedFriendsHandler={addedFriendsHandler}
+        updatedChatImageHandler={updatedChatImageHandler}
     />));
 }
 
@@ -27,6 +35,7 @@ vi.mock('@/components/ProfileImage', () => ({
     default: ({
         src,
         alt,
+        status,
         sizePx,
     }) => {
         return (<></>);
@@ -43,6 +52,35 @@ vi.mock('@/components/OptionButton', () => ({
         fontSizePx,
         borderStyle,
         onClickHandler,
+    }) => {
+        return (<></>);
+    }
+}));
+
+vi.mock('@/components/FieldUpdater', () => ({ 
+    default: ({
+        labelText,
+        fieldName,
+        initialValue,
+        validator,
+        apiFunction,
+        context,
+        onUpdateHandler,
+    }) => {
+        return (<></>);
+    }
+}));
+
+vi.mock('@/components/FriendSelectorPanel', () => ({ 
+    default: ({
+        title,
+        removeButtonText,
+        addButtonText,
+        submitButtonText,
+        noFriendsText,
+        onCloseHandler,
+        onSubmitHandler,
+        submissionErrors,
     }) => {
         return (<></>);
     }
@@ -72,63 +110,113 @@ vi.mock('../../components/MessageBox', () => ({
     }
 }));
 
+const users = [
+    {
+        _id: 0,
+        username: "Friend 1",
+        preferences: {
+            displayName: "Friend 1",
+            tagLine: "Friend 1 tagline",
+        },
+        status: "online",
+        imageSrc: "",
+        imageAlt: "",
+    },
+    {
+        _id: 1,
+        username: "Friend 2",
+        preferences: {
+            displayName: "Friend 2",
+            tagLine: "Friend 2 tagline",
+        },
+        status: "online",
+        imageSrc: "",
+        imageAlt: "",
+    },
+    {
+        _id: 2,
+        username: "Friend 3",
+        preferences: {
+            displayName: "Friend 3",
+            tagLine: "Friend 3 tagline",
+        },
+        status: "online",
+        imageSrc: "",
+        imageAlt: "",
+    },
+];
+
 const participants = [
     {
-        _id: "1",
-        name: "Person 1",
+        user: { ...users[0] },
+        nickname: "friend1",
+        role: "guest",
+        muted: false,
     },
     {
-        _id: "2",
-        name: "Person 2",
+        user: { ...users[1] },
+        nickname: "friend2",
+        role: "guest",
+        muted: false,
     },
     {
-        _id: "3",
-        name: "Person 3",
+        user: { ...users[2] },
+        nickname: "friend3",
+        role: "guest",
+        muted: false,
     },
 ];
 const messages = [
     {
-        _id: "3",
-        author: {
-            _id: "2",
-            name: "Person 2",
-            status: "online",
-            imageSrc: "",
-            imageAlt: "",
-        },
-        text: "Message 3 text",
-        dateSent: "2023-01-01T00:00:00",
-    },
-    {
-        _id: "2",
-        author: {
-            _id: "3",
-            name: "Person 3",
-            status: "online",
-            imageSrc: "",
-            imageAlt: "",
-        },
-        text: "Message 2 text",
-        dateSent: "2023-01-01T00:00:00",
-    },
-    {
-        _id: "1",
-        author: {
-            _id: "1",
-            name: "Person 1",
-            status: "online",
-            imageSrc: "",
-            imageAlt: "",
-        },
+        _id: 0,
+        author: { ...users[0] },
         text: "Message 1 text",
-        dateSent: "2023-01-01T00:00:00",
+        image: {
+            img: {
+                data: {
+                    data: new Uint8Array(),
+                },
+            },
+        },
+        deleted: false,
+    },
+    {
+        _id: 1,
+        author: { ...users[1] },
+        text: "Message 2 text",
+        image: {
+            img: {
+                data: {
+                    data: new Uint8Array(),
+                },
+            },
+        },
+        deleted: false,
+    },
+    {
+        _id: 2,
+        author: { ...users[2] },
+        text: "Message 3 text",
+        image: {
+            img: {
+                data: {
+                    data: new Uint8Array(),
+                },
+            },
+        },
+        deleted: false,
     },
 ];
 const chat = {
     participants: participants,
     name: "",
-    imageSrc: "",
-    imageAlt: "",
+    image: {
+        img: {
+            data: {
+                data: new Uint8Array(),
+            },
+        },
+    },
     messages: messages,
 }
 const getChat = vi.fn(() => {
@@ -146,6 +234,8 @@ const combineParticipantNames = vi.fn(() => "Combined");
 vi.mock('../../utils/combineParticipantNames', async () => ({
     default: () => combineParticipantNames(),
 }));
+
+global.URL.createObjectURL = vi.fn(() => 'image');
 
 describe("UI/DOM Testing...", () => {
     describe("The heading element displaying the chat name...", () => {

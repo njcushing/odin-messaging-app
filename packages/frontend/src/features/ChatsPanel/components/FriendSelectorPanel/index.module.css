@@ -255,7 +255,7 @@
 }
 
 .no-friends {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--color-text-secondary);
     font-size: 1.1rem;
     font-family: Gabarito;
     text-align: center;

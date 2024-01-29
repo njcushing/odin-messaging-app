@@ -924,8 +924,7 @@ export const addFriendsPost = [
                 });
 
                 await newChat.save().catch((error) => {
-                    error.message =
-                        "Unable to save duplicate of 'individual'-type chat.";
+                    error.message = "Unable to save new chat.";
                     error.status = 500;
                     throw error;
                 });

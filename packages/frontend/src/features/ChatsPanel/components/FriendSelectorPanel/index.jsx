@@ -102,7 +102,7 @@ const FriendSelectorPanel = ({
                                                 <li
                                                     className={styles["friend-selected"]}
                                                     aria-label="friend-selected"
-                                                    key={friend._id}
+                                                    key={user._id}
                                                 >
                                                     <h5
                                                         className={styles["friend-selected-name"]}
@@ -195,6 +195,7 @@ const FriendSelectorPanel = ({
                                     onMouseLeave={(e) => {
                                         e.currentTarget.blur();
                                     }}
+                                    key="load-more-button"
                                 >{!friendsList.appending
                                 ?   "Load More"
                                 :   <div className={styles["load-more-button-waiting-wheel-container"]}>

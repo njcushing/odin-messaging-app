@@ -347,16 +347,20 @@ const FieldUpdater = ({
     );
 };
 
+const validateMongoDBObjectId = (props, propName, componentName) => {
+    const propValue = props[propName];
+    if (propValue === null) return;
+    if (!mongoose.Types.ObjectId.isValid(propValue)) {
+        return new Error(`'${propName}' prop in ${componentName} needs to be a
+        valid MongoDB ObjectId or null; got ${propValue}`);
+    }
+    return;
+}
+
 FieldUpdater.propTypes = {
     labelText: PropTypes.string,
     fieldName: PropTypes.string,
-    initialValue: function(props, propName, componentName) {
-        const propValue = props[propName]
-        if (typeof propValue === "undefined") {
-            return new Error(`${componentName} is required, got 'undefined'`);
-        }
-        return;
-    },
+    initialValue: validateMongoDBObjectId,
     validator: PropTypes.func.isRequired,
     apiFunction: PropTypes.shape({
         func: PropTypes.func.isRequired,
