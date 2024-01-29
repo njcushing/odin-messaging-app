@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
-import { body, param, query } from "express-validator";
+import { body, param, query, validationResult } from "express-validator";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -48,7 +48,7 @@ const validators = {
                 if (!validUsername.status) {
                     throw new Error(validUsername.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             }),
         email: body("email")
@@ -58,7 +58,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             })
             .normalizeEmail({ all_lowercase: true }),
@@ -69,7 +69,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             }),
         confirmPassword: body("confirmPassword")
@@ -79,7 +79,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             })
             .custom((value, { req, loc, path }) => {
@@ -88,7 +88,7 @@ const validators = {
                         "'password' field (String) and 'confirmPassword' field (String) must match"
                     );
                 } else {
-                    return value;
+                    return true;
                 }
             }),
         displayName: body("displayName")
@@ -98,7 +98,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             })
             .optional({ values: "falsy" }),
@@ -109,7 +109,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             })
             .optional({ values: "falsy" }),
@@ -120,7 +120,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             }),
         setStatus: body("setStatus")
@@ -130,7 +130,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             })
             .optional({ nullable: true }),
@@ -141,7 +141,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             }),
     },
@@ -153,41 +153,20 @@ const validators = {
                 if (!validUsername.status) {
                     throw new Error(validUsername.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
-            }),
-        page: param("page")
-            .trim()
-            .custom((value, { req, loc, path }) => {
-                if (isNaN(value)) {
-                    throw new Error(
-                        "'page' field (Number) must be a valid numeric value."
-                    );
-                }
-                value = parseInt(value);
-                if (!Number.isInteger(value)) {
-                    throw new Error(
-                        "'page' field (Number) must be an integer."
-                    );
-                }
-                if (value < 0) {
-                    throw new Error(
-                        "'page' field (Number) must be greater than or equal to 0."
-                    );
-                }
-                return value;
             }),
     },
     query: {
         first: query("first")
             .trim()
             .custom((value, { req, loc, path }) => {
-                if (isNaN(value)) {
+                if (isNaN(Number(value))) {
                     throw new Error(
                         "'first' field (Number) must be a valid numeric value."
                     );
                 }
-                value = parseInt(value);
+                value = Number(value);
                 if (!Number.isInteger(value)) {
                     throw new Error(
                         "'first' field (Number) must be an integer."
@@ -198,17 +177,17 @@ const validators = {
                         "'first' field (Number) must be greater than or equal to 0."
                     );
                 }
-                return value;
+                return true;
             }),
         last: query("last")
             .trim()
             .custom((value, { req, loc, path }) => {
-                if (isNaN(value)) {
+                if (isNaN(Number(value))) {
                     throw new Error(
                         "'last' field (Number) must be a valid numeric value."
                     );
                 }
-                value = parseInt(value);
+                value = Number(value);
                 if (!Number.isInteger(value)) {
                     throw new Error(
                         "'last' field (Number) must be an integer."
@@ -219,15 +198,13 @@ const validators = {
                         "'last' field (Number) must be greater than or equal to 0."
                     );
                 }
-                return value;
+                return true;
             }),
     },
 };
 
 export const userGet = [
-    param("username", "'username' parameter (String) must not be empty")
-        .trim()
-        .isLength({ min: 1 }),
+    validators.param.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         let user = await User.findOne({ username: req.params.username })
@@ -442,6 +419,7 @@ export const friendGet = [
 
 export const friendCanBeAdded = [
     protectedRouteJWT,
+    validators.param.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
@@ -528,6 +506,7 @@ export const friendsGet = [
     protectedRouteJWT,
     validators.query.first,
     validators.query.last,
+    checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
@@ -655,13 +634,6 @@ export const friendsPost = [
                 }
 
                 session.commitTransaction();
-
-                return sendResponse(
-                    res,
-                    201,
-                    `${friend.username} successfully added as a friend.`,
-                    { token: token }
-                );
             } catch (error) {
                 return sendResponse(
                     res,
@@ -672,6 +644,13 @@ export const friendsPost = [
                 );
             } finally {
                 session.endSession();
+
+                return sendResponse(
+                    res,
+                    201,
+                    `${friend.username} successfully added as a friend.`,
+                    { token: token }
+                );
             }
         } else {
             // Add currently logged-in user's _id to friend's pending friendRequest array
@@ -702,6 +681,7 @@ export const friendRequestsGet = [
     protectedRouteJWT,
     validators.query.first,
     validators.query.last,
+    checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
@@ -808,13 +788,6 @@ export const friendRequestsAccept = [
             }
 
             session.commitTransaction();
-
-            return sendResponse(
-                res,
-                200,
-                `${friend.username} successfully accepted as a friend.`,
-                { token: token }
-            );
         } catch (error) {
             return sendResponse(
                 res,
@@ -825,6 +798,13 @@ export const friendRequestsAccept = [
             );
         } finally {
             session.endSession();
+
+            return sendResponse(
+                res,
+                200,
+                `${friend.username} successfully accepted as a friend.`,
+                { token: token }
+            );
         }
     }),
 ];
@@ -888,6 +868,7 @@ export const chatsGet = [
     protectedRouteJWT,
     validators.query.first,
     validators.query.last,
+    checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
@@ -1013,7 +994,9 @@ export const profileImagePut = [
         try {
             session.startTransaction();
 
-            if (user.preferences.profileImage) {
+            if (
+                mongoose.Types.ObjectId.isValid(user.preferences.profileImage)
+            ) {
                 await Image.findByIdAndDelete(
                     user.preferences.profileImage
                 ).catch((error) => {
@@ -1039,13 +1022,6 @@ export const profileImagePut = [
             }
 
             session.commitTransaction();
-
-            return sendResponse(
-                res,
-                200,
-                "Profile Image successfully updated.",
-                { token: token }
-            );
         } catch (error) {
             return sendResponse(
                 res,
@@ -1056,6 +1032,13 @@ export const profileImagePut = [
             );
         } finally {
             session.endSession();
+
+            return sendResponse(
+                res,
+                200,
+                "Profile Image successfully updated.",
+                { token: token }
+            );
         }
     }),
 ];
