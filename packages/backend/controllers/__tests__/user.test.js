@@ -149,8 +149,7 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(500);
         });
-        test(`Should respond with an error if the User schema .save() operation
-         fails`, async () => {
+        test(`Should throw an error if the User schema .save() operation fails`, async () => {
             vi.spyOn(User.prototype, "save").mockImplementationOnce(
                 async () => {
                     throw new Error("failed");
@@ -161,7 +160,11 @@ describe("Route testing...", () => {
                 .send({ ...credentials })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect((res) => res.error !== false);
+                .expect((res) => {
+                    if (!(res.error instanceof Error)) {
+                        throw new Error("Expected error to be thrown.");
+                    }
+                });
         });
         test(`Should respond with status code 409 if the value provided in the
          'username' field already exists within a User in the database`, async () => {
@@ -1096,8 +1099,8 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(401);
         });
-        test(`Should respond with an error if the Image schema
-         .findByIdAndDelete() operation fails`, async () => {
+        test(`Should throw an error if the Image schema .findByIdAndDelete()
+         operation fails`, async () => {
             vi.spyOn(Image, "findByIdAndDelete").mockImplementationOnce(
                 async () => {
                     throw new Error("failed");
@@ -1108,10 +1111,13 @@ describe("Route testing...", () => {
                 .send({ profileImage: [] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect((res) => res.error !== false);
+                .expect((res) => {
+                    if (!(res.error instanceof Error)) {
+                        throw new Error("Expected error to be thrown.");
+                    }
+                });
         });
-        test(`Should respond with an error if the Image schema .save() operation
-         fails`, async () => {
+        test(`Should throw an error if the Image schema .save() operation fails`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             vi.spyOn(Image.prototype, "save").mockImplementationOnce(
                 async () => {
@@ -1123,7 +1129,11 @@ describe("Route testing...", () => {
                 .send({ profileImage: [] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect((res) => res.error !== false);
+                .expect((res) => {
+                    if (!(res.error instanceof Error)) {
+                        throw new Error("Expected error to be thrown.");
+                    }
+                });
         });
         test(`Should respond with status code 401 if, when attempting to
          update the currently logged-in user's fields, it cannot be found in the
