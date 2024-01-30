@@ -69,10 +69,6 @@ const selfNotFound = (res, next, userId) => {
     return sendResponse(res, 401, "User not found in database.");
 };
 
-const userNotFound = (res, userId) => {
-    return sendResponse(res, 404, `User not found in database: ${userId}`);
-};
-
 const chatNotFound = (res, chatId) => {
     return sendResponse(res, 404, `Chat not found in database: ${chatId}`);
 };
@@ -86,7 +82,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             }),
         participants: body("participants").custom(
@@ -110,7 +106,7 @@ const validators = {
                         );
                     }
                 }
-                return value;
+                return true;
             }
         ),
         messageText: body("text")
@@ -120,7 +116,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             }),
         messageImage: body("image")
@@ -130,7 +126,7 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
             }),
         messageReplyingTo: body("replyingTo")
@@ -141,43 +137,20 @@ const validators = {
                 if (!valid.status) {
                     throw new Error(valid.message.back);
                 } else {
-                    return value;
+                    return true;
                 }
-            }),
-    },
-    param: {
-        page: param("page")
-            .trim()
-            .custom((value, { req, loc, path }) => {
-                if (isNaN(value)) {
-                    throw new Error(
-                        "'page' field (Number) must be a valid numeric value."
-                    );
-                }
-                value = parseInt(value);
-                if (!Number.isInteger(value)) {
-                    throw new Error(
-                        "'page' field (Number) must be an integer."
-                    );
-                }
-                if (value < 0) {
-                    throw new Error(
-                        "'page' field (Number) must be greater than or equal to 0."
-                    );
-                }
-                return value;
             }),
     },
     query: {
         firstMessage: query("firstMessage")
             .trim()
             .custom((value, { req, loc, path }) => {
-                if (isNaN(value)) {
+                if (isNaN(Number(value))) {
                     throw new Error(
                         "'firstMessage' field (Number) must be a valid numeric value."
                     );
                 }
-                value = parseInt(value);
+                value = Number(value);
                 if (!Number.isInteger(value)) {
                     throw new Error(
                         "'firstMessage' field (Number) must be an integer."
@@ -188,17 +161,17 @@ const validators = {
                         "'firstMessage' field (Number) must be greater than or equal to 0."
                     );
                 }
-                return value;
+                return true;
             }),
         lastMessage: query("lastMessage")
             .trim()
             .custom((value, { req, loc, path }) => {
-                if (isNaN(value)) {
+                if (isNaN(Number(value))) {
                     throw new Error(
                         "'lastMessage' field (Number) must be a valid numeric value."
                     );
                 }
-                value = parseInt(value);
+                value = Number(value);
                 if (!Number.isInteger(value)) {
                     throw new Error(
                         "'lastMessage' field (Number) must be an integer."
@@ -209,7 +182,7 @@ const validators = {
                         "'lastMessage' field (Number) must be greater than or equal to 0."
                     );
                 }
-                return value;
+                return true;
             }),
     },
 };
@@ -218,6 +191,7 @@ export const chatGet = [
     protectedRouteJWT,
     validators.query.firstMessage,
     validators.query.lastMessage,
+    checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
@@ -418,7 +392,9 @@ export const chatPost = [
                     throw error;
                 }
 
-                sessionIndividual.commitTransaction();
+                await sessionIndividual.commitTransaction();
+
+                sessionIndividual.endSession();
 
                 return sendResponse(
                     res,
@@ -432,6 +408,8 @@ export const chatPost = [
                     }
                 );
             } catch (error) {
+                sessionIndividual.endSession();
+
                 return sendResponse(
                     res,
                     error.status,
@@ -439,8 +417,6 @@ export const chatPost = [
                     { token: token },
                     error
                 );
-            } finally {
-                sessionIndividual.endSession();
             }
         }
 
@@ -486,7 +462,9 @@ export const chatPost = [
                 })
             );
 
-            sessionGroup.commitTransaction();
+            await sessionGroup.commitTransaction();
+
+            sessionGroup.endSession();
 
             sendResponse(
                 res,
@@ -498,6 +476,8 @@ export const chatPost = [
                 }
             );
         } catch (error) {
+            sessionGroup.endSession();
+
             return sendResponse(
                 res,
                 error.status,
@@ -505,8 +485,6 @@ export const chatPost = [
                 { token: token },
                 error
             );
-        } finally {
-            sessionGroup.endSession();
         }
     }),
 ];
@@ -533,7 +511,7 @@ export const imagePut = [
         try {
             session.startTransaction();
 
-            if (chat.image) {
+            if (mongoose.Types.ObjectId.isValid(chat.image)) {
                 await Image.findByIdAndDelete(chat.image).catch((error) => {
                     error.message = "Unable to delete existing chat image.";
                     throw error;
@@ -556,12 +534,16 @@ export const imagePut = [
                 return chatNotFound(res, next, req.user._id);
             }
 
-            session.commitTransaction();
+            await session.commitTransaction();
+
+            session.endSession();
 
             return sendResponse(res, 200, "Chat Image successfully updated.", {
                 token: token,
             });
         } catch (error) {
+            session.endSession();
+
             return sendResponse(
                 res,
                 error.status,
@@ -569,8 +551,6 @@ export const imagePut = [
                 { token: token },
                 error
             );
-        } finally {
-            session.endSession();
         }
     }),
 ];
@@ -635,7 +615,9 @@ export const messageTextPost = [
                 throw error;
             }
 
-            session.commitTransaction();
+            await session.commitTransaction();
+
+            session.endSession();
 
             sendResponse(
                 res,
@@ -647,6 +629,8 @@ export const messageTextPost = [
                 }
             );
         } catch (error) {
+            session.endSession();
+
             return sendResponse(
                 res,
                 error.status,
@@ -657,8 +641,6 @@ export const messageTextPost = [
                 },
                 error
             );
-        } finally {
-            session.endSession();
         }
     }),
 ];
@@ -737,7 +719,7 @@ export const messageImagePost = [
                 throw error;
             }
 
-            session.commitTransaction();
+            await session.commitTransaction();
 
             sendResponse(
                 res,
@@ -891,7 +873,7 @@ export const addFriendsPost = [
 
             let chatId = chat._id;
 
-            // If this is an 'individual' chat, duplicate the existing chat and make it a 'group' chat
+            // If this is an 'individual'-type chat, make a new 'group'-type chat
             if (chat.type === "individual") {
                 const newChatId = new mongoose.Types.ObjectId();
                 const newChat = new Chat({
@@ -944,11 +926,11 @@ export const addFriendsPost = [
             });
 
             // Add new participants to chat
-            const friendsObjects = friendsFiltered.map((friendStringId) => {
+            const friendsInformation = friendsFiltered.map((friendStringId) => {
                 return { user: new mongoose.Types.ObjectId(friendStringId) };
             });
             await Chat.findByIdAndUpdate(chatId, {
-                $push: { participants: { $each: friendsObjects } },
+                $push: { participants: { $each: friendsInformation } },
             }).catch((error) => {
                 error.message =
                     "Unable to add new participants to chat's participants.";
@@ -956,20 +938,22 @@ export const addFriendsPost = [
                 throw error;
             });
 
-            session.commitTransaction();
+            await session.commitTransaction();
+
+            session.endSession();
 
             sendResponse(
                 res,
                 201,
-                `Friend${
-                    friendsFiltered.length > 1 ? "s" : ""
-                } successfully added to chat at: ${chatId}.`,
+                `Friend(s) successfully added to chat at: ${chatId}.`,
                 {
                     chatId: chatId,
                     token: token,
                 }
             );
         } catch (error) {
+            session.endSession();
+
             return sendResponse(
                 res,
                 error.status,
@@ -980,8 +964,6 @@ export const addFriendsPost = [
                 },
                 error
             );
-        } finally {
-            session.endSession();
         }
     }),
 ];
