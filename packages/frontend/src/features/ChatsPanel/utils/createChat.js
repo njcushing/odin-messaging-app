@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 const createChat = async (participants, abortController) => {
     const data = await fetch(`${import.meta.env.VITE_SERVER_DOMAIN}/chat`, {
@@ -19,9 +20,7 @@ const createChat = async (participants, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             let chatId = null;
             if (
@@ -40,8 +39,8 @@ const createChat = async (participants, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Chat creation failed",
+                status: error.status,
+                message: error.message,
                 chatId: null,
             };
         });

@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 const addFriendsToChat = async (chatId, participants, abortController) => {
     const data = await fetch(
@@ -22,9 +23,7 @@ const addFriendsToChat = async (chatId, participants, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             let chatId = null;
             if (
@@ -43,8 +42,8 @@ const addFriendsToChat = async (chatId, participants, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Adding friends to chat failed",
+                status: error.status,
+                message: error.message,
                 chatId: null,
             };
         });

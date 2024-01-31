@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 const getFriendCanBeAdded = async (username, abortController) => {
     const data = await fetch(
@@ -20,9 +21,7 @@ const getFriendCanBeAdded = async (username, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             let friend = null;
             if (
@@ -50,8 +49,8 @@ const getFriendCanBeAdded = async (username, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Finding if friend can be added failed",
+                status: error.status,
+                message: error.message,
                 friend: null,
             };
         });

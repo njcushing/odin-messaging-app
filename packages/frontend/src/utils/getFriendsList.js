@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 const getFriendsList = async ([first, last], abortController) => {
     const data = await fetch(
@@ -21,9 +22,7 @@ const getFriendsList = async ([first, last], abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             let friends = [];
             if (
@@ -42,8 +41,8 @@ const getFriendsList = async ([first, last], abortController) => {
         })
         .catch(async (error) => {
             return {
-                status: 500,
-                message: "Requesting friends list failed",
+                status: error.status,
+                message: error.message,
                 friends: [],
             };
         });

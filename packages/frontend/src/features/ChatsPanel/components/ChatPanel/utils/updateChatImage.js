@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 const updateChatImage = async (value, abortController, args) => {
     const [chatId] = args;
@@ -24,9 +25,7 @@ const updateChatImage = async (value, abortController, args) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             return {
                 status: responseJSON.status,
@@ -35,8 +34,8 @@ const updateChatImage = async (value, abortController, args) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Updating chat image failed.",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;
