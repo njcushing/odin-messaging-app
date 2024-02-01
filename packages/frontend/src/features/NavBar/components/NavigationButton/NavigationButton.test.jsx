@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import {render, screen} from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom";
@@ -23,6 +23,7 @@ describe("UI/DOM Testing...", () => {
             const button = screen.getByRole("link", { name: /Example/i });
 
             await user.click(button);
+            fireEvent.mouseLeave(button);
 
             expect(callback).toHaveBeenCalled();
         });
