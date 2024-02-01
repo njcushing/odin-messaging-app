@@ -1,28 +1,35 @@
-const combineParticipantNames = (names, maxNames) => {
+const combineParticipantNames = (names, maxNames = 3) => {
     if (!Array.isArray(names)) return "";
     if (names.length === 0) return "";
     let combined = "";
-    for (let i = 0; i < Math.min(maxNames, names.length); i++) {
-        if (typeof names[i] !== "string") continue;
-        if (combined === "") {
-            combined = names[i];
+    let namesFiltered = names.filter((name) => {
+        return typeof name === "string" && name.length > 0;
+    });
+    if (maxNames === 0 && namesFiltered.length > 0) {
+        return `${namesFiltered.length} participant${
+            namesFiltered.length === 1 ? "" : "s"
+        }`;
+    }
+    for (let i = 0; i < Math.min(maxNames, namesFiltered.length); i++) {
+        if (i === namesFiltered.length - 1) {
+            combined =
+                combined + `${combined !== "" ? " & " : ""}${namesFiltered[i]}`;
             continue;
         }
-        if (i === names.length - 1) {
-            combined = combined + ` & ${names[i]}`;
-            break;
-        }
-        combined = combined + `, ${names[i]}`;
+        combined =
+            combined + `${combined !== "" ? ", " : ""}${namesFiltered[i]}`;
         if (i === maxNames - 1) {
-            const remainingNamesCount = names.length - 1 - i;
-            combined =
-                combined +
-                ` & ${remainingNamesCount}
-                other${remainingNamesCount === 1 ? "" : "s"}`;
-            break;
+            const nameCountRemaining = namesFiltered.length - 1 - i;
+            if (nameCountRemaining > 0) {
+                combined =
+                    combined +
+                    ` & ${nameCountRemaining} other${
+                        nameCountRemaining === 1 ? "" : "s"
+                    }`;
+            }
+            continue;
         }
     }
-    if (combined === "") return "Chat";
     return combined;
 };
 
