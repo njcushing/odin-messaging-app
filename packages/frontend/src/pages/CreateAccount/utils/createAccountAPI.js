@@ -20,8 +20,8 @@ const createAccountAPI = async (credentials) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Account creation attempt failed",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;
