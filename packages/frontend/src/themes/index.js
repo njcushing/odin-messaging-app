@@ -12,11 +12,13 @@ export const options = () => {
 };
 
 export const optionNames = () => {
-    return options().map((option) => option.name);
+    const optionsInfo = options();
+    return optionsInfo.map((option) => option.name);
 };
 
 export const setTheme = (theme) => {
-    const root = document.querySelector(":root");
-    if (root === null) return;
-    if (optionNames().includes(theme)) root.setAttribute("theme", theme);
+    if (optionNames().includes(theme)) {
+        const root = document.querySelector(":root");
+        root.setAttribute("theme", theme);
+    }
 };
