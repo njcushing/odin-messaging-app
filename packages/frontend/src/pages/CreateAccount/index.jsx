@@ -3,6 +3,7 @@ import styles from "./index.module.css";
 
 import createAccountAPI from "./utils/createAccountAPI";
 import { username, email, password } from "../../../../../utils/validateUserFields";
+import redirectUserToLogin from "@/utils/redirectUserToLogin";
 
 const CreateAccount = () => {
     const [usernameError, setUsernameError] = useState(null);
@@ -238,7 +239,7 @@ const CreateAccount = () => {
                             className={styles["return-to-log-in-button"]}
                             aria-label="return-to-log-in"
                             onClick={(e) => {
-                                window.location.href = "/log-in"
+                                redirectUserToLogin();
                                 e.currentTarget.blur();
                                 e.preventDefault();
                             }}
