@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
@@ -152,11 +152,16 @@ describe("UI/DOM Testing...", () => {
             username.mockReturnValueOnce({
                 status: false,
                 message: "Invalid Username",
-            })
+            });
+            password.mockReturnValueOnce({
+                status: false,
+                message: "Invalid Password",
+            });
             await renderComponent();
 
             const logInButton = screen.getByRole("button", { name: "log-in-button" });
             await user.click(logInButton);
+            fireEvent.mouseLeave(logInButton);
             expect(logInAPISpy).toHaveBeenCalledTimes(0);
         });
         test(`When clicked, should invoke the 'logInAPI' function if both the
@@ -168,6 +173,39 @@ describe("UI/DOM Testing...", () => {
             const logInButton = screen.getByRole("button", { name: "log-in-button" });
             await user.click(logInButton);
             expect(logInAPISpy).toHaveBeenCalledTimes(1);
+        });
+    });
+    describe("When receiving a response from the 'logInAPI' function...", () => {
+        test(`If the response has a status of >= 400, the username used in the
+         attempt should be retained in the input`, async () => {
+            const user = userEvent.setup();
+            username.mockReturnValueOnce({
+                status: true,
+                message: "Valid Username",
+            }).mockReturnValueOnce({
+                status: true,
+                message: "Valid Username",
+            });
+            password.mockReturnValueOnce({
+                status: true,
+                message: "Valid Password",
+            });
+
+            logInAPIMock.mockReturnValueOnce({
+                status: 400,
+                message: "Bad data",
+            });
+
+            await renderComponent();
+
+            let usernameInput = screen.getByRole("textbox", { name: "username-input" });
+            await user.type(usernameInput, "a");
+            usernameInput = screen.getByRole("textbox", { name: "username-input" });
+
+            const logInButton = screen.getByRole("button", { name: "log-in-button" });
+            await user.click(logInButton);
+
+            expect(usernameInput.value).toBe("a");
         });
     });
     describe("The 'Create Account' message...", () => {
@@ -182,6 +220,16 @@ describe("UI/DOM Testing...", () => {
             await renderComponent();
             const createAccountButton = screen.getByRole("button", { name: "create-account-button" });
             expect(createAccountButton).toBeInTheDocument();
+        });
+        test(`When clicked, should redirect the user to the /create-account
+         route`, async () => {
+            const user = userEvent.setup();
+            await renderComponent();
+            const createAccountButton = screen.getByRole("button", { name: "create-account-button" });
+            expect(window.location.href).not.toBe("/create-account");
+            await user.click(createAccountButton);
+            fireEvent.mouseLeave(createAccountButton);
+            expect(window.location.href).toBe("/create-account");
         });
     });
     describe("The log in error...", () => {
