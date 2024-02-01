@@ -13,7 +13,7 @@ const FriendRequest = ({
     onSuccessHandler,
 }) => {
     const [requesting, setRequesting] = useState("");
-    const [abortController, setAbortController] = useState(null);
+    const [abortController, setAbortController] = useState(new AbortController());
     const [responseMessage, setResponseMessage] = useState(null);
 
     useEffect(() => {
@@ -53,14 +53,6 @@ const FriendRequest = ({
         <div
             className={styles["container"]}
             aria-label="friend-request"
-            tabIndex={0}
-            onClick={(e) => {
-                e.currentTarget.blur();
-                e.preventDefault();
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.blur();
-            }}
         >   
             {(requesting !== "accept" && requesting !== "decline")
             ?   <>

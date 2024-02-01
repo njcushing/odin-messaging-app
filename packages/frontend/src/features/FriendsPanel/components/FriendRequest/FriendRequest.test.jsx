@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
@@ -116,6 +116,7 @@ describe("UI/DOM Testing...", () => {
             const user = userEvent.setup();
             await act(async () => { await renderComponent() });
             const acceptButton = screen.getByRole("button", { name: "accept-friend-request-button" });
+            fireEvent.mouseLeave(acceptButton);
             await user.click(acceptButton);
             expect(acceptButton).not.toBeInTheDocument();
         });
@@ -163,6 +164,7 @@ describe("UI/DOM Testing...", () => {
             const user = userEvent.setup();
             await act(async () => { await renderComponent() });
             const declineButton = screen.getByRole("button", { name: "decline-friend-request-button" });
+            fireEvent.mouseLeave(declineButton);
             await user.click(declineButton);
             expect(declineButton).not.toBeInTheDocument();
         });
