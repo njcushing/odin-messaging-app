@@ -14,7 +14,7 @@ const AddFriendPanel = ({
     onSuccessHandler,
 }) => {
     const [searchUsername, setSearchUsername] = useState("");
-    const [abortController, setAbortController] = useState(null);
+    const [abortController, setAbortController] = useState(new AbortController());
     const [resultFound, setResultFound] = useState(null);
     const [responseMessage, setResponseMessage] = useState(null);
     const [addingFriend, setAddingFriend] = useState(false);
@@ -27,7 +27,7 @@ const AddFriendPanel = ({
             (async () => {
                 const response = await getFriendCanBeAdded(searchUsername, abortControllerNew);
                 setResultFound(response.friend);
-                if (response.friend === null && response.status === 400) {
+                if (response.status >= 400) {
                     setResponseMessage(response.message);
                 } else {
                     setResponseMessage(null);

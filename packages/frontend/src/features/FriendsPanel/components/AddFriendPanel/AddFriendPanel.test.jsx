@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
@@ -154,6 +154,7 @@ describe("UI/DOM Testing...", () => {
             const nameInput = screen.getByRole("textbox", { name: "friend-name-input" });
             await user.type(nameInput, "a");
             const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
+            fireEvent.mouseLeave(addFriendButton);
             await user.click(addFriendButton);
             expect(addFriendSpy).toHaveBeenCalled();
         });
@@ -174,6 +175,27 @@ describe("UI/DOM Testing...", () => {
         });
     });
     describe("The response message...", () => {
+        test(`Should not be in the document by default`, async () => {
+            await renderComponent();
+            const responseMessage = screen.queryByRole("heading", { name: "response-message" });
+            expect(responseMessage).toBeNull();
+        });
+        test(`Should be displayed if the status code of the response object returned
+         by the 'getFriendCanBeAdded' API function is >= 400`, async () => {
+            const user = userEvent.setup();
+            await renderComponent();
+
+            getFriendCanBeAdded.mockReturnValueOnce({
+                status: 400,
+                message: "Bad data",
+                friend: null,
+            });
+
+            const nameInput = screen.getByRole("textbox", { name: "friend-name-input" });
+            await user.type(nameInput, "a");
+            const responseMessage = screen.getByRole("heading", { name: "response-message" });
+            expect(responseMessage).toBeInTheDocument();
+        });
         test(`Should be displayed if after the 'Add Friend' button has been
          clicked and therefore the 'addFriend' API function has been invoked and
          has returned the response`, async () => {
