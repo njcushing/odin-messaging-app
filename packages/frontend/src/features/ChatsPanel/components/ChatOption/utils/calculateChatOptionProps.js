@@ -1,28 +1,26 @@
-import ProfileImage from "@/components/ProfileImage";
-
 import combineParticipantNames from "../../../utils/combineParticipantNames.js";
 import * as extractImage from "@/utils/extractImage.js";
 
-export const defaultProps = {
+export const defaultProps = () => ({
     name: "",
     recentMessage: null,
     status: null,
     image: {
         src: new Uint8Array([]),
         alt: "",
-        status: null,
     },
-};
+});
 
 const statusHeirarchy = {
-    online: 3,
-    away: 2,
-    busy: 1,
-    offline: 0,
+    online: 4,
+    away: 3,
+    busy: 2,
+    offline: 1,
+    null: 0,
 };
 
 export const calculateProps = (chat, userId) => {
-    const chatProps = { ...defaultProps };
+    const chatProps = { ...defaultProps() };
 
     const message = chat.messages.length > 0 ? chat.messages[0] : null;
     const participantNames = [];
@@ -33,7 +31,7 @@ export const calculateProps = (chat, userId) => {
         const participant = chat.participants[j];
         const user = participant.user;
 
-        if (user.status > statusHeirarchy[chatProps.status]) {
+        if (statusHeirarchy[user.status] > statusHeirarchy[chatProps.status]) {
             chatProps.status = user.status;
         }
 
@@ -45,8 +43,7 @@ export const calculateProps = (chat, userId) => {
         } else {
             name = user.username;
         }
-        if (userId && user._id.toString() === userId.toString()) {
-        } else {
+        if (userId && user._id.toString() !== userId.toString()) {
             participantNames.push(name);
         }
 
@@ -69,7 +66,7 @@ export const calculateProps = (chat, userId) => {
         }
     }
 
-    if (chatProps.name.length !== 0) {
+    if (chat.name.length !== 0) {
         chatProps.name = chat.name;
     } else {
         chatProps.name = combineParticipantNames(participantNames, 3);
