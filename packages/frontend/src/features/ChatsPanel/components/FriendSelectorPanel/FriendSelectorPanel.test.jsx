@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
@@ -48,6 +48,7 @@ vi.mock('@/components/ProfileImage', () => ({
     default: ({
         src,
         alt,
+        status,
         sizePx,
     }) => {
         return (<div aria-label="profile-image"></div>);
@@ -73,7 +74,7 @@ const friendsList = [
             _id: 1,
             username: "Friend 2",
             preferences: {
-                displayName: "Friend 2",
+                displayName: "",
                 tagLine: "Friend 2 tagline",
             },
             status: "online",
@@ -86,7 +87,7 @@ const friendsList = [
             _id: 2,
             username: "Friend 3",
             preferences: {
-                displayName: "Friend 3",
+                displayName: "",
                 tagLine: "Friend 3 tagline",
             },
             status: "online",
@@ -167,7 +168,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [friendsList[0]],
+                friends: [friendsList[1]],
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
@@ -199,6 +200,7 @@ describe("UI/DOM Testing...", () => {
             const addButton = screen.getByRole("button", { name: "add-button" });
             await user.click(addButton);
             const removeButton = screen.getByRole("button", { name: "remove-button" });
+            fireEvent.mouseLeave(removeButton);
             await user.click(removeButton);
             const friendSelected = screen.queryByRole("listitem", { name: "friend-selected" });
             expect(friendSelected).toBeNull();
@@ -257,6 +259,34 @@ describe("UI/DOM Testing...", () => {
             expect(friend).not.toBeInTheDocument();
         });
     });
+    describe("The 'Load More' button...", () => {
+        test(`Should be present in the document`, async () => {
+            await renderComponent();
+            const loadMoreButton = screen.getByRole("button", { name: "load-more" });
+            expect(loadMoreButton).toBeInTheDocument();
+        });
+        test(`Should, when clicked, attempt to append more friends to the end
+         of the friends list`, async () => {
+            const user = userEvent.setup();
+            getFriendsList.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [friendsList[0]],
+            }).mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [friendsList[1]],
+            });
+            await renderComponent();
+            const friendsBefore = screen.getAllByRole("listitem", { name: "friend" });
+            expect(friendsBefore.length).toBe(1);
+            const loadMoreButton = screen.getByRole("button", { name: "load-more" });
+            fireEvent.mouseLeave(loadMoreButton);
+            await user.click(loadMoreButton);
+            const friendsAfter = screen.getAllByRole("listitem", { name: "friend" });
+            expect(friendsAfter.length).toBe(2);
+        });
+    });
     describe("The information element for each friend...", () => {
         test(`Should be present in the document if friends are returned by the
          'getFriendsList' function`, async () => {
@@ -303,12 +333,13 @@ describe("UI/DOM Testing...", () => {
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
+            fireEvent.mouseLeave(addButton);
             await user.click(addButton);
             const friendSelected = screen.getByRole("listitem", { name: "friend-selected" });
             expect(friendSelected).toBeInTheDocument();
         });
     });
-    describe("The 'Create Group' button...", () => {
+    describe("The 'Submit' button...", () => {
         test(`Should not be present in the document if there are currently no
          friends in the list of friends being added to the group`, async () => {
             await renderComponent();
@@ -342,6 +373,7 @@ describe("UI/DOM Testing...", () => {
             const addButtons = screen.getAllByRole("button", { name: "add-button" });
             await user.click(addButtons[0]);
             const submitButton = screen.getByRole("button", { name: "submit-button" });
+            fireEvent.mouseLeave(submitButton);
             await user.click(submitButton);
             expect(callback).toHaveBeenCalledTimes(1);
         });
