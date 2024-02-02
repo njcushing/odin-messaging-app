@@ -13,7 +13,7 @@ const renderComponent = (
     status = null,
     sizePx = 50,
 ) => {
-    render(<ProfileImage
+    return render(<ProfileImage
         src={src}
         alt={alt}
         status={status}
@@ -24,6 +24,20 @@ const renderComponent = (
 global.URL.createObjectURL = vi.fn(() => 'image');
 
 describe("UI/DOM Testing...", () => {
+    describe("The 'src' prop...", () => {
+        test(`When specified, should throw an error if the value isn't a Typed
+         Array`, () => {
+            const consoleErrorSpy = vi.spyOn(console, "error");
+            consoleErrorSpy.mockReturnValueOnce(); // suppress console error
+            renderComponent("");
+            expect(consoleErrorSpy).toHaveBeenCalled();
+
+            consoleErrorSpy.mockClear();
+
+            renderComponent();
+            expect(consoleErrorSpy).not.toHaveBeenCalled();
+        });
+    });
     describe("The <img> element...", () => {
         test(`Should have a 'alt' attribute with a value equal to the provided
          'imageAlt' prop's value`, () => {
