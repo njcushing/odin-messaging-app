@@ -124,7 +124,7 @@ const Message = ({
                     widthPx={30}
                     heightPx={30}
                     fontSizePx={16}
-                    borderStyle="circular"
+                    borderType="circular"
                     onClickHandler={(e) => { onReplyToHandler(e); }}
                 />
             </div>

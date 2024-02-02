@@ -174,7 +174,7 @@ const ChatsPanel = ({
                             widthPx={50}
                             heightPx={50}
                             fontSizePx={24}
-                            borderStyle="circular"
+                            borderType="circular"
                             onClickHandler={() => {
                                 if (!creatingChat.attempting) {
                                     setCreatingChat({

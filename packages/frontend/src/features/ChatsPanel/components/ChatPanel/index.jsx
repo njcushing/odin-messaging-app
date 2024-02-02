@@ -577,7 +577,7 @@ const ChatPanel = ({
                                 widthPx={44}
                                 heightPx={44}
                                 fontSizePx={22}
-                                borderStyle="circular"
+                                borderType="circular"
                                 onClickHandler={() => switchPanel("addingFriends")}
                             />
                             <OptionButton
@@ -587,7 +587,7 @@ const ChatPanel = ({
                                 widthPx={44}
                                 heightPx={44}
                                 fontSizePx={22}
-                                borderStyle="circular"
+                                borderType="circular"
                                 onClickHandler={() => {}}
                             />
                             <OptionButton
@@ -597,7 +597,7 @@ const ChatPanel = ({
                                 widthPx={44}
                                 heightPx={44}
                                 fontSizePx={22}
-                                borderStyle="circular"
+                                borderType="circular"
                                 onClickHandler={() => {}}
                             />
                         </ul>
