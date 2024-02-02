@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
@@ -68,6 +68,7 @@ describe("UI/DOM Testing...", () => {
             await renderComponent(null, callback);
             const container = screen.getByRole("generic", { name: "chat-option" });
 
+            fireEvent.mouseLeave(container);
             await user.click(container);
 
             expect(callback).toHaveBeenCalled();
