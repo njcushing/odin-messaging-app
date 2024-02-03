@@ -1,11 +1,14 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
 import FriendsPanel from './index.jsx'
+
+import * as getFriendsList from "@/utils/getFriendsList.js";
+import * as getFriendRequests from "./utils/getFriendRequests.js";
 
 // For 'Not implemented: navigation' error 
 let assignMock = vi.fn();
@@ -26,15 +29,21 @@ const renderComponent = async (
 vi.mock('@/components/OptionButton', () => ({ 
     default: ({
         text,
+        label,
         tooltipText,
         tooltipPosition,
         widthPx,
         heightPx,
         fontSizePx,
-        borderStyle,
+        borderType,
         onClickHandler,
     }) => {
-        return (<></>);
+        return (
+            <button
+                aria-label={label}
+                onClick={() => onClickHandler()}
+            ></button>
+        );
     }
 }));
 
@@ -54,11 +63,15 @@ vi.mock('./components/Friend', () => ({
 vi.mock('./components/FriendRequest', () => ({ 
     default: ({
         username,
-        imageSrc,
-        imageAlt,
+        profileImage,
         onSuccessHandler,
     }) => {
-        return (<></>);
+        return (
+            <button
+                aria-label="friend-request-mock-success-button"
+                onClick={() => onSuccessHandler()}
+            ></button>
+        );
     }
 }));
 
@@ -67,7 +80,20 @@ vi.mock('./components/AddFriendPanel', () => ({
         onCloseHandler,
         onSuccessHandler,
     }) => {
-        return (<div aria-label="add-friend-panel"></div>);
+        return (
+            <div
+                aria-label="add-friend-panel-mock"
+            >
+                <button
+                    aria-label="add-friend-panel-mock-close-button"
+                    onClick={() => onCloseHandler()}
+                ></button>
+                <button
+                    aria-label="add-friend-panel-mock-success-button"
+                    onClick={() => onSuccessHandler("Friend 4")}
+                ></button>
+            </div>
+        );
     }
 }));
 
@@ -97,7 +123,7 @@ const friendsList = [
             _id: 1,
             username: "Friend 2",
             preferences: {
-                displayName: "Friend 2",
+                displayName: "",
                 tagLine: "Friend 2 tagline",
                 profileImage: {
                     img: {
@@ -133,7 +159,7 @@ const friendsList = [
         },
     },
 ]
-const getFriendsList = vi.fn(() => {
+const getFriendsListMock = vi.fn(() => {
     return {
         status: 200,
         message: "Found",
@@ -141,7 +167,7 @@ const getFriendsList = vi.fn(() => {
     }
 });
 vi.mock('@/utils/getFriendsList', async () => ({
-    default: () => getFriendsList(),
+    default: () => getFriendsListMock(),
 }));
 
 const friendRequests = [
@@ -157,7 +183,6 @@ const friendRequests = [
                 }
             },
         },
-        onSuccessHandler: () => {},
     },
     {
         _id: 4,
@@ -171,7 +196,6 @@ const friendRequests = [
                 }
             },
         },
-        onSuccessHandler: () => {},
     },
     {
         _id: 5,
@@ -185,10 +209,9 @@ const friendRequests = [
                 }
             },
         },
-        onSuccessHandler: () => {},
     },
 ];
-const getFriendRequests = vi.fn(() => {
+const getFriendRequestsMock = vi.fn(() => {
     return {
         status: 200,
         message: "Found",
@@ -196,7 +219,7 @@ const getFriendRequests = vi.fn(() => {
     }
 });
 vi.mock('./utils/getFriendRequests', async () => ({
-    default: () => getFriendRequests(),
+    default: () => getFriendRequestsMock(),
 }));
 
 describe("UI/DOM Testing...", () => {
@@ -210,15 +233,55 @@ describe("UI/DOM Testing...", () => {
     describe("The 'Add Friend' button...", () => {
         test(`Should be present in the document`, async () => {
             await act(async () => { await renderComponent() });
-            const addFriendButton = screen.getByRole("listitem", { name: "add-friend-button" });
+            const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
             expect(addFriendButton).toBeInTheDocument();
+        });
+        test(`When clicked, should open/close the 'AddFriendPanel' component`, async () => {
+            const user = userEvent.setup();
+            await act(async () => { await renderComponent("friends", false); });
+
+            const addFriendPanelBefore = screen.queryByRole("generic", { name: "add-friend-panel-mock" });
+            expect(addFriendPanelBefore).toBeNull();
+
+            const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
+            await user.click(addFriendButton);
+
+            const addFriendPanelAfter = screen.getByRole("generic", { name: "add-friend-panel-mock" });
+            expect(addFriendPanelAfter).toBeInTheDocument();
         });
     });
     describe("The 'View Friend Requests'/'View Friends' button...", () => {
         test(`Should be present in the document`, async () => {
             await act(async () => { await renderComponent() });
-            const listViewingButton = screen.getByRole("listitem", { name: "list-viewing-button" });
+            const listViewingButton = screen.getByRole("button", { name: "list-viewing-button" });
             expect(listViewingButton).toBeInTheDocument();
+        });
+        test(`When clicked, should toggle the list being viewed between
+         'friends' and 'requests'`, async () => {
+            const user = userEvent.setup();
+            await act(async () => { await renderComponent("friends") });
+            let friendsList;
+            let friendRequestsList;
+            const listViewingButton = screen.getByRole("button", { name: "list-viewing-button" });
+
+            friendsList = screen.getByRole("list", { name: "friends-list" });
+            expect(friendsList).toBeInTheDocument();
+            friendRequestsList = screen.queryByRole("list", { name: "friend-requests-list" });
+            expect(friendRequestsList).toBeNull();
+
+            await user.click(listViewingButton);
+
+            friendsList = screen.queryByRole("list", { name: "friends-list" });
+            expect(friendsList).toBeNull();
+            friendRequestsList = screen.getByRole("list", { name: "friend-requests-list" });
+            expect(friendRequestsList).toBeInTheDocument();
+
+            await user.click(listViewingButton);
+
+            friendsList = screen.getByRole("list", { name: "friends-list" });
+            expect(friendsList).toBeInTheDocument();
+            friendRequestsList = screen.queryByRole("list", { name: "friend-requests-list" });
+            expect(friendRequestsList).toBeNull();
         });
     });
     describe("The friends list...", () => {
@@ -250,29 +313,91 @@ describe("UI/DOM Testing...", () => {
         });
         test(`Should be present in the document if the 'defaultList' prop value
             is equal to "friends"`, async () => {
-                await act(async () => { await renderComponent("friends") });
+            await act(async () => { await renderComponent("friends") });
             const friendRequestsList = screen.queryByRole("list", { name: "friend-requests-list" });
             expect(friendRequestsList).toBeNull();
         });
         test(`Should have as many 'FriendRequest' component children as there are
          friends returned by the 'getFriendRequests' API function`, async () => {
             await act(async () => { await renderComponent("requests") });
-            const FriendRequests = screen.getAllByRole("listitem", { name: "friend-request" });
-            expect(FriendRequests.length).toBe(friendRequests.length);
+            const friendRequestOptions = screen.getAllByRole("listitem", { name: "friend-request" });
+            expect(friendRequestOptions.length).toBe(friendRequests.length);
+        });
+    });
+    describe("The friend request options...", () => {
+        test(`Should, when their 'onSuccessHandler' callback functions are
+         invoked, be removed from the friend requests list`, async () => {
+            const user = userEvent.setup();
+            await act(async () => { await renderComponent("requests") });
+            const friendRequestOptionsBefore = screen.getAllByRole("listitem", { name: "friend-request" });
+            expect(friendRequestOptionsBefore.length).toBe(friendRequests.length);
+            const friendRequestSuccessButtons = screen.getAllByRole("button", { name: "friend-request-mock-success-button" });
+            await user.click(friendRequestSuccessButtons[0]);
+            const friendRequestOptionsAfter = screen.getAllByRole("listitem", { name: "friend-request" });
+            expect(friendRequestOptionsAfter.length).toBe(friendRequests.length - 1);
+        });
+    });
+    describe("The 'Load More' button...", () => {
+        test(`Should be present in the document`, async () => {
+            await act(async () => { await renderComponent() });
+            const loadMoreButton = screen.getByRole("button", { name: "load-more" });
+            expect(loadMoreButton).toBeInTheDocument();
+        });
+        test(`Should, when clicked, attempt to append more friends to the end of
+         the friends list (when the list currently being viewed is "friends")`, async () => {
+            const getFriendsListSpy = vi.spyOn(getFriendsList, "default");
+            const user = userEvent.setup();
+            await act(async () => { await renderComponent("friends") });
+            getFriendsListMock.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friends: [],
+            });
+            const loadMoreButton = screen.getByRole("button", { name: "load-more" });
+            fireEvent.mouseLeave(loadMoreButton);
+            await user.click(loadMoreButton);
+            expect(getFriendsListSpy).toHaveBeenCalled(2);
+        });
+        test(`Should, when clicked, attempt to append more friends to the end of
+         the friends list (when the list currently being viewed is "friends")`, async () => {
+            const getFriendRequestsSpy = vi.spyOn(getFriendRequests, "default");
+            const user = userEvent.setup();
+            await act(async () => { await renderComponent("requests") });
+            getFriendRequestsMock.mockReturnValueOnce({
+                status: 200,
+                message: "Found",
+                friendRequests: [],
+            });
+            const loadMoreButton = screen.getByRole("button", { name: "load-more" });
+            fireEvent.mouseLeave(loadMoreButton);
+            await user.click(loadMoreButton);
+            expect(getFriendRequestsSpy).toHaveBeenCalled(2);
         });
     });
     describe("The 'AddFriendPanel' component...", () => {
         test(`Should be present in the document if the 'addingFriendDefault'
          prop value is equal to 'true'`, async () => {
             await act(async () => { await renderComponent("friends", true) });
-            const addFriendPanel = screen.getByRole("generic", { name: "add-friend-panel" });
+            const addFriendPanel = screen.getByRole("generic", { name: "add-friend-panel-mock" });
             expect(addFriendPanel).toBeInTheDocument();
         });
         test(`Should not be present in the document if the 'addingFriendDefault'
          prop value is equal to 'false'`, async () => {
             await act(async () => { await renderComponent("friends", false) });
-            const addFriendPanel = screen.queryByRole("generic", { name: "add-friend-panel" });
+            const addFriendPanel = screen.queryByRole("generic", { name: "add-friend-panel-mock" });
             expect(addFriendPanel).toBeNull();
+        });
+        test(`Should remove a user from the friend requests list if it is on
+         that list and the panels 'onSuccessHandler' callback function is
+         invoked`, async () => {
+            const user = userEvent.setup();
+            await act(async () => { await renderComponent("requests", true) });
+            const friendRequestOptionsBefore = screen.getAllByRole("listitem", { name: "friend-request" });
+            expect(friendRequestOptionsBefore.length).toBe(friendRequests.length);
+            const addFriendPanelSuccessButton = screen.getByRole("button", { name: "add-friend-panel-mock-success-button" });
+            await user.click(addFriendPanelSuccessButton);
+            const friendRequestOptionsAfter = screen.getAllByRole("listitem", { name: "friend-request" });
+            expect(friendRequestOptionsAfter.length).toBe(friendRequests.length - 1);
         });
     });
 });
