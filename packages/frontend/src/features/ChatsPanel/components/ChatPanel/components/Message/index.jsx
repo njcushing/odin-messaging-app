@@ -20,26 +20,6 @@ const Message = ({
     replyingTo,
     onReplyToHandler,
 }) => {
-    const wrapperStyleRules = {
-        justifyContent: position === "left" ? "start" : "end",
-    }
-    const messageTextContainerStyleRules = {
-        alignSelf: position === "left" ? "start" : "end",
-        backgroundColor: position === "left" ? "rgb(4, 187, 28)" : "rgb(4, 98, 187)",
-        borderBottomLeftRadius: position === "right" ? "12px" : "0px",
-        borderBottomRightRadius: position === "left" ? "12px" : "0px",
-    }
-    const profileImageStyleRules = {
-        gridArea: position === "left" ? "1 / 1 / -1 / 2" : "1 / 3 / -1 / -1",
-    }
-    const replyButtonStyleRules = {
-        gridArea: position === "left" ? "1 / 3 / 2 / -1" : "1 / 1 / 2 / 2",
-    }
-    const nameAndDateStringStyleRules = {
-        justifyContent: position === "left" ? "start" : "end",
-        gridArea: position === "left" ? "2 / 2 / -1 / -1" : "2 / 1 / -1 / 3",
-    }
-
     let imageSrc = null;
     if (image && image.constructor === Object) {
         if (validateTypedArray(image.src)) {
@@ -86,12 +66,12 @@ const Message = ({
     return (
         <div
             className={styles["wrapper"]}
-            style={{ ...wrapperStyleRules }}
+            position={position}
         >
         <div className={styles["container"]}>
             <div
                 className={styles["profile-image"]}
-                style={{ ...profileImageStyleRules }}
+                position={position}
             >
                 <ProfileImage
                     src={profileImage.src}
@@ -102,7 +82,7 @@ const Message = ({
             </div>
             <div
                 className={styles["message-container"]}
-                style={{ ...messageTextContainerStyleRules }}
+                position={position}
             >
                 {text.length > 0
                 ?   <p
@@ -126,7 +106,7 @@ const Message = ({
             </div>
             <div
                 className={styles["option-button"]}
-                style={{ ...replyButtonStyleRules }}
+                position={position}
             >
                 <OptionButton
                     text="reply"
@@ -142,7 +122,7 @@ const Message = ({
             <p
                 className={styles["name-and-date-string"]}
                 aria-label="author-and-date"
-                style={{ ...nameAndDateStringStyleRules }}
+                position={position}
             >
                 {`${name} at ${formatDate(dateSent)}`}
             </p>
