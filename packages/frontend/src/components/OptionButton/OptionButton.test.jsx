@@ -9,6 +9,7 @@ import OptionButton from './index.jsx'
 
 const renderComponent = (
     text = "Button",
+    label = "option-button",
     tooltipText = "tooltip",
     tooltipPosition = "bottom",
     widthPx = 50,
@@ -19,6 +20,7 @@ const renderComponent = (
 ) => {
     render(<OptionButton
         text={text}
+        label={label}
         tooltipText={tooltipText}
         tooltipPosition={tooltipPosition}
         widthPx={widthPx}
