@@ -32,7 +32,7 @@ export const displayName = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
             };
         });
@@ -70,7 +70,7 @@ export const tagLine = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
             };
         });
@@ -108,7 +108,7 @@ export const status = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
             };
         });
@@ -146,7 +146,7 @@ export const profileImage = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
             };
         });
@@ -184,7 +184,7 @@ export const theme = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
             };
         });
