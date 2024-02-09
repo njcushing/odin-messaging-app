@@ -633,7 +633,7 @@ export const friendsPost = [
                     throw error;
                 }
 
-                session.commitTransaction();
+                await session.commitTransaction();
             } catch (error) {
                 return sendResponse(
                     res,
@@ -787,7 +787,7 @@ export const friendRequestsAccept = [
                 throw error;
             }
 
-            session.commitTransaction();
+            await session.commitTransaction();
         } catch (error) {
             return sendResponse(
                 res,
@@ -1021,7 +1021,7 @@ export const profileImagePut = [
                 return selfNotFound(res, next, req.user._id);
             }
 
-            session.commitTransaction();
+            await session.commitTransaction();
         } catch (error) {
             return sendResponse(
                 res,
