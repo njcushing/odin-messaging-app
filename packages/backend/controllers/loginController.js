@@ -17,8 +17,7 @@ const validateFields = [
             } else {
                 return value;
             }
-        })
-        .escape(),
+        }),
     body("password")
         .trim()
         .custom((value, { req, loc, path }) => {
@@ -28,8 +27,7 @@ const validateFields = [
             } else {
                 return value;
             }
-        })
-        .escape(),
+        }),
 ];
 
 export const loginPost = [
