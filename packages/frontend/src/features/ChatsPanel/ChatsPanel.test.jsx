@@ -14,10 +14,10 @@ window.location = { assign: assignMock };
 afterEach(() => { assignMock.mockClear(); });
 
 const renderComponent = async (
-    creatingChatDefault = false,
+    createChatPanelOpenDefault = false,
 ) => {
     act(() => render(<ChatsPanel
-        creatingChatDefault={creatingChatDefault}
+        createChatPanelOpenDefault={createChatPanelOpenDefault}
     />));
 }
 
@@ -142,14 +142,14 @@ describe("UI/DOM Testing...", () => {
         });
     });
     describe("The 'FriendSelectorPanel' component...", () => {
-        test(`Should be present in the document if the 'creatingChatDefault'
-         prop value is equal to 'true'`, async () => {
+        test(`Should be present in the document if the
+         'createChatPanelOpenDefault' prop value is equal to 'true'`, async () => {
             await act(async () => { await renderComponent(true) });
             const friendSelectorPanel = screen.getByRole("generic", { name: "friend-selector-panel" });
             expect(friendSelectorPanel).toBeInTheDocument();
         });
-        test(`Should not be present in the document if the 'creatingChatDefault'
-         prop value is equal to 'false'`, async () => {
+        test(`Should not be present in the document if the
+         'createChatPanelOpenDefault' prop value is equal to 'false'`, async () => {
             await act(async () => { await renderComponent(false) });
             const friendSelectorPanel = screen.queryByRole("generic", { name: "friend-selector-panel" });
             expect(friendSelectorPanel).toBeNull();

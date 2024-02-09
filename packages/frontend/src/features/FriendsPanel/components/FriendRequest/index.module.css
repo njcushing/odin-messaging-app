@@ -164,8 +164,8 @@
 .waiting-wheel {
     align-self: center;
 
-    border: 5px solid rgba(128, 128, 128, 0.9); /* Light grey */
-    border-top: 5px solid rgba(255, 255, 255, 0.9); /* Blue */
+    border: 5px solid rgba(128, 128, 128, 0.9);
+    border-top: 5px solid rgba(255, 255, 255, 0.9);
     border-radius: 50%;
 
     width: 30px;

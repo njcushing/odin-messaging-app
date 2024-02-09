@@ -19,6 +19,7 @@ const FriendsPanel = ({
     const [friendsListAC, setFriendsListAC] = useState(null);
     const [friendRequests, setFriendRequests] = useState([]);
     const [friendRequestsAC, setFriendRequestsAC] = useState(null);
+    const [gettingList, setGettingList] = useState(false);
     const [addingFriend, setAddingFriend] = useState(addingFriendDefault);
 
     useEffect(() => {
@@ -29,18 +30,22 @@ const FriendsPanel = ({
             case "friends":
                 const friendsListACNew = new AbortController();
                 setFriendsListAC(friendsListACNew);
+                setGettingList(true);
                 (async () => {
                     const response = await getFriendsList(friendsListACNew);
                     setFriendsList(response.friends);
+                    setGettingList(false);
                 })();
                 setFriendRequestsAC(null);
                 break;
             case "requests":
                 const friendRequestsACNew = new AbortController();
                 setFriendRequestsAC(friendRequestsACNew);
+                setGettingList(true);
                 (async () => {
                     const friendRequestsNew = await getFriendRequests(friendRequestsACNew);
                     setFriendRequests(friendRequestsNew.friendRequests);
+                    setGettingList(false);
                 })();
                 setFriendsListAC(null);
                 break;
@@ -176,7 +181,15 @@ const FriendsPanel = ({
                         />
                     </li>
                 </ul>
-                {optionsList}
+                {!gettingList
+                ?   optionsList
+                :   <div className={styles["waiting-wheel-container"]}>
+                        <div
+                            className={styles["waiting-wheel"]}
+                            aria-label="attempting-create-account"
+                        ></div>
+                    </div>
+                }
             </div>
             {addingFriend
             ?   <AddFriendPanel
