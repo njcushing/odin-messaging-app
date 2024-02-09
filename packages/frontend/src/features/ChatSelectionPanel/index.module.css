@@ -44,11 +44,11 @@
     flex-direction: column;
     gap: 0.4rem;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 
     list-style: none;
 
-    padding: 0.1rem 0.3rem 0.1rem 0.1rem;
+    padding: 0.1rem 0.3rem;
     margin: 0rem;
 }
 
