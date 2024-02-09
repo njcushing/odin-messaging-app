@@ -50,11 +50,12 @@ const initialiseMongoServer = async () => {
         users[index] = user;
     };
 
-    const newChat = async (index, _id, type, participants) => {
+    const newChat = async (index, _id, type, participants, imageId) => {
         const chat = new Chat({
             _id: _id,
             type: type,
             participants: participants,
+            image: imageId,
         });
         await chat.save();
         chats[index] = chat;
@@ -77,6 +78,7 @@ const initialiseMongoServer = async () => {
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
     ];
 
     const chatIds = [
@@ -89,6 +91,12 @@ const initialiseMongoServer = async () => {
     ];
 
     const imageIds = [
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
@@ -199,36 +207,90 @@ const initialiseMongoServer = async () => {
                 [mockChatId, chatIds[4]],
                 imageIds[4]
             ),
+            newUser(
+                5,
+                userIds[5],
+                "Person6",
+                "person6@company.com",
+                "person6*",
+                [
+                    {
+                        user: userIds[0],
+                        chat: null,
+                    },
+                    {
+                        user: userIds[1],
+                        chat: null,
+                    },
+                    {
+                        user: userIds[2],
+                        chat: null,
+                    },
+                    {
+                        user: userIds[3],
+                        chat: null,
+                    },
+                    {
+                        user: userIds[4],
+                        chat: null,
+                    },
+                ],
+                [],
+                [chatIds[5]],
+                imageIds[4]
+            ),
         ]);
     };
 
     const createChats = async () => {
         await Promise.all([
-            newChat(0, chatIds[0], "individual", [
-                { user: userIds[0] },
-                { user: userIds[1], muted: true },
-            ]),
-            newChat(1, chatIds[1], "individual", [
-                { user: userIds[1], role: "admin" },
-                { user: userIds[2] },
-            ]),
-            newChat(2, chatIds[2], "individual", [
-                { user: userIds[2] },
-                { user: userIds[3] },
-            ]),
-            newChat(3, chatIds[3], "individual", [
-                { user: userIds[3] },
-                { user: userIds[4] },
-            ]),
-            newChat(4, chatIds[4], "individual", [
-                { user: userIds[4] },
-                { user: userIds[0] },
-            ]),
-            newChat(5, chatIds[5], "group", [
-                { user: userIds[0] },
-                { user: userIds[1] },
-                { user: userIds[2] },
-            ]),
+            newChat(
+                0,
+                chatIds[0],
+                "individual",
+                [{ user: userIds[0] }, { user: userIds[1], muted: true }],
+                imageIds[5]
+            ),
+            newChat(
+                1,
+                chatIds[1],
+                "individual",
+                [{ user: userIds[1], role: "admin" }, { user: userIds[2] }],
+                imageIds[6]
+            ),
+            newChat(
+                2,
+                chatIds[2],
+                "individual",
+                [{ user: userIds[2] }, { user: userIds[3] }],
+                imageIds[7]
+            ),
+            newChat(
+                3,
+                chatIds[3],
+                "individual",
+                [{ user: userIds[3] }, { user: userIds[4] }],
+                imageIds[8]
+            ),
+            newChat(
+                4,
+                chatIds[4],
+                "individual",
+                [{ user: userIds[4] }, { user: userIds[0] }],
+                imageIds[9]
+            ),
+            newChat(
+                5,
+                chatIds[5],
+                "group",
+                [
+                    { user: userIds[0] },
+                    { user: userIds[1] },
+                    { user: userIds[2] },
+                    { user: userIds[5], role: "admin" },
+                ],
+                imageIds[10]
+            ),
         ]);
     };
 
@@ -239,6 +301,12 @@ const initialiseMongoServer = async () => {
             newImage(2, chatIds[2], "Image 3 Name", "Image 3 Text"),
             newImage(3, chatIds[3], "Image 4 Name", "Image 4 Text"),
             newImage(4, chatIds[4], "Image 5 Name", "Image 5 Text"),
+            newImage(5, chatIds[5], "Image 6 Name", "Image 6 Text"),
+            newImage(6, chatIds[6], "Image 7 Name", "Image 7 Text"),
+            newImage(7, chatIds[7], "Image 8 Name", "Image 8 Text"),
+            newImage(8, chatIds[8], "Image 9 Name", "Image 9 Text"),
+            newImage(9, chatIds[9], "Image 10 Name", "Image 10 Text"),
+            newImage(10, chatIds[10], "Image 11 Name", "Image 11 Text"),
         ]);
     };
 
