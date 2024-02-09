@@ -3,6 +3,7 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
+import Image from "../models/image.js";
 
 const initialiseMongoServer = async () => {
     // Create database and connect
@@ -32,7 +33,8 @@ const initialiseMongoServer = async () => {
         password,
         friends,
         friendRequests,
-        chats
+        chats,
+        profileImageId
     ) => {
         const user = new User({
             _id: _id,
@@ -42,7 +44,7 @@ const initialiseMongoServer = async () => {
             friends: friends,
             friendRequests: friendRequests,
             chats: chats,
-            "preferences.image": new ArrayBuffer(),
+            "preferences.profileImage": profileImageId,
         });
         await user.save();
         users[index] = user;
@@ -58,6 +60,17 @@ const initialiseMongoServer = async () => {
         chats[index] = chat;
     };
 
+    const newImage = async (index, _id, name, alt) => {
+        const image = new Image({
+            _id: _id,
+            name: name,
+            alt: alt,
+            img: new Uint8Array(),
+        });
+        await image.save();
+        images[index] = image;
+    };
+
     const userIds = [
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
@@ -68,6 +81,14 @@ const initialiseMongoServer = async () => {
 
     const chatIds = [
         new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
+    ];
+
+    const imageIds = [
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
@@ -95,7 +116,8 @@ const initialiseMongoServer = async () => {
                     },
                 ],
                 [userIds[2]],
-                [chatIds[4], chatIds[0], chatIds[5]]
+                [chatIds[4], chatIds[0], chatIds[5]],
+                imageIds[0]
             ),
             newUser(
                 1,
@@ -114,7 +136,8 @@ const initialiseMongoServer = async () => {
                     },
                 ],
                 [userIds[3]],
-                [chatIds[0], chatIds[1], chatIds[5]]
+                [chatIds[0], chatIds[1], chatIds[5]],
+                imageIds[1]
             ),
             newUser(
                 2,
@@ -133,7 +156,8 @@ const initialiseMongoServer = async () => {
                     },
                 ],
                 [userIds[4]],
-                [chatIds[1], chatIds[2], chatIds[5]]
+                [chatIds[1], chatIds[2], chatIds[5]],
+                imageIds[2]
             ),
             newUser(
                 3,
@@ -152,7 +176,8 @@ const initialiseMongoServer = async () => {
                     },
                 ],
                 [userIds[0]],
-                [chatIds[3]]
+                [chatIds[3]],
+                imageIds[3]
             ),
             newUser(
                 4,
@@ -171,7 +196,8 @@ const initialiseMongoServer = async () => {
                     },
                 ],
                 [userIds[1]],
-                [mockChatId, chatIds[4]]
+                [mockChatId, chatIds[4]],
+                imageIds[4]
             ),
         ]);
     };
@@ -206,13 +232,25 @@ const initialiseMongoServer = async () => {
         ]);
     };
 
+    const createImages = async () => {
+        await Promise.all([
+            newImage(0, chatIds[0], "Image 1 Name", "Image 1 Text"),
+            newImage(1, chatIds[1], "Image 2 Name", "Image 2 Text"),
+            newImage(2, chatIds[2], "Image 3 Name", "Image 3 Text"),
+            newImage(3, chatIds[3], "Image 4 Name", "Image 4 Text"),
+            newImage(4, chatIds[4], "Image 5 Name", "Image 5 Text"),
+        ]);
+    };
+
     // Populate database
     const users = [];
     const chats = [];
+    const images = [];
     await createUsers();
     await createChats();
+    await createImages();
 
-    return [users, chats];
+    return [users, chats, images];
 };
 
 export default initialiseMongoServer;

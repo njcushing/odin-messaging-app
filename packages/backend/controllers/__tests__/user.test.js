@@ -80,6 +80,13 @@ afterAll(async () => await disconnect());
 
 describe("Route testing...", () => {
     describe("/user/:username GET route...", () => {
+        test(`Should respond with status code 400 if the username provided as a
+         request parameter fails its validation`, async () => {
+            vi.spyOn(validateUserFields, "username").mockReturnValueOnce({
+                status: false,
+            });
+            await request(app).get(`/personDoesNotExist`).expect(400);
+        });
         test(`Should respond with status code 404 if the user is not found in
          the database`, async () => {
             await request(app).get(`/personDoesNotExist`).expect(404);
@@ -219,7 +226,7 @@ describe("Route testing...", () => {
         });
     });
 
-    describe("/user/self GET route...", () => {
+    describe("/user/self/ GET route...", () => {
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -260,6 +267,14 @@ describe("Route testing...", () => {
     });
 
     describe("/user/self/:username GET route...", () => {
+        test(`Should respond with status code 400 if the username provided as a
+         request parameter fails its validation`, async () => {
+            vi.spyOn(validateUserFields, "username").mockReturnValueOnce({
+                status: false,
+            });
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/self/Person1`).expect(400);
+        });
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -304,6 +319,14 @@ describe("Route testing...", () => {
     });
 
     describe("/user/friend/:username GET route...", () => {
+        test(`Should respond with status code 400 if the username provided as a
+         request parameter fails its validation`, async () => {
+            vi.spyOn(validateUserFields, "username").mockReturnValueOnce({
+                status: false,
+            });
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/friends/Person2`).expect(400);
+        });
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -359,7 +382,15 @@ describe("Route testing...", () => {
         });
     });
 
-    describe("/user/friend/can-be-added/:username GET route...", () => {
+    describe("/user/friends/can-be-added/:username GET route...", () => {
+        test(`Should respond with status code 400 if the username provided as a
+         request parameter fails its validation`, async () => {
+            vi.spyOn(validateUserFields, "username").mockReturnValueOnce({
+                status: false,
+            });
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/friends/can-be-added/Person3`).expect(400);
+        });
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -383,6 +414,11 @@ describe("Route testing...", () => {
                 "person1*"
             );
             await request(app).get(`/friends/can-be-added/Person2`).expect(401);
+        });
+        test(`Should respond with status code 400 if the currently logged-in
+         user is identical to the one being checked`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/friends/can-be-added/Person1`).expect(400);
         });
         test(`Should respond with status code 400 if the '_id' of the
          potential friend being checked already exists within the currently
@@ -417,11 +453,15 @@ describe("Route testing...", () => {
     });
 
     describe("/user/friends GET route...", () => {
-        test(`Should respond with status code 400 if the user '_id' value
-         extracted from the token in the 'authorization' header is not a valid
-         MongoDB ObjectId`, async () => {
-            mockProtectedRouteJWT(null, "Person1", "person1*");
-            await request(app).get(`/friends?first=0&last=1`).expect(400);
+        test(`Should respond with status code 400 if the 'first' and/or 'last'
+         query parameters fail their validation`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/friends?first=a&last=1`).expect(400);
+            await request(app).get(`/friends?first=1&last=a`).expect(400);
+            await request(app).get(`/friends?first=0.1&last=1`).expect(400);
+            await request(app).get(`/friends?first=1&last=0.1`).expect(400);
+            await request(app).get(`/friends?first=-1&last=1`).expect(400);
+            await request(app).get(`/friends?first=1&last=-1`).expect(400);
         });
         test(`Should respond with status code 401 if the currently logged-in
          user is not found in the database`, async () => {
@@ -469,6 +509,28 @@ describe("Route testing...", () => {
     });
 
     describe("/user/friend-requests GET route...", () => {
+        test(`Should respond with status code 400 if the 'first' and/or 'last'
+         query parameters fail their validation`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .get(`/friend-requests?first=a&last=1`)
+                .expect(400);
+            await request(app)
+                .get(`/friend-requests?first=1&last=a`)
+                .expect(400);
+            await request(app)
+                .get(`/friend-requests?first=0.1&last=1`)
+                .expect(400);
+            await request(app)
+                .get(`/friend-requests?first=1&last=0.1`)
+                .expect(400);
+            await request(app)
+                .get(`/friend-requests?first=-1&last=1`)
+                .expect(400);
+            await request(app)
+                .get(`/friend-requests?first=1&last=-1`)
+                .expect(400);
+        });
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -571,6 +633,16 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(401);
         });
+        test(`Should respond with status code 400 if the currently logged-in
+         user is identical to the one being added`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/friends`)
+                .send({ username: "Person1" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
         test(`Should respond with status code 400 if the '_id' of the user
          being added already exists within the currently logged-in user's
          friends list`, async () => {
@@ -660,6 +732,16 @@ describe("Route testing...", () => {
     });
 
     describe("/user/friend-requests/:username/accept PUT route...", () => {
+        test(`Should respond with status code 400 if the username provided as a
+         request parameter fails its validation`, async () => {
+            vi.spyOn(validateUserFields, "username").mockReturnValueOnce({
+                status: false,
+            });
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .put(`/friend-requests/Person2/accept`)
+                .expect(400);
+        });
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -731,6 +813,16 @@ describe("Route testing...", () => {
     });
 
     describe("/user/friend-requests/:username/decline PUT route...", () => {
+        test(`Should respond with status code 400 if the username provided as a
+         request parameter fails its validation`, async () => {
+            vi.spyOn(validateUserFields, "username").mockReturnValueOnce({
+                status: false,
+            });
+            mockProtectedRouteJWT(users[3]._id, "Person4", "person4*");
+            await request(app)
+                .put(`/friend-requests/Person1/decline`)
+                .expect(400);
+        });
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -787,6 +879,16 @@ describe("Route testing...", () => {
     });
 
     describe("/user/chats GET route...", () => {
+        test(`Should respond with status code 400 if the 'first' and/or 'last'
+         query parameters fail their validation`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/chats?first=a&last=1`).expect(400);
+            await request(app).get(`/chats?first=1&last=a`).expect(400);
+            await request(app).get(`/chats?first=0.1&last=1`).expect(400);
+            await request(app).get(`/chats?first=1&last=0.1`).expect(400);
+            await request(app).get(`/chats?first=-1&last=1`).expect(400);
+            await request(app).get(`/chats?first=1&last=-1`).expect(400);
+        });
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -994,8 +1096,23 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(401);
         });
+        test(`Should respond with an error if the Image schema
+         .findByIdAndDelete() operation fails`, async () => {
+            vi.spyOn(Image, "findByIdAndDelete").mockImplementationOnce(
+                async () => {
+                    throw new Error("failed");
+                }
+            );
+            await request(app)
+                .put(`/preferences/profileImage`)
+                .send({ profileImage: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect((res) => res.error !== false);
+        });
         test(`Should respond with an error if the Image schema .save() operation
          fails`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             vi.spyOn(Image.prototype, "save").mockImplementationOnce(
                 async () => {
                     throw new Error("failed");
