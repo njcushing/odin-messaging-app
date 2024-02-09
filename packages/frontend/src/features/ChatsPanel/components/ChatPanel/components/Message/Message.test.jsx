@@ -99,7 +99,7 @@ describe(`UI/DOM Testing...`, () => {
     describe(`The <p> element displaying the message author name and date...`, () => {
         test(`Should be present in the document`, () => {
             renderComponent(props);
-            const nameAndDate = screen.getByText("My Name at 01/01/2023, 00:00:00");
+            const nameAndDate = screen.getByLabelText("author-and-date");
             expect(nameAndDate).toBeInTheDocument();
         });
     });

@@ -13,5 +13,5 @@ test(`If the argument is not a valid date, return "Unknown"`, async () => {
 });
 test(`If the argument is a valid date, return the return value of the 'DateTime'
      method in luxon`, async () => {
-    expect(formatDate("2000-01-01T01:02:03")).toBe("01/01/2000, 01:02:03");
+    expect(formatDate("2000-01-01T01:02:03")).toBe("1/1/2000, 1:02:03 AM");
 });
