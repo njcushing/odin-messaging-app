@@ -94,7 +94,7 @@ describe("Route testing...", () => {
                 .send({ ...credentials })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(302);
+                .expect(200);
         });
         test(`Should respond with token if log-in is successful`, async () => {
             vi.spyOn(jwt, "sign").mockImplementationOnce(

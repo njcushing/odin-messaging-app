@@ -62,7 +62,7 @@ export const loginPost = [
                         err
                     );
                 } else {
-                    sendResponse(res, 302, "Log-in successful.", {
+                    sendResponse(res, 200, "Log-in successful.", {
                         token: token,
                     });
                 }
