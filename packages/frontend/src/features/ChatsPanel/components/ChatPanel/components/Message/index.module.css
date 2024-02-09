@@ -13,21 +13,50 @@
 }
 
 .profile-image {
-    align-self: center;
+    align-self: end;
+
+    margin-bottom: 0.3rem;
+}
+
+.message-text-container {
+    max-width: 100%;
+
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 }
 
 .message-text {
-    grid-area: 1 / 2 / 2 / 3;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.2rem;
 
     color: rgba(255, 255, 255, 1.0);
     font-size: 1.0rem;
     line-height: 1.36rem;
     font-family: Gabarito;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
 
+    max-width: 100%;
     min-height: 1rem;
-    padding: 0.4rem 0.6rem;
+    padding: 0.5rem;
+    margin: 0rem;
+}
+
+.replying-to-text-container {
+    display: flex;
+    flex-direction: start;
+}
+
+.replying-to-text {
+    align-self: start;
+
+    color: rgba(0, 0, 0);
+    font-size: 0.8rem;
+    font-family: Gabarito;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 6px;
+    line-height: 1.1rem;
+
+    padding: 0.2rem 0.4rem;
     margin: 0rem;
 }
 

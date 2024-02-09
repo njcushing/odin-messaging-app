@@ -109,7 +109,16 @@ export const chatGet = [
                         `,
                     },
                 },
-                { path: "messages" },
+                {
+                    path: "messages",
+                    populate: {
+                        path: "replyingTo",
+                        populate: {
+                            path: "author",
+                            select: "username preferences.displayName",
+                        },
+                    },
+                },
             ])
             .exec();
         if (chat === null) return chatNotFound(res, next, req.params.chatId);
@@ -407,6 +416,16 @@ export const messagePost = [
                 error.status = 500;
                 throw error;
             });
+
+            if (req.body.messageReplyingTo !== null) {
+                await Message.populate(message, {
+                    path: "replyingTo",
+                    populate: {
+                        path: "author",
+                        select: "username preferences.displayName",
+                    },
+                });
+            }
 
             const updatedChat = await Chat.findByIdAndUpdate(chat._id, {
                 $push: { messages: message._id },

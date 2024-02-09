@@ -22,6 +22,7 @@ const ChatPanel = ({
     const [chat, setChat] = useState(null);
     const [gettingChat, setGettingChat] = useState(false);
     const [gettingChatAC, setGettingChatAC] = useState(null);
+    const [participantInfo, setParticipantInfo] = useState(new Map());
     const [sendingMessageAC, setSendingMessageAC] = useState(null);
     const [attemptingSendMessage, setAttemptingSendMessage] = useState(false);
     const [currentMessage, setCurrentMessage] = useState("");
@@ -83,7 +84,7 @@ const ChatPanel = ({
             (async () => {
                 const response = await sendMessage(chatId, {
                     messageText: currentMessage,
-                    messageReplyingTo: replyingTo,
+                    messageReplyingTo: replyingTo ? replyingTo._id : null,
                 }, sendingMessageACNew);
                 if (response.status >= 400) {
                     setMessageSubmissionErrors([response.message]);
@@ -95,6 +96,7 @@ const ChatPanel = ({
                         messages: messages,
                     });
                     setCurrentMessage("");
+                    setReplyingTo(null);
                 }
                 setAttemptingSendMessage(false);
                 setSendingMessageAC(null);
@@ -107,6 +109,27 @@ const ChatPanel = ({
             if (sendingMessageAC) sendingMessageAC.abort;
         }
     }, [attemptingSendMessage]);
+
+    useEffect(() => {
+        if (chat && typeof chat === "object" && "participants" in chat) {
+            const participantInfoNew = new Map();
+            chat.participants.forEach((participant) => {
+                let participantName = "User";
+                if (participant.nickname.length > 0) {
+                    participantName = participant.nickname;
+                } else if (participant.user.preferences.displayName > 0) {
+                    participantName = participant.user.preferences.displayName;
+                } else {
+                    participantName = participant.user.username;
+                }
+
+                participantInfoNew.set(participant.user._id, {
+                    name: participantName,
+                });
+            });
+            setParticipantInfo(participantInfoNew);
+        }
+    }, [chat]);
 
     return (
         <div className={styles["wrapper"]}>
@@ -196,7 +219,11 @@ const ChatPanel = ({
                                                 key={message._id}
                                             ><Message
                                                 text={message.text}
-                                                name={message.author.name}
+                                                name={
+                                                    participantInfo.get(message.author) ?
+                                                    participantInfo.get(message.author).name :
+                                                    "user"
+                                                }
                                                 dateSent={message.createdAt}
                                                 imageSrc={message.author.imageSrc}
                                                 imageAlt={message.author.imageAlt}
@@ -206,6 +233,30 @@ const ChatPanel = ({
                                                         "right" :
                                                         "left"
                                                 }
+                                                replyingTo={message.replyingTo ?
+                                                {
+                                                    author:
+                                                        participantInfo.get(message.replyingTo.author._id) ?
+                                                        participantInfo.get(message.replyingTo.author._id).name :
+                                                        "User",
+                                                    text: message.replyingTo.text,
+                                                }
+                                                : null}
+                                                onReplyToHandler={(e) => {
+                                                    if (replyingTo && replyingTo._id.toString() === message._id.toString()) {
+                                                        setReplyingTo(null);
+                                                    } else {
+                                                        setReplyingTo({
+                                                            _id: message._id,
+                                                            authorId: message.author,
+                                                            authorName:
+                                                                participantInfo.get(message.author) ?
+                                                                participantInfo.get(message.author).name :
+                                                                "user",
+                                                            text: message.text
+                                                        });
+                                                    }
+                                                }}
                                             /></li>
                                         )
                                     })
@@ -226,6 +277,11 @@ const ChatPanel = ({
                             submissionErrors={[]}
                         />
                     }
+                    {replyingTo
+                    ?   <div className={styles["replying-to-container"]}>
+                            {`Replying to ${replyingTo.author}...`}
+                        </div>
+                    :   null}
                     <div
                         className={styles["text-editor-container"]}
                     >

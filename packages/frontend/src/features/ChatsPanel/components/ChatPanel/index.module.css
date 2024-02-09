@@ -40,7 +40,7 @@
 
 .container {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
     
     width: auto;
     height: 100%;
@@ -48,6 +48,7 @@
 
 .top-bar,
 .messages-container,
+.replying-to-container,
 .text-editor-container {
     padding: 0.6rem;
 }
@@ -119,6 +120,21 @@
     margin: 0rem;
 }
 
+.replying-to-container {
+    grid-area: 3 / 1 / 4 / -1;
+
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.0rem;
+    font-family: Gabarito;
+    text-align: start;
+
+    padding: 0rem 0.6rem;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0.45s 1 normal forwards fade-in;
+}
+
 .empty-chat-text {
     color: rgba(255, 255, 255, 0.6);
     font-size: 1.2rem;
@@ -130,7 +146,7 @@
 }
 
 .text-editor-container {
-    grid-area: 3 / 1 / -1 / -1;
+    grid-area: 4 / 1 / -1 / -1;
 
     opacity: 0%;
     transform: translateY(0.5rem);
