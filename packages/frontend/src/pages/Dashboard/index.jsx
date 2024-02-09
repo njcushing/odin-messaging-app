@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import styles from "./index.module.css";
 import { setTheme } from "@/themes";
 
@@ -10,17 +11,19 @@ import Settings from "@/features/Settings";
 
 import getSelf from "@/utils/getSelf.js";
 
-const Dashboard = () => {
+const Dashboard = ({
+    defaultOption,
+}) => {
     const [userInfo, setUserInfo] = useState({
         currentValue: null,
-        abortController: null,
+        abortController: new AbortController(),
         attempting: true,
     })
-    const [optionSelected, setOptionSelected] = useState("friends");
+    const [optionSelected, setOptionSelected] = useState(defaultOption);
 
     useEffect(() => {
+        if (userInfo.abortController) userInfo.abortController.abort;
         if (userInfo.attempting) {
-            if (userInfo.abortController) userInfo.abortController.abort;
             const abortControllerNew = new AbortController();
             setUserInfo({
                 ...userInfo,
@@ -37,7 +40,6 @@ const Dashboard = () => {
                 setTheme(response.user.preferences.theme);
             })();
         } else {
-            if (userInfo.abortController) userInfo.abortController.abort;
             setUserInfo({
                 ...userInfo,
                 abortController: null,
@@ -120,9 +122,7 @@ const Dashboard = () => {
                     }}
                 />
             );
-        break;
-        default:
-            mainDashboardContent = null;
+            break;
     }
 
     return (
@@ -147,6 +147,14 @@ const Dashboard = () => {
         </div>
         </div>
     )
+}
+
+Dashboard.propTypes = {
+    defaultOption: PropTypes.oneOf(["friends", "chats", "account", "settings"]),
+}
+
+Dashboard.defaultProps = {
+    defaultOption: "friends",
 }
 
 export default Dashboard;
