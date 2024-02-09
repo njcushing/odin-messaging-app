@@ -42,6 +42,7 @@ const initialiseMongoServer = async () => {
             friends: friends,
             friendRequests: friendRequests,
             chats: chats,
+            "preferences.image": new ArrayBuffer(),
         });
         await user.save();
         users[index] = user;
