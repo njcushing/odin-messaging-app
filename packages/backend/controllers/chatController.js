@@ -644,9 +644,6 @@ export const addFriendsPost = [
                 throw error;
             });
 
-            const test = await Chat.findById(chatId);
-            console.log(test);
-
             session.commitTransaction();
 
             sendResponse(
