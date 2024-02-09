@@ -294,8 +294,10 @@ export const friendGet = [
             email: friendInfo.user.email,
             displayName: friendInfo.user.preferences.displayName,
             tagLine: friendInfo.user.preferences.tagLine,
-            status: friendInfo.user.status,
-            setStatus: friendInfo.user.preferences.setStatus,
+            status:
+                friendInfo.user.preferences.setStatus !== null
+                    ? friendInfo.user.preferences.setStatus
+                    : friendInfo.user.status,
             chat: friendInfo.user.chat,
             friendStatus: friendInfo.user.friendStatus,
             becameFriendsDate: friendInfo.user.becameFriendsDate,
@@ -417,8 +419,10 @@ export const friendsGet = [
             email: friend.user.email,
             displayName: friend.user.preferences.displayName,
             tagLine: friend.user.preferences.tagLine,
-            status: friend.user.status,
-            setStatus: friend.user.preferences.setStatus,
+            status:
+                friend.user.preferences.setStatus !== null
+                    ? friend.user.preferences.setStatus
+                    : friend.user.status,
             chat: friend.user.chat,
             friendStatus: friend.user.friendStatus,
             becameFriendsDate: friend.user.becameFriendsDate,
