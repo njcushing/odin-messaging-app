@@ -85,7 +85,7 @@ const CreateAccount = () => {
                 window.location.href = "/dashboard";
             }
             setAttemptingCreateAccount(false);
-            setCredentials({});
+            setCredentials({ username: credentials.username });
         })();
     }
 
@@ -115,6 +115,7 @@ const CreateAccount = () => {
                                 id="username"
                                 name="username"
                                 required
+                                defaultValue={credentials.username ? credentials.username : ""}
                                 style={{ resize: "none" }}
                                 onChange={(e) => {
                                     const validUsername = validateUsername(e.target.value);
