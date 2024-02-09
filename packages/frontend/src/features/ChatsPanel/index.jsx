@@ -22,6 +22,7 @@ const ChatsPanel = ({
     const [creatingChat, setCreatingChat] = useState(false);
     const [creatingChatSubmissionErrors, setCreatingChatSubmissionErrors] = useState([]);
     const [chatSelectedId, setChatSelectedId] = useState(null);
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         updateChatsList();
