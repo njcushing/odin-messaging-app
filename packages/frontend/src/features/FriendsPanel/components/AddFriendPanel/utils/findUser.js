@@ -9,6 +9,7 @@ const findUser = async (username, abortController) => {
     )
         .then(async (response) => {
             const responseJSON = await response.json();
+
             let user = null;
             if (
                 responseJSON.data !== null &&
@@ -17,6 +18,7 @@ const findUser = async (username, abortController) => {
             ) {
                 user = responseJSON.data.user;
             }
+
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
