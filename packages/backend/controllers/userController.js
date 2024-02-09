@@ -23,8 +23,8 @@ const validateUserId = (res, next, userId) => {
     }
 };
 
-const userNotFound = (res, next, userId) => {
-    return next(sendResponse(res, 404, "User not found in database."));
+const userNotFound = (res, userId) => {
+    return sendResponse(res, 404, "User not found in database.");
 };
 
 const userPostValidateFields = [
@@ -190,6 +190,38 @@ export const userPost = [
                     });
             }
         });
+    }),
+];
+
+export const userSelf = [
+    protectedRouteJWT,
+    param("username", "'username' parameter (String) must not be empty")
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        let user = await User.findById(req.user._id).select("username").exec();
+        if (user === null) {
+            return userNotFound(res, next, req.user._id);
+        }
+        const token = await generateToken(req.user.username, req.user.password);
+        if (user.username === req.params.username) {
+            sendResponse(
+                res,
+                200,
+                "Specified user is the currently logged-in user.",
+                { token: token }
+            );
+        } else {
+            sendResponse(
+                res,
+                400,
+                "Specified user is not the currently logged-in user.",
+                { token: token }
+            );
+        }
     }),
 ];
 
