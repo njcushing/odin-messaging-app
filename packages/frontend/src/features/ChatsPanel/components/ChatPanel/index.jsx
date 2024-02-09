@@ -26,7 +26,6 @@ const ChatPanel = ({
         abortController: null,
         attempting: false,
         appending: false,
-        page: 1,
     });
 
     const [participantInfo, setParticipantInfo] = useState(new Map());
@@ -54,14 +53,18 @@ const ChatPanel = ({
                 abortController: abortControllerNew,
             });
             (async () => {
-                let messageQuantity = chat.currentValue ? chat.currentValue.messages.length : 0;
+                const messageQuantity = chat.currentValue ? chat.currentValue.messages.length : 0;
+                const existingMessages = chat.currentValue ? chat.currentValue.messages : [];
                 const response = await getChat(chatId, [
                     messageQuantity,
                     messageQuantity + 20
                 ], abortControllerNew);
                 setChat({
                     ...chat,
-                    currentValue: response.chat,
+                    currentValue: {
+                        ...response.chat,
+                        messages: [...existingMessages, ...response.chat.messages],
+                    },
                     abortController: null,
                     attempting: false,
                     appending: false,
@@ -73,13 +76,6 @@ const ChatPanel = ({
             if (chat.abortController) chat.abortController.abort;
         }
     }, [chat.attempting, chat.appending]);
-
-    useEffect(() => {
-        setChat({
-            ...chat,
-            appending: true,
-        });
-    }, [chat.page]);
 
     useEffect(() => {
         if (mongoose.Types.ObjectId.isValid(chatId)) {
@@ -156,7 +152,7 @@ const ChatPanel = ({
                     setMessageSubmissionErrors([response.message]);
                 } else {
                     const messages = [...chat.currentValue.messages];
-                    messages.push(response.newMessage);
+                    messages.unshift(response.newMessage);
                     setChat({
                         ...chat,
                         currentValue: {
@@ -257,9 +253,7 @@ const ChatPanel = ({
             ?   <>
                 {chat.currentValue !== null
                 ?   <>
-                    <div
-                        className={styles["top-bar"]}
-                    >
+                    <div className={styles["top-bar"]}>
                         <ProfileImage
                             src={""}
                             alt={""}
@@ -341,7 +335,8 @@ const ChatPanel = ({
                                 aria-label="chat-message-list"
                             >
                                 {chat.currentValue.messages && Array.isArray(chat.currentValue.messages) && chat.currentValue.messages.length > 0
-                                ?   chat.currentValue.messages.toReversed().map((message) => {
+                                ?   <>
+                                    {chat.currentValue.messages.map((message) => {
                                         return (
                                             <li
                                                 aria-label="chat-message"
@@ -388,11 +383,38 @@ const ChatPanel = ({
                                                 }}
                                             /></li>
                                         )
-                                    })
+                                    })}
+                                    <button
+                                        className={styles["load-more-button"]}
+                                        aria-label="load-more"
+                                        onClick={(e) => {
+                                            if (!chat.appending) {
+                                                setChat({
+                                                    ...chat,
+                                                    appending: true,
+                                                });
+                                            }
+                                            e.currentTarget.blur();
+                                            e.preventDefault();
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.blur();
+                                        }}
+                                    >{!chat.appending
+                                    ?   "Load More"
+                                    :   <div className={styles["load-more-button-waiting-wheel-container"]}>
+                                            <div
+                                                className={styles["load-more-button-waiting-wheel"]}
+                                                aria-label="waiting"
+                                            ></div>
+                                        </div>
+                                    }</button>
+                                    </>
                                 :   <p
                                         className={styles["empty-chat-text"]}
                                         aria-label="empty-chat-text"
-                                    >There are no messages in this chat yet!</p>}
+                                    >There are no messages in this chat yet!</p>
+                                }
                             </ul>
                         </div>
                     :   <FriendSelectorPanel

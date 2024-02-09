@@ -172,8 +172,7 @@ export const chatGet = [
             {
                 messages: {
                     $slice: [
-                        Math.max(0, firstMessage) * -1 -
-                            Math.max(0, lastMessage - firstMessage),
+                        Math.max(0, firstMessage),
                         Math.max(0, lastMessage - firstMessage),
                     ],
                 },
@@ -513,7 +512,12 @@ export const messagePost = [
             }
 
             const updatedChat = await Chat.findByIdAndUpdate(chat._id, {
-                $push: { messages: message._id },
+                $push: {
+                    messages: {
+                        $each: [message._id],
+                        $position: 0,
+                    },
+                },
             });
             if (updatedChat === null) {
                 const error = new Error(
