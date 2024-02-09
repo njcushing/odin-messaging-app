@@ -80,6 +80,7 @@ const Tooltip = ({
     return text.length > 0 ? (
         <div
             className={styles["wrapper"]}
+            aria-label="tooltip"
             style={{
                 pointerEvents: "none",
 
