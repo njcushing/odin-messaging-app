@@ -61,15 +61,6 @@ describe("Route testing...", () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
             await request(app).get(`/${chats[0]._id}`).expect(400);
         });
-        test(`Should respond with status code 404 if the currently-logged in
-         user is not found in the database`, async () => {
-            mockProtectedRouteJWT(
-                new mongoose.Types.ObjectId(),
-                "Person1",
-                "person1*"
-            );
-            await request(app).get(`/${chats[0]._id}`).expect(404);
-        });
         test(`Should respond with status code 400 if the chatId from the request
          parameters is not a valid MongoDB ObjectId`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
@@ -82,10 +73,15 @@ describe("Route testing...", () => {
                 .get(`/${new mongoose.Types.ObjectId()}`)
                 .expect(404);
         });
-        test(`Should respond with status code 401 if user is not a participant
-         in the chat and is therefore unauthorised to view it`, async () => {
-            mockProtectedRouteJWT(users[2]._id, "Person3", "person3*");
-            await request(app).get(`/${chats[0]._id}`).expect(401);
+        test(`Should respond with status code 404 if the currently-logged in
+         user containing the specified chat '_id' in its 'chats' array is not
+         found in the database`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app).get(`/${chats[0]._id}`).expect(404);
         });
         test(`Should respond with status code 200 on successful request, with a
          valid token`, async () => {
@@ -181,35 +177,37 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(404);
         });
-        test(`Should respond with status code 400 if, when trying to create
-         a chat with only two users, the chat saved within the friends list for
-         that friend is not a valid MongoDB ObjectId`, async () => {
-            mockProtectedRouteJWT(users[3]._id, "Person1", "person1*");
+        test(`Should respond with status code 401 if, when there is only one
+         participant, the currently logged-in user cannot be found in the
+         database when trying to update its fields`, async () => {
+            vi.spyOn(User, "updateOne").mockReturnValueOnce({
+                acknowledged: false,
+            });
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
                 .post(`/`)
-                .send({ participants: [users[2]._id] })
+                .send({ participants: [users[1]._id] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(400);
+                .expect(401);
         });
-        test(`Should respond with status code 404 if, when trying to create
-         a chat with only two users, the chat saved within the friends list for
-         that friend cannot be found in the database`, async () => {
-            mockProtectedRouteJWT(users[4]._id, "Person1", "person1*");
+        test(`Should respond with status code 404 if, when there is only one
+         participant, the other participant cannot be found in the database when
+         trying to update its fields`, async () => {
+            vi.spyOn(User, "updateOne")
+                .mockReturnValueOnce({ acknowledged: true })
+                .mockReturnValueOnce({ acknowledged: false });
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
                 .post(`/`)
-                .send({ participants: [users[3]._id] })
+                .send({ participants: [users[1]._id] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(404);
         });
-        test(`Should respond with status code 409 if, when trying to create
-         a chat with only two users, the chat saved within the friends list for
-         that friend is found in the database`, async () => {
+        test(`Should respond with status code 409 if, when there is only one
+         participant, a chat already exists for both users`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
-            vi.spyOn(Chat, "findByIdAndUpdate").mockReturnValueOnce(
-                chats[0]._id
-            );
             await request(app)
                 .post(`/`)
                 .send({ participants: [users[1]._id] })
@@ -217,9 +215,27 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(409);
         });
-        test(`Should respond with status code 500 if, when trying to create
-         a chat for more than two users, the new chat failed to save after
-         creation`, async () => {
+        test(`Should respond with status code 201 and a valid token if, when
+         there is only one participant, a chat does not yet exist for both users
+         and a new one is created`, async () => {
+            vi.spyOn(Chat, "findOne").mockReturnValueOnce(null);
+            generateToken.mockReturnValueOnce("Bearer token");
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/`)
+                .send({ participants: [users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(201)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+        test(`Should respond with status code 500 if, when trying to create a
+         chat for more than two users, the operation fails`, async () => {
             vi.spyOn(Chat.prototype, "save").mockImplementationOnce(() =>
                 Promise.reject("fail update")
             );
@@ -231,8 +247,8 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(500);
         });
-        test(`Should respond with status code 500 if, when trying to create
-         a chat for more than two users, any of the operations fail where the
+        test(`Should respond with status code 500 if, when trying to create a
+         chat for more than two users, any of the operations fail where the
          participants' 'chat' array is being pushed with the new chat's '_id'
          value`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
@@ -244,8 +260,8 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(500);
         });
-        test(`Should respond with status code 201 on successful request, with a
-         valid token`, async () => {
+        test(`Should respond with status code 201 on successful request when
+         trying to create a chat for more than two users, with a valid token`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             generateToken.mockReturnValueOnce("Bearer token");
             vi.spyOn(User, "findByIdAndUpdate")

@@ -65,31 +65,22 @@ export const chatGet = [
     protectedRouteJWT,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let user = await User.findById(req.user._id).exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
 
         validateChatId(res, next, req.params.chatId);
         let chat = await Chat.findById(req.params.chatId).exec();
         if (chat === null) return chatNotFound(res, next, req.params.chatId);
 
+        let user = await User.findById(req.user._id)
+            .select("chats")
+            .populate({
+                path: "chats",
+                select: "_id",
+                match: { _id: chat._id },
+            })
+            .exec();
+        if (user === null) return userNotFound(res, next, req.user._id);
+
         const token = await generateToken(req.user.username, req.user.password);
-
-        let userAuthorised = false;
-        for (let i = 0; i < chat.participants.length; i++) {
-            if (chat.participants[i].user.toString() === user._id.toString()) {
-                userAuthorised = true;
-                break;
-            }
-        }
-
-        if (!userAuthorised) {
-            return sendResponse(
-                res,
-                401,
-                "User is not authorised to view this chat.",
-                { chat: null, token: token }
-            );
-        }
 
         sendResponse(res, 200, "Chat found.", { chat: chat, token: token });
     }),
@@ -135,7 +126,7 @@ export const chatPost = [
         }
 
         // Ensure all participants are on currently logged-in user's friends list
-        const friendIds = user.friends.map((friend) => friend._id.toString());
+        const friendIds = user.friends.map((friend) => friend.user.toString());
         for (let i = 0; i < req.body.participants.length; i++) {
             if (!friendIds.includes(req.body.participants[i].toString())) {
                 return sendResponse(
@@ -148,35 +139,98 @@ export const chatPost = [
             }
         }
 
-        // If there is only one participant, return the chat for the two users
+        // If there is only one participant, check if there is an existing chat
         if (req.body.participants.length === 1) {
             const friend = user.friends.filter(
-                (friend) => friend._id.toString() === req.body.participants[0]
+                (friend) => friend.user.toString() === req.body.participants[0]
             )[0];
-            if (mongoose.Types.ObjectId.isValid(friend.chat)) {
-                const chat = await Chat.findById(friend.chat).exec();
-                if (chat) {
-                    sendResponse(
-                        res,
-                        409,
-                        `Chat already exists at: ${chat._id}.`,
-                        {
-                            chatId: chat._id,
-                            token: token,
-                        }
-                    );
-                } else {
-                    return chatNotFound(res, next, friend.chat);
+
+            const sessionIndividual = await mongoose.startSession();
+            try {
+                sessionIndividual.startTransaction();
+
+                let chat = await Chat.findOne({
+                    type: "individual",
+                    participants: { $size: 2 },
+                    "participants.user": { $all: [user._id, friend.user] },
+                });
+                let existingChat = true;
+                if (chat === null) {
+                    chat = new Chat({
+                        type: "individual",
+                        participants: [
+                            { user: user._id },
+                            { user: friend._id },
+                        ],
+                    });
+                    await chat.save().catch((error) => {
+                        error.message = "Unable to create Chat.";
+                        error.status = 500;
+                        throw error;
+                    });
+                    existingChat = false;
                 }
-            } else {
-                return sendResponse(res, 400, "Bad chat id.", { token: token });
+
+                const updatedUser = await User.updateOne(
+                    { _id: user._id, "friends.user": friend.user },
+                    {
+                        $set: { "friends.$.chat": chat._id },
+                        $addToSet: { chats: chat._id },
+                    }
+                );
+                if (!updatedUser.acknowledged) {
+                    const error = new Error(
+                        `User not found in database: ${user._id}.`
+                    );
+                    error.status = 401;
+                    throw error;
+                }
+
+                const updatedFriend = await User.updateOne(
+                    { _id: friend.user, "friends.user": user._id },
+                    {
+                        $set: { "friends.$.chat": chat._id },
+                        $addToSet: { chats: chat._id },
+                    }
+                );
+                if (!updatedFriend.acknowledged) {
+                    const error = new Error(
+                        `User not found in database: ${friend.user}.`
+                    );
+                    error.status = 404;
+                    throw error;
+                }
+
+                sessionIndividual.commitTransaction();
+
+                return sendResponse(
+                    res,
+                    existingChat ? 409 : 201,
+                    `Chat ${
+                        existingChat ? "already exists" : "successfully created"
+                    } at: ${chat._id}.`,
+                    {
+                        chatId: chat._id,
+                        token: token,
+                    }
+                );
+            } catch (error) {
+                return sendResponse(
+                    res,
+                    error.status,
+                    error.message,
+                    { token: token },
+                    error
+                );
+            } finally {
+                sessionIndividual.endSession();
             }
         }
 
         // Create and save new chat for multiple users
-        const session = await mongoose.startSession();
+        const sessionGroup = await mongoose.startSession();
         try {
-            session.startTransaction();
+            sessionGroup.startTransaction();
 
             const chat = new Chat({
                 type: "group",
@@ -188,7 +242,11 @@ export const chatPost = [
                 user: user._id,
                 role: "admin", // On chat creation, only creator is admin
             });
-            await chat.save();
+            await chat.save().catch((error) => {
+                error.message = "Unable to create Chat.";
+                error.status = 500;
+                throw error;
+            });
 
             await Promise.all(
                 chat.participants.map((participant) => {
@@ -196,7 +254,7 @@ export const chatPost = [
                         let updatedUser = await User.findByIdAndUpdate(
                             participant,
                             {
-                                $push: { chats: chat._id },
+                                $addToSet: { chats: chat._id },
                             }
                         );
                         if (updatedUser === null) {
@@ -211,7 +269,7 @@ export const chatPost = [
                 })
             );
 
-            session.commitTransaction();
+            sessionGroup.commitTransaction();
 
             sendResponse(
                 res,
@@ -225,13 +283,13 @@ export const chatPost = [
         } catch (error) {
             return sendResponse(
                 res,
-                500,
-                "Something went wrong.",
+                error.status,
+                error.message,
                 { token: token },
                 error
             );
         } finally {
-            session.endSession();
+            sessionGroup.endSession();
         }
     }),
 ];
