@@ -5,10 +5,10 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { forwardRef } from 'react'
-import Landing from './index.jsx'
+import Dashboard from './index.jsx'
 
 const renderComponent = () => {
-    render(<Landing />);
+    render(<Dashboard />);
 }
 
 describe("UI/DOM Testing...", () => {
