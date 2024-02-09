@@ -3,7 +3,6 @@ import styles from "./index.module.css";
 
 import OptionsSidebar from "@/features/OptionsSidebar";
 import ChatSelectionPanel from "@/features/ChatSelectionPanel";
-import ChatPanel from "@/features/ChatPanel";
 
 const Dashboard = () => {
     const [optionSelected, setOptionSelected] = useState("friends");
@@ -15,13 +14,10 @@ const Dashboard = () => {
         case "communities":
             mainDashboardContent = (
                 <>
-                <div className={styles["chat-selection-panel"]}>
+                <div className={styles["main-content-panel"]}>
                     <ChatSelectionPanel
                         chatType={optionSelected}
                     />
-                </div>
-                <div className={styles["chat-panel"]}>
-                    <ChatPanel />
                 </div>
                 </>
             );
