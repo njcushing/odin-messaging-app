@@ -238,7 +238,7 @@ export const getSelf = [
         validateUserId(res, next, req.user._id);
 
         let user = await User.findById(req.user._id)
-            .select("-admin -createdAt -updatedAt")
+            .select("-password -admin -createdAt -updatedAt")
             .exec();
         if (user === null) return selfNotFound(res, next, req.user._id);
 
