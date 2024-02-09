@@ -424,7 +424,6 @@ export const friendGet = [
 
 export const friendCanBeAdded = [
     protectedRouteJWT,
-    validators.param.username,
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
