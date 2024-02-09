@@ -8,14 +8,24 @@ import { BrowserRouter } from "react-router-dom"
 import CreateGroupPanel from './index.jsx'
 
 const renderComponent = async (
+    title = "Title",
+    removeButtonText = "Remove",
+    addButtonText = "Add",
+    submitButtonText = "Submit",
+    noFriendsText = "No friends found.",
     onCloseHandler = () => {},
-    createGroupHandler = () => {},
-    createGroupSubmissionErrors = [],
+    onSubmitHandler = () => {},
+    submissionErrors = [],
 ) => { await act(async () => render(
     <CreateGroupPanel
+        title={title}
+        removeButtonText={removeButtonText}
+        addButtonText={addButtonText}
+        submitButtonText={submitButtonText}
+        noFriendsText={noFriendsText}
         onCloseHandler={onCloseHandler}
-        createGroupHandler={createGroupHandler}
-        createGroupSubmissionErrors={createGroupSubmissionErrors}
+        onSubmitHandler={onSubmitHandler}
+        submissionErrors={submissionErrors}
     />
 )); }
 
@@ -76,19 +86,19 @@ describe("UI/DOM Testing...", () => {
     describe("The heading element displaying the title...", () => {
         test(`Should be present in the document`, async () => {
             await renderComponent();
-            const title = screen.getByRole("heading", { name: "create-group-panel" });
+            const title = screen.getByRole("heading", { name: "friend-selector-panel" });
             expect(title).toBeInTheDocument();
         });
     });
-    describe("The list element displaying the friends being added to the group...", () => {
+    describe("The list element displaying the friends selected...", () => {
         test(`Should not be present in the document if no friends are currently
-         being added to the group`, async () => {
+         selected`, async () => {
             await renderComponent();
-            const friendsAddingList = screen.queryByRole("list", { name: "friends-adding-list" });
-            expect(friendsAddingList).toBeNull();
+            const friendsSelectedList = screen.queryByRole("list", { name: "friends-selected-list" });
+            expect(friendsSelectedList).toBeNull();
         });
         test(`Should be present in the document if there is at least one friend
-         currently being added to the group`, async () => {
+         selected`, async () => {
             const user = userEvent.setup();
             getFriendsList.mockReturnValueOnce([
                 {
@@ -100,20 +110,20 @@ describe("UI/DOM Testing...", () => {
                 },
             ]);
             await renderComponent();
-            const addToGroupButton = screen.getByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButton);
-            const friendsAddingList = screen.getByRole("list", { name: "friends-adding-list" });
-            expect(friendsAddingList).toBeInTheDocument();
+            const addButton = screen.getByRole("button", { name: "add-button" });
+            await user.click(addButton);
+            const friendsSelectedList = screen.getByRole("list", { name: "friends-selected-list" });
+            expect(friendsSelectedList).toBeInTheDocument();
         });
         test(`Should contain any friends that have been added to the list of
          friends that will be in the new group`, async () => {
             const user = userEvent.setup();
             await renderComponent();
-            const addToGroupButtons = screen.getAllByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButtons[0]);
-            await user.click(addToGroupButtons[1]);
-            await user.click(addToGroupButtons[2]);
-            const friendsAdding = screen.getAllByRole("listitem", { name: "friend-adding" });
+            const addButtons = screen.getAllByRole("button", { name: "add-button" });
+            await user.click(addButtons[0]);
+            await user.click(addButtons[1]);
+            await user.click(addButtons[2]);
+            const friendsAdding = screen.getAllByRole("listitem", { name: "friend-selected" });
             expect(friendsAdding.length).toBe(3);
         });
     });
@@ -131,10 +141,10 @@ describe("UI/DOM Testing...", () => {
                 },
             ]);
             await renderComponent();
-            const addToGroupButton = screen.getByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButton);
-            const friendAdding = screen.getByRole("listitem", { name: "friend-adding" });
-            expect(friendAdding).toBeInTheDocument();
+            const addButton = screen.getByRole("button", { name: "add-button" });
+            await user.click(addButton);
+            const friendSelected = screen.getByRole("listitem", { name: "friend-selected" });
+            expect(friendSelected).toBeInTheDocument();
         });
         test("Should display a name", async () => {
             const user = userEvent.setup();
@@ -148,10 +158,10 @@ describe("UI/DOM Testing...", () => {
                 },
             ]);
             await renderComponent();
-            const addToGroupButton = screen.getByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButton);
-            const friendAddingName = screen.getByRole("heading", { name: "friend-adding-name" });
-            expect(friendAddingName.textContent).toBe("Person 1");
+            const addButton = screen.getByRole("button", { name: "add-button" });
+            await user.click(addButton);
+            const friendSelectedName = screen.getByRole("heading", { name: "friend-selected-name" });
+            expect(friendSelectedName.textContent).toBe("Person 1");
         });
         test("Should display a 'Remove' button", async () => {
             const user = userEvent.setup();
@@ -165,10 +175,10 @@ describe("UI/DOM Testing...", () => {
                 },
             ]);
             await renderComponent();
-            const addToGroupButton = screen.getByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButton);
-            const removeFromGroupButton = screen.getByRole("button", { name: "remove-from-group-button" });
-            expect(removeFromGroupButton).toBeInTheDocument();
+            const addButton = screen.getByRole("button", { name: "add-button" });
+            await user.click(addButton);
+            const removeButton = screen.getByRole("button", { name: "remove-button" });
+            expect(removeButton).toBeInTheDocument();
         });
         test(`That, when clicked, should remove the friend from the list of
          friends being added to the group`, async () => {
@@ -183,12 +193,12 @@ describe("UI/DOM Testing...", () => {
                 },
             ]);
             await renderComponent();
-            const addToGroupButton = screen.getByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButton);
-            const removeFromGroupButton = screen.getByRole("button", { name: "remove-from-group-button" });
-            await user.click(removeFromGroupButton);
-            const friendAdding = screen.queryByRole("listitem", { name: "friend-adding" });
-            expect(friendAdding).toBeNull();
+            const addButton = screen.getByRole("button", { name: "add-button" });
+            await user.click(addButton);
+            const removeButton = screen.getByRole("button", { name: "remove-button" });
+            await user.click(removeButton);
+            const friendSelected = screen.queryByRole("listitem", { name: "friend-selected" });
+            expect(friendSelected).toBeNull();
         });
     });
     describe("The 'No friends' message...", () => {
@@ -235,8 +245,8 @@ describe("UI/DOM Testing...", () => {
             await renderComponent();
             const friend = screen.getByRole("listitem", { name: "friend" });
             expect(friend).toBeInTheDocument();
-            const addToGroupButton = screen.getByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButton);
+            const addButton = screen.getByRole("button", { name: "add-button" });
+            await user.click(addButton);
             expect(friend).not.toBeInTheDocument();
         });
     });
@@ -275,7 +285,7 @@ describe("UI/DOM Testing...", () => {
             const friendName = screen.getByRole("heading", { name: "friend-name" });
             expect(friendName.textContent).toBe("Person 1");
         });
-        test("Should display an 'Add to Group' button", async () => {
+        test("Should display an 'Add' button", async () => {
             getFriendsList.mockReturnValueOnce([
                 {
                     _id: "1",
@@ -286,8 +296,8 @@ describe("UI/DOM Testing...", () => {
                 },
             ]);
             await renderComponent();
-            const addToGroupButton = screen.getByRole("button", { name: "add-to-group-button" });
-            expect(addToGroupButton).toBeInTheDocument();
+            const addButton = screen.getByRole("button", { name: "add-button" });
+            expect(addButton).toBeInTheDocument();
         });
         test(`That, when clicked, should add the friend to the list of friends
          being added to the group`, async () => {
@@ -302,84 +312,104 @@ describe("UI/DOM Testing...", () => {
                 },
             ]);
             await renderComponent();
-            const addToGroupButton = screen.getByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButton);
-            const friendAdding = screen.getByRole("listitem", { name: "friend-adding" });
-            expect(friendAdding).toBeInTheDocument();
+            const addButton = screen.getByRole("button", { name: "add-button" });
+            await user.click(addButton);
+            const friendSelected = screen.getByRole("listitem", { name: "friend-selected" });
+            expect(friendSelected).toBeInTheDocument();
         });
     });
     describe("The 'Create Group' button...", () => {
         test(`Should not be present in the document if there are currently no
          friends in the list of friends being added to the group`, async () => {
             await renderComponent();
-            const createGroupButton = screen.queryByRole("button", { name: "create-group-button" });
-            expect(createGroupButton).toBeNull();
+            const submitButton = screen.queryByRole("button", { name: "submit-button" });
+            expect(submitButton).toBeNull();
         });
         test(`Should be present in the document if there is at least one friend
          in the list of friends being added to the group`, async () => {
             const user = userEvent.setup();
             await renderComponent();
-            const addToGroupButtons = screen.getAllByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButtons[0]);
-            const createGroupButton = screen.getByRole("button", { name: "create-group-button" });
-            expect(createGroupButton).toBeInTheDocument();
+            const addButtons = screen.getAllByRole("button", { name: "add-button" });
+            await user.click(addButtons[0]);
+            const submitButton = screen.getByRole("button", { name: "submit-button" });
+            expect(submitButton).toBeInTheDocument();
         });
         test(`Should, when clicked, invoke the callback function specified in
-         the 'createGroupHandler' prop`, async () => {
+         the 'submitHandler' prop`, async () => {
             const user = userEvent.setup();
             const callback = vi.fn();
             await renderComponent(
+                "Title",
+                "Remove",
+                "Add",
+                "Submit",
+                "No friends found.",
                 () => {},
                 callback,
                 [],
             );
             await renderComponent();
-            const addToGroupButtons = screen.getAllByRole("button", { name: "add-to-group-button" });
-            await user.click(addToGroupButtons[0]);
-            const createGroupButton = screen.getByRole("button", { name: "create-group-button" });
-            await user.click(createGroupButton);
+            const addButtons = screen.getAllByRole("button", { name: "add-button" });
+            await user.click(addButtons[0]);
+            const submitButton = screen.getByRole("button", { name: "submit-button" });
+            await user.click(submitButton);
             expect(callback).toHaveBeenCalledTimes(1);
         });
     });
     describe("The submission errors list title...", () => {
         test(`Should not be present in the document if there are no errors`, async () => {
             renderComponent();
-            const submissionErrorsList = screen.queryByRole("heading", { name: "create-group-submission-errors-title" });
+            const submissionErrorsList = screen.queryByRole("heading", { name: "submission-errors-title" });
             expect(submissionErrorsList).toBeNull();
         });
         test(`Should be present in the document if there are errors`, async () => {
             await act(() => renderComponent(
+                "Title",
+                "Remove",
+                "Add",
+                "Submit",
+                "No friends found.",
                 () => {},
                 () => {},
                 ["error_1", "error_2", "error_3"],
             ));
-            const submissionErrorsList = screen.queryByRole("heading", { name: "create-group-submission-errors-title" });
+            const submissionErrorsList = screen.queryByRole("heading", { name: "submission-errors-title" });
             expect(submissionErrorsList).toBeInTheDocument();
         });
     });
     describe("The submission errors list...", () => {
         test(`Should not be present in the document if there are no errors`, async () => {
             renderComponent();
-            const submissionErrorsList = screen.queryByRole("list", { name: "create-group-submission-errors-list" });
+            const submissionErrorsList = screen.queryByRole("list", { name: "submission-errors-list" });
             expect(submissionErrorsList).toBeNull();
         });
         test(`Should be present in the document if there are errors`, async () => {
             await act(() => renderComponent(
+                "Title",
+                "Remove",
+                "Add",
+                "Submit",
+                "No friends found.",
                 () => {},
                 () => {},
                 ["error_1", "error_2", "error_3"],
             ));
-            const submissionErrorsList = screen.getByRole("list", { name: "create-group-submission-errors-list" });
+            const submissionErrorsList = screen.getByRole("list", { name: "submission-errors-list" });
             expect(submissionErrorsList).toBeInTheDocument();
         });
         test(`Should have a number of list item children equivalent to the
          number of errors`, async () => {
             await act(() => renderComponent(
+                "Title",
+                "Remove",
+                "Add",
+                "Submit",
+                "No friends found.",
                 () => {},
                 () => {},
                 ["error_1", "error_2", "error_3"],
             ));
-            const submissionErrorsList = screen.getAllByRole("listitem", { name: "create-group-submission-error-item" });
+            const submissionErrorsList = screen.getAllByRole("listitem", { name: "submission-error-item" });
             expect(submissionErrorsList.length).toBe(3);
         });
     });

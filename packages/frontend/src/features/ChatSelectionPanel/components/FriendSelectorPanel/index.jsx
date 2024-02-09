@@ -7,13 +7,18 @@ import ProfileImage from "@/components/ProfileImage";
 
 import getFriendsList from "../../utils/getFriendsList";
 
-const CreateGroupPanel = ({
+const FriendSelectorPanel = ({
+    title,
+    removeButtonText,
+    addButtonText,
+    submitButtonText,
+    noFriendsText,
     onCloseHandler,
-    createGroupHandler,
-    createGroupSubmissionErrors,
+    onSubmitHandler,
+    submissionErrors,
 }) => {
     const [friendsList, setFriendsList] = useState([]);
-    const [friendsAdding, setFriendsAdding] = useState(new Set());
+    const [friendsSelected, setFriendsSelected] = useState(new Set());
 
     useEffect(() => {
         (async () => {
@@ -22,16 +27,16 @@ const CreateGroupPanel = ({
         })();
     }, []);
 
-    const addToGroup = (_id) => {
-        const friendsAddingNew = new Set(friendsAdding);
-        friendsAddingNew.add(_id);
-        setFriendsAdding(friendsAddingNew);
+    const addToSelectedList = (_id) => {
+        const friendsSelectedNew = new Set(friendsSelected);
+        friendsSelectedNew.add(_id);
+        setFriendsSelected(friendsSelectedNew);
     };
 
-    const removeFromGroup = (_id) => {
-        const friendsAddingNew = new Set(friendsAdding);
-        friendsAddingNew.delete(_id);
-        setFriendsAdding(friendsAddingNew);
+    const removeFromSelectedList = (_id) => {
+        const friendsSelectedNew = new Set(friendsSelected);
+        friendsSelectedNew.delete(_id);
+        setFriendsSelected(friendsSelectedNew);
     }
 
     return (
@@ -40,8 +45,8 @@ const CreateGroupPanel = ({
             <div className={styles["box"]}>
                 <h4
                     className={styles["title"]}
-                    aria-label="create-group-panel"
-                >Create a New Group</h4>
+                    aria-label="friend-selector-panel"
+                >{title}</h4>
                 <div className={styles["option-button"]}>
                     <OptionButton
                         text="close"
@@ -54,36 +59,36 @@ const CreateGroupPanel = ({
                         onClickHandler={(e) => onCloseHandler(e)}
                     />
                 </div>
-                    {friendsAdding.size > 0
-                    ?   <div className={styles["friends-adding-container"]}>
+                    {friendsSelected.size > 0
+                    ?   <div className={styles["friends-selected-container"]}>
                             <ul
-                                className={styles["friends-adding-list"]}
-                                aria-label="friends-adding-list"
+                                className={styles["friends-selected-list"]}
+                                aria-label="friends-selected-list"
                             >
                                 {friendsList.map((friend, i) => {
-                                    if (friendsAdding.has(friend._id)) {
+                                    if (friendsSelected.has(friend._id)) {
                                         return(
                                             <li
-                                                className={styles["friend-adding"]}
-                                                aria-label="friend-adding"
+                                                className={styles["friend-selected"]}
+                                                aria-label="friend-selected"
                                                 key={friend._id}
                                             >
                                                 <h5
-                                                    className={styles["friend-adding-name"]}
-                                                    aria-label="friend-adding-name"
+                                                    className={styles["friend-selected-name"]}
+                                                    aria-label="friend-selected-name"
                                                 >{friend.name}</h5>
                                                 <button
-                                                    className={styles["remove-from-group-button"]}
-                                                    aria-label="remove-from-group-button"
+                                                    className={styles["remove-button"]}
+                                                    aria-label="remove-button"
                                                     onClick={(e) => {
-                                                        removeFromGroup(friend._id);
+                                                        removeFromSelectedList(friend._id);
                                                         e.currentTarget.blur();
                                                         e.preventDefault();
                                                     }}
                                                     onMouseLeave={(e) => {
                                                         e.currentTarget.blur();
                                                     }}
-                                                >Remove</button>
+                                                >{removeButtonText}</button>
                                             </li>
                                         );
                                     }
@@ -98,7 +103,7 @@ const CreateGroupPanel = ({
                             aria-label="friends-list"
                         >
                             {friendsList.map((friend, i) => {
-                                if (!friendsAdding.has(friend._id)) {
+                                if (!friendsSelected.has(friend._id)) {
                                     return(
                                         <li
                                             className={styles["friend"]}
@@ -117,17 +122,17 @@ const CreateGroupPanel = ({
                                                 aria-label="friend-name"
                                             >{friend.name}</h5>
                                             <button
-                                                className={styles["add-to-group-button"]}
-                                                aria-label="add-to-group-button"
+                                                className={styles["add-button"]}
+                                                aria-label="add-button"
                                                 onClick={(e) => {
-                                                    addToGroup(friend._id);
+                                                    addToSelectedList(friend._id);
                                                     e.currentTarget.blur();
                                                     e.preventDefault();
                                                 }}
                                                 onMouseLeave={(e) => {
                                                     e.currentTarget.blur();
                                                 }}
-                                            >Add to Group</button>
+                                            >{addButtonText}</button>
                                         </li>
                                     );
                                 }
@@ -136,39 +141,39 @@ const CreateGroupPanel = ({
                     :   <h5
                             className={styles["no-friends"]}
                             aria-label="no-friends"
-                        >You do not have any friends to create a group with</h5>
+                        >{noFriendsText}</h5>
                     }
                 </div>
-                {friendsAdding.size > 0
-                ?   <div className={styles["create-group-button-container"]}>
+                {friendsSelected.size > 0
+                ?   <div className={styles["submit-button-container"]}>
                         <button
-                            className={styles["create-group-button"]}
-                            aria-label="create-group-button"
+                            className={styles["submit-button"]}
+                            aria-label="submit-button"
                             onClick={(e) => {
-                                createGroupHandler(friendsAdding);
+                                onSubmitHandler(friendsSelected);
                                 e.currentTarget.blur();
                                 e.preventDefault();
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.blur();
                             }}
-                        >Create Group</button>
+                        >{submitButtonText}</button>
                     </div>
                 :   null}
-                {createGroupSubmissionErrors.length > 0
-                ?   <div className={styles["create-group-submission-errors"]}>
+                {submissionErrors.length > 0
+                ?   <div className={styles["submission-errors"]}>
                         <h4
-                            className={styles["create-group-submission-errors-title"]}
-                            aria-label="create-group-submission-errors-title"
+                            className={styles["submission-errors-title"]}
+                            aria-label="submission-errors-title"
                         >Error(s):</h4>
                         <ul
-                            className={styles["create-group-submission-errors-list"]}
-                            aria-label="create-group-submission-errors-list"
+                            className={styles["submission-errors-list"]}
+                            aria-label="submission-errors-list"
                         >
-                            {createGroupSubmissionErrors.map((error, i) => {
+                            {submissionErrors.map((error, i) => {
                                 return <li
-                                    className={styles["create-group-submission-error-item"]}
-                                    aria-label="create-group-submission-error-item"
+                                    className={styles["submission-error-item"]}
+                                    aria-label="submission-error-item"
                                     key={i}
                                 >{error}</li>
                             })}
@@ -181,16 +186,26 @@ const CreateGroupPanel = ({
     );
 };
 
-CreateGroupPanel.propTypes = {
+FriendSelectorPanel.propTypes = {
+    title: PropTypes.string,
+    removeButtonText: PropTypes.string,
+    addButtonText: PropTypes.string,
+    submitButtonText: PropTypes.string,
+    noFriendsText: PropTypes.string,
     onCloseHandler: PropTypes.func,
-    createGroupHandler: PropTypes.func,
-    createGroupSubmissionErrors: PropTypes.arrayOf(PropTypes.string),
+    onSubmitHandler: PropTypes.func,
+    submissionErrors: PropTypes.arrayOf(PropTypes.string),
 }
 
-CreateGroupPanel.defaultProps = {
+FriendSelectorPanel.defaultProps = {
+    title: "Title",
+    removeButtonText: "Remove",
+    addButtonText: "Add",
+    submitButtonText: "Submit",
+    noFriendsText: "No friends found.",
     onCloseHandler: () => {},
-    createGroupHandler: () => {},
-    createGroupSubmissionErrors: [],
+    onSubmitHandler: () => {},
+    submissionErrors: [],
 }
 
-export default CreateGroupPanel;
+export default FriendSelectorPanel;
