@@ -44,12 +44,28 @@ const UserSchema = new Schema({
         default: false,
     },
     account_creation_date: { type: Date, default: Date.now },
-    image: { type: Schema.Types.ObjectId, ref: "Image" },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
     chats: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
-    /*
-    preferences,
-    */
+    preferences: {
+        displayName: {
+            type: String,
+            trim: true,
+            maxlength: 40,
+            default: "",
+        },
+        tagLine: {
+            type: String,
+            trim: true,
+            maxlength: 100,
+            default: "",
+        },
+        image: { type: Schema.Types.ObjectId, ref: "Image" },
+        setStatus: {
+            type: String,
+            enum: ["online", "busy", "away", "offline", null],
+            default: null,
+        },
+    },
 });
 
 export default mongoose.model("User", UserSchema);
