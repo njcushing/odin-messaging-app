@@ -17,22 +17,20 @@ const credentials = {
     password: "person1*",
 };
 
-const validateUsername = vi.fn(() => ({
+const username = vi.fn(() => ({
     status: true,
     message: "Valid Username.",
 }));
-const validatePassword = vi.fn(() => ({
+const password = vi.fn(() => ({
     status: true,
     message: "Valid Password.",
 }));
-vi.mock("../../../utils/validateCreateAccountFields", async () => {
-    const actual = await vi.importActual(
-        "../../../utils/validateCreateAccountFields"
-    );
+vi.mock("../../../utils/validateUserFields", async () => {
+    const actual = await vi.importActual("../../../utils/validateUserFields");
     return {
         ...actual,
-        validateUsername: () => validateUsername(),
-        validatePassword: () => validatePassword(),
+        username: () => username(),
+        password: () => password(),
     };
 });
 

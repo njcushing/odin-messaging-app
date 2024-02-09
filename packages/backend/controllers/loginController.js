@@ -4,17 +4,14 @@ import jwt from "jsonwebtoken";
 
 import sendResponse from "../utils/sendResponse.js";
 import checkRequestValidationError from "../utils/checkRequestValidationError.js";
-import {
-    validateUsername,
-    validatePassword,
-} from "../../../utils/validateCreateAccountFields.js";
+import { username, password } from "../../../utils/validateUserFields.js";
 import validateUserCredentials from "../utils/validateUserCredentials.js";
 
 const validateFields = [
     body("username")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const validUsername = validateUsername(value);
+            const validUsername = username(value);
             if (!validUsername.status) {
                 throw new Error(validUsername.message.back);
             } else {
@@ -25,7 +22,7 @@ const validateFields = [
     body("password")
         .trim()
         .custom((value, { req, loc, path }) => {
-            const validPassword = validatePassword(value);
+            const validPassword = password(value);
             if (!validPassword.status) {
                 throw new Error(validPassword.message.back);
             } else {

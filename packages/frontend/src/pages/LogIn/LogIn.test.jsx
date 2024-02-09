@@ -28,11 +28,11 @@ vi.mock('./utils/logInAPI', async () => ({
     default: () => logInAPIMock(),
 }));
 
-const validateUsername = vi.fn(() => ({
+const username = vi.fn(() => ({
     status: true,
     message: "Valid Username.",
 }));
-const validatePassword = vi.fn(() => ({
+const password = vi.fn(() => ({
     status: true,
     message: "Valid Password.",
 }));
@@ -40,8 +40,8 @@ vi.mock('./utils/validateFields', async () => {
     const actual = await vi.importActual("./utils/validateFields");
     return {
         ...actual,
-        validateUsername: () => validateUsername(),
-        validatePassword: () => validatePassword(),
+        username: () => username(),
+        password: () => password(),
     }
 });
 
@@ -66,13 +66,13 @@ describe("UI/DOM Testing...", () => {
             const usernameInput = screen.getByRole("textbox", { name: "username-input" });
             expect(usernameInput).toBeInTheDocument();
         });
-        test(`On change, should invoke the validateUsername function`, async () => {
+        test(`On change, should invoke the username function`, async () => {
             const user = userEvent.setup();
-            const validateUsernameSpy = vi.spyOn(validateFields, "validateUsername");
+            const usernameSpy = vi.spyOn(validateFields, "username");
             await renderComponent();
             const usernameInput = screen.getByRole("textbox", { name: "username-input" });
             await user.type(usernameInput, "a");
-            expect(validateUsernameSpy).toHaveBeenCalledTimes(1);
+            expect(usernameSpy).toHaveBeenCalledTimes(1);
         });
     });
     describe("The 'Username' error message...", () => {
@@ -84,7 +84,7 @@ describe("UI/DOM Testing...", () => {
         test(`Should be present if the value of the 'Username' input is changed
          and the new value is invalid`, async () => {
             const user = userEvent.setup();
-            validateUsername.mockReturnValueOnce({
+            username.mockReturnValueOnce({
                 status: false,
                 message: "Invalid Username.",
             })
@@ -109,13 +109,13 @@ describe("UI/DOM Testing...", () => {
             const passwordInput = screen.getByLabelText("password-input");
             expect(passwordInput).toBeInTheDocument();
         });
-        test(`On change, should invoke the validatePassword function`, async () => {
+        test(`On change, should invoke the password function`, async () => {
             const user = userEvent.setup();
-            const validatePasswordSpy = vi.spyOn(validateFields, "validatePassword");
+            const passwordSpy = vi.spyOn(validateFields, "password");
             await renderComponent();
             const passwordInput = screen.getByLabelText("password-input");
             await user.type(passwordInput, "a");
-            expect(validatePasswordSpy).toHaveBeenCalledTimes(1);
+            expect(passwordSpy).toHaveBeenCalledTimes(1);
         });
     });
     describe("The 'Password' error message...", () => {
@@ -127,7 +127,7 @@ describe("UI/DOM Testing...", () => {
         test(`Should be present if the value of the 'Password' input is changed
          and the new value is invalid`, async () => {
             const user = userEvent.setup();
-            validatePassword.mockReturnValueOnce({
+            password.mockReturnValueOnce({
                 status: false,
                 message: "Invalid Password.",
             })
@@ -149,7 +149,7 @@ describe("UI/DOM Testing...", () => {
          Username and/or Password fields are invalid`, async () => {
             const user = userEvent.setup();
             const logInAPISpy = vi.spyOn(logInAPI, "default");
-            validateUsername.mockReturnValueOnce({
+            username.mockReturnValueOnce({
                 status: false,
                 message: "Invalid Username",
             })

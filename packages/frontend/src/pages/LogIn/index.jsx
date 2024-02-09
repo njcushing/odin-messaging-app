@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./index.module.css";
 
 import logInAPI from "./utils/logInAPI";
-import { validateUsername, validatePassword } from "./utils/validateFields";
+import { username, password } from "./utils/validateFields";
 
 const LogIn = () => {
     const [usernameError, setUsernameError] = useState(null);
@@ -19,8 +19,8 @@ const LogIn = () => {
         const formFields = Object.fromEntries(formData);
 
         // Client-side validation
-        const validUsername = validateUsername(formFields.username);
-        const validPassword = validatePassword(formFields.password);
+        const validUsername = username(formFields.username);
+        const validPassword = password(formFields.password);
         if (!validUsername.status) setUsernameError(validUsername.message);
         if (!validPassword.status) setPasswordError(validPassword.message);
 
@@ -70,7 +70,7 @@ const LogIn = () => {
                                 defaultValue={credentials.username ? credentials.username : ""}
                                 style={{ resize: "none" }}
                                 onChange={(e) => {
-                                    const validUsername = validateUsername(e.target.value);
+                                    const validUsername = username(e.target.value);
                                     if (!validUsername.status) {
                                         setUsernameError(validUsername.message);
                                     } else {
@@ -97,7 +97,7 @@ const LogIn = () => {
                                 required
                                 style={{ resize: "none" }}
                                 onChange={(e) => {
-                                    const validPassword = validatePassword(e.target.value);
+                                    const validPassword = password(e.target.value);
                                     if (!validPassword.status) {
                                         setPasswordError(validPassword.message);
                                     } else {
