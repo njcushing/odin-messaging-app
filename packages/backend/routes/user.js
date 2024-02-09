@@ -4,6 +4,7 @@ const router = express.Router();
 import * as controller from "../controllers/userController.js";
 
 router.put("/preferences/displayName", controller.displayNamePut);
+router.put("/preferences/tagLine", controller.tagLinePut);
 router.get("/self/:username", controller.userSelf);
 router.get("/self", controller.getSelf);
 router.get("/friends/can-be-added/:username", controller.friendCanBeAdded);
