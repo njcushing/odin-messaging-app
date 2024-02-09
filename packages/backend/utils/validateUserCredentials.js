@@ -7,7 +7,6 @@ const validateUserCredentials = async (username, password) => {
         { username: username },
         { _id: 1, username: 1, password: 1 }
     ).exec();
-    console.log(user);
     if (!user) return [false, null, "Incorrect username."];
     const match = await bcrypt.compare(password, user.password);
     if (!match) return [false, null, "Incorrect password."];

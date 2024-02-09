@@ -22,8 +22,8 @@ const FriendSelectorPanel = ({
 
     useEffect(() => {
         (async () => {
-            const friendsListNew = await getFriendsList();
-            setFriendsList(friendsListNew);
+            const response = await getFriendsList();
+            setFriendsList(Array.isArray(response.data) ? response.data : []);
         })();
     }, []);
 
