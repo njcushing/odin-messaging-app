@@ -1,7 +1,8 @@
-const getFriendsList = async () => {
+const getFriendRequests = async (abortController) => {
     const data = await fetch(
-        `${import.meta.env.VITE_SERVER_DOMAIN}/user/friends`,
+        `${import.meta.env.VITE_SERVER_DOMAIN}/user/friendRequests`,
         {
+            signal: abortController.signal,
             method: "GET",
             mode: "cors",
             headers: {
@@ -30,17 +31,17 @@ const getFriendsList = async () => {
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
-                friends: responseJSON.data.friends,
+                friendRequests: responseJSON.data.friendRequests,
             };
         })
         .catch((error) => {
             return {
                 status: 500,
-                message: "Requesting friends list failed",
-                friends: [],
+                message: "Requesting friend requests list failed",
+                friendRequests: [],
             };
         });
     return data;
 };
 
-export default getFriendsList;
+export default getFriendRequests;
