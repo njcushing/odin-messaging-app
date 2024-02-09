@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 const acceptFriendRequest = async (username, abortController) => {
     const data = await fetch(
@@ -21,9 +22,7 @@ const acceptFriendRequest = async (username, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             return {
                 status: responseJSON.status,
@@ -32,8 +31,8 @@ const acceptFriendRequest = async (username, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Accepting friend request failed",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;

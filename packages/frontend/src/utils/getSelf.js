@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 const getSelf = async (abortController) => {
     const data = await fetch(
@@ -19,9 +20,7 @@ const getSelf = async (abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             let user = null;
             if (
@@ -40,8 +39,8 @@ const getSelf = async (abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Getting currently logged-in user's data failed",
+                status: error.status,
+                message: error.message,
                 user: null,
             };
         });

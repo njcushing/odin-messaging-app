@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 const getChat = async (
     chatId,
@@ -25,9 +26,7 @@ const getChat = async (
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             let chat = null;
             if (
@@ -46,8 +45,8 @@ const getChat = async (
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Accepting friend request failed",
+                status: error.status,
+                message: error.message,
                 chat: null,
             };
         });

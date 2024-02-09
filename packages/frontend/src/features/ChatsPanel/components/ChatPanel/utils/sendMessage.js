@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 export const text = async (chatId, message, abortController) => {
     const data = await fetch(
@@ -20,9 +21,7 @@ export const text = async (chatId, message, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             let message = null;
             if (
@@ -41,8 +40,8 @@ export const text = async (chatId, message, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Sending message failed",
+                status: error.status,
+                message: error.message,
                 newMessage: null,
             };
         });
@@ -69,9 +68,7 @@ export const image = async (chatId, image, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             let message = null;
             if (
@@ -90,8 +87,8 @@ export const image = async (chatId, image, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Sending message failed",
+                status: error.status,
+                message: error.message,
                 newMessage: null,
             };
         });

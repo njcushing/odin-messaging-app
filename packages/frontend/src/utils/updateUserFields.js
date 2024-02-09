@@ -1,4 +1,5 @@
 import saveTokenFromResponseJSON from "./saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
 export const displayName = async (value, abortController) => {
     const data = await fetch(
@@ -22,9 +23,7 @@ export const displayName = async (value, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             return {
                 status: responseJSON.status,
@@ -33,8 +32,8 @@ export const displayName = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Updating display name failed.",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;
@@ -62,9 +61,7 @@ export const tagLine = async (value, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             return {
                 status: responseJSON.status,
@@ -73,8 +70,8 @@ export const tagLine = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Updating tag line failed.",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;
@@ -102,9 +99,7 @@ export const status = async (value, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             return {
                 status: responseJSON.status,
@@ -113,8 +108,8 @@ export const status = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Updating status failed.",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;
@@ -142,9 +137,7 @@ export const profileImage = async (value, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             return {
                 status: responseJSON.status,
@@ -153,8 +146,8 @@ export const profileImage = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Updating profile image failed.",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;
@@ -182,9 +175,7 @@ export const theme = async (value, abortController) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             return {
                 status: responseJSON.status,
@@ -193,8 +184,8 @@ export const theme = async (value, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Updating theme failed.",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;

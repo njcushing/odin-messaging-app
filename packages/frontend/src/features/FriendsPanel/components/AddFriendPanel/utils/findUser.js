@@ -25,8 +25,8 @@ const findUser = async (username, abortController) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Finding user failed",
+                status: error.status,
+                message: error.message,
                 user: null,
             };
         });

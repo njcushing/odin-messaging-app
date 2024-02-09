@@ -1,9 +1,11 @@
 import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+import redirectUserToLogin from "@/utils/redirectUserToLogin.js";
 
-const addFriend = async (username) => {
+const addFriend = async (username, abortController) => {
     const data = await fetch(
         `${import.meta.env.VITE_SERVER_DOMAIN}/user/friends`,
         {
+            signal: abortController ? abortController.signal : null,
             method: "POST",
             mode: "cors",
             headers: {
@@ -19,9 +21,7 @@ const addFriend = async (username) => {
             const responseJSON = await response.json();
             saveTokenFromResponseJSON(responseJSON);
 
-            if (responseJSON.status === 401) {
-                window.location.href = "/log-in";
-            }
+            if (responseJSON.status === 401) redirectUserToLogin();
 
             return {
                 status: responseJSON.status,
@@ -30,8 +30,8 @@ const addFriend = async (username) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Adding friend failed",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;
