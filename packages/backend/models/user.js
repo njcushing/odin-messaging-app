@@ -36,12 +36,6 @@ const UserSchema = new Schema({
     password: {
         type: String,
         trim: true,
-        validate: {
-            validator: function (value) {
-                return validatePassword(value).status;
-            },
-            message: (props) => validatePassword(props.value).message.back,
-        },
         required: [true, "'password' field required"],
     },
     admin: {
