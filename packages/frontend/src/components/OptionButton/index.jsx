@@ -6,6 +6,7 @@ import Tooltip from "@/components/Tooltip";
 
 const OptionButton = ({
     text,
+    label,
     tooltipText,
     tooltipPosition,
     widthPx,
@@ -23,7 +24,7 @@ const OptionButton = ({
         >
         <button
             className="option-button"
-            aria-label={"option-button"}
+            aria-label={label}
             onClick={(e) => {
                 onClickHandler(e);
                 e.currentTarget.blur();
@@ -61,6 +62,7 @@ const OptionButton = ({
 
 OptionButton.propTypes = {
     text: PropTypes.string.isRequired,
+    label: PropTypes.string,
     tooltipText: PropTypes.string.isRequired,
     tooltipPosition: PropTypes.oneOf(["top", "right", "bottom", "left"]),
     widthPx: PropTypes.number,
@@ -71,6 +73,7 @@ OptionButton.propTypes = {
 }
 
 OptionButton.defaultProps = {
+    label: "option-button",
     tooltipPosition: "bottom",
     widthPx: 64,
     heightPx: 64,
