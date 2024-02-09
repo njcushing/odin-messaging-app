@@ -408,6 +408,7 @@ export const friendGet = [
                 preferences.displayName
                 preferences.tagLine
                 preferences.profileImage
+                preferences.setStatus
                 email
                 status
             `,
@@ -914,7 +915,12 @@ export const chatsGet = [
                     path: "participants",
                     populate: {
                         path: "user",
-                        select: "username preferences.displayName status",
+                        select: `
+                            username
+                            preferences.displayName
+                            preferences.setStatus
+                            status
+                        `,
                     },
                 },
                 { path: "messages" },

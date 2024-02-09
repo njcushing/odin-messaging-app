@@ -237,9 +237,22 @@ const ChatPanel = ({
                     participantName = participant.user.username;
                 }
 
+                const profileImage = participant.user.preferences.profileImage;
+                let participantProfileImage = { ...ProfileImage.defaultProps };
+                if (typeof profileImage !== "undefined") {
+                    if ("img" in profileImage) {
+                        participantProfileImage.src = profileImage.img.data.data;
+                    }
+                    if ("alt" in profileImage) {
+                        participantProfileImage.alt = profileImage.alt;
+                    }
+                    participantProfileImage.status = participant.user.status;
+                }
+
                 participantInfoNew.set(participant.user._id, {
                     _id: participant.user._id,
                     name: participantName,
+                    profileImage: participantProfileImage,
                 });
             });
             setParticipantInfo(participantInfoNew);
@@ -349,8 +362,11 @@ const ChatPanel = ({
                                                     "user"
                                                 }
                                                 dateSent={message.createdAt}
-                                                imageSrc={message.author.imageSrc}
-                                                imageAlt={message.author.imageAlt}
+                                                profileImage={
+                                                    participantInfo.get(message.author) ?
+                                                    participantInfo.get(message.author).profileImage :
+                                                    { ...ProfileImage.defaultProps }
+                                                }
                                                 position={
                                                     userId &&
                                                     message.author.toString() === userId.toString() ?

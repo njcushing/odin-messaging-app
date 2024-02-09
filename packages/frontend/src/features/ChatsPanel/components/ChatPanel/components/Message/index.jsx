@@ -10,8 +10,7 @@ const Message = ({
     text,
     name,
     dateSent,
-    imageSrc,
-    imageAlt,
+    profileImage,
     position,
     replyingTo,
     onReplyToHandler,
@@ -64,8 +63,9 @@ const Message = ({
                 style={{ ...profileImageStyleRules }}
             >
                 <ProfileImage
-                    src={""}
-                    alt={""}
+                    src={profileImage.src}
+                    alt={profileImage.alt}
+                    status={profileImage.status}
                     sizePx={50}
                 />
             </div>
@@ -112,8 +112,7 @@ Message.propTypes = {
     text: PropTypes.string,
     name: PropTypes.string,
     dateSent: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    imageSrc: PropTypes.string,
-    imageAlt: PropTypes.string,
+    profileImage: PropTypes.shape({ ...ProfileImage.propTypes }),
     position: PropTypes.oneOf(["left", "right"]),
     replyingTo: PropTypes.oneOfType([PropTypes.shape({
         author: PropTypes.string,
@@ -126,8 +125,7 @@ Message.defaultProps = {
     text: "",
     name: "",
     dateSent: "",
-    imageSrc: "",
-    imageAlt: "",
+    profileImage: { ...ProfileImage.defaultProps },
     position: "right",
     replyingTo: null,
     onReplyToHandler: () => {},
