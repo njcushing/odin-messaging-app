@@ -30,7 +30,7 @@ const calculateChatOptionProps = (chat, userId) => {
         let name = "";
         if (participant.nickname.length > 0) {
             name = participant.nickname;
-        } else if (user.preferences.displayName > 0) {
+        } else if (user.preferences.displayName.length > 0) {
             name = user.preferences.displayName;
         } else {
             name = user.username;
