@@ -508,6 +508,7 @@ export const friendsPost = [
                             user: user._id,
                             chat: chat._id,
                         },
+                        chats: chat._id,
                     },
                 });
                 if (updatedFriend === null) {
@@ -524,6 +525,7 @@ export const friendsPost = [
                             user: friend._id,
                             chat: chat._id,
                         },
+                        chats: chat._id,
                     },
                     $pull: { friendRequests: friend._id },
                 });
@@ -667,6 +669,7 @@ export const friendRequestsAccept = [
                         user: user._id,
                         chat: chat._id,
                     },
+                    chats: chat._id,
                 },
             });
             if (updatedFriend === null) {
@@ -682,6 +685,7 @@ export const friendRequestsAccept = [
                         user: friend._id,
                         chat: chat._id,
                     },
+                    chats: chat._id,
                 },
                 $pull: { friendRequests: friend._id },
             });
