@@ -7,7 +7,7 @@ import ProfileImage from "@/components/ProfileImage";
 
 import findUser from "./utils/findUser";
 
-const AddFriendModal = ({
+const AddFriendPanel = ({
     onCloseHandler,
     addFriendHandler,
     addFriendSubmissionErrors,
@@ -118,16 +118,16 @@ const AddFriendModal = ({
     );
 };
 
-AddFriendModal.propTypes = {
+AddFriendPanel.propTypes = {
     onCloseHandler: PropTypes.func,
     addFriendHandler: PropTypes.func,
     addFriendSubmissionErrors: PropTypes.arrayOf(PropTypes.string),
 }
 
-AddFriendModal.defaultProps = {
+AddFriendPanel.defaultProps = {
     onCloseHandler: () => {},
     addFriendHandler: () => {},
     addFriendSubmissionErrors: [],
 }
 
-export default AddFriendModal;
+export default AddFriendPanel;
