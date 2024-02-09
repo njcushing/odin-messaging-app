@@ -5,6 +5,7 @@ import OptionsSidebar from "@/features/OptionsSidebar";
 import FriendsPanel from "@/features/FriendsPanel";
 import ChatsPanel from "@/features/ChatsPanel";
 import AccountInformation from "@/features/AccountInformation";
+import Settings from "@/features/Settings";
 
 import getSelf from "@/utils/getSelf.js";
 
@@ -94,6 +95,30 @@ const Dashboard = () => {
             )
             break;
         case "settings":
+            mainDashboardContent = (
+                <Settings
+                    userSettings={(() => {
+                        try {
+                            return {
+                                theme: userInfo.value.preferences.theme,
+                            }
+                        } catch (error) {
+                            return {
+                                theme: "default",
+                            }
+                        }
+                    })()}
+                    onUpdateHandler={() => {
+                        if (!userInfo.attempting) {
+                            setUserInfo({
+                                ...userInfo,
+                                attempting: true,
+                            })
+                        }
+                    }}
+                />
+            );
+        break;
         default:
             mainDashboardContent = null;
     }
