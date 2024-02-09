@@ -55,7 +55,11 @@ const ChatOption = ({
                 ?   <h5
                         className={styles["most-recent-message"]}
                         aria-label="most-recent-message"
-                    >{`${chatProps.recentMessage.author}: ${chatProps.recentMessage.message}`}</h5>
+                    >{
+                        new DOMParser().parseFromString(
+                            `${chatProps.recentMessage.author}: ${chatProps.recentMessage.message}`, "text/html"
+                        ).body.textContent
+                    }</h5>
                 :   null}
             </div>
         </div>

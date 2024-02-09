@@ -15,7 +15,7 @@ const ChatsPanel = ({
     userId,
 }) => {
     const [chatsList, setChatsList] = useState([]);
-    const [gettingChatsList, setGettingChatsList] = useState(false);
+    const [gettingChatsList, setGettingChatsList] = useState(!createChatPanelOpenDefault);
     const [chatsListAC, setChatsListAC] = useState(null);
     const [createChatPanelOpen, setCreateChatPanelOpen] = useState(createChatPanelOpenDefault);
     const [creatingChatParticipants, setCreatingChatParticipants] = useState([]);
@@ -25,24 +25,21 @@ const ChatsPanel = ({
     const [page, setPage] = useState(1);
 
     useEffect(() => {
-        updateChatsList();
-        setGettingChatsList(true);
+        if (chatsListAC) chatsListAC.abort;
+        const chatsListACNew = new AbortController();
+        if (gettingChatsList) {
+            setChatsListAC(chatsListACNew);
+            (async () => {
+                const response = await getChatsList(chatsListACNew);
+                setChatsList(response.chats);
+                setGettingChatsList(false);
+            })();
+        }
 
         return () => {
             if (chatsListAC) chatsListAC.abort;
         }
-    }, []);
-
-    const updateChatsList = () => {
-        if (chatsListAC) chatsListAC.abort;
-        const chatsListACNew = new AbortController();
-        setChatsListAC(chatsListACNew);
-        (async () => {
-            const response = await getChatsList(chatsListACNew);
-            setChatsList(response.chats);
-            setGettingChatsList(false);
-        })();
-    }
+    }, [gettingChatsList]);
 
     useEffect(() => {
         if (creatingChat) {
@@ -52,7 +49,7 @@ const ChatsPanel = ({
                     setChatSelectedId(chatNew.chatId);
                     setCreateChatPanelOpen(false);
                     setCreatingChatSubmissionErrors([]);
-                    updateChatsList();
+                    setGettingChatsList(true);
                 } else {
                     setCreatingChatSubmissionErrors([chatNew.message]);
                 }
@@ -67,6 +64,24 @@ const ChatsPanel = ({
             <ChatPanel
                 chatId={chatSelectedId}
                 userId={userId}
+                messageSentHandler={(message) => {
+                    const chatsListNew = [...chatsList];
+                    const chatOptionToUpdate = chatsListNew.find((chat) => {
+                        return chat._id.toString() === chatSelectedId.toString()
+                    });
+                    const chatsListOptionRemoved = chatsListNew.filter((chat) => {
+                        return chat._id.toString() !== chatSelectedId.toString()
+                    });
+                    if (typeof chatOptionToUpdate !== "undefined") {
+                        chatOptionToUpdate.messages[0] = message;
+                        chatsListOptionRemoved.unshift(chatOptionToUpdate);
+                        setChatsList(chatsListOptionRemoved);
+                    }
+                }}
+                addedFriendsHandler={(chatId) => {
+                    setGettingChatsList(true);
+                    setChatSelectedId(chatId);
+                }}
                 key={chatSelectedId}
             />
         </div>
@@ -135,7 +150,7 @@ const ChatsPanel = ({
                                     aria-label="chat-option"
                                     key={chat._id}
                                 ><ChatOption
-                                    chat={chat}
+                                    chat={{...chat}}
                                     onClickHandler={() => {
                                         if (!creatingChat) {
                                             setChatSelectedId(chat._id);
