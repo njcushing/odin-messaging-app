@@ -19,7 +19,7 @@ const getFriendsList = async () => {
             }
             if (
                 responseJSON.data !== null &&
-                typeof responseJSON === "object" &&
+                typeof responseJSON.data === "object" &&
                 "token" in responseJSON.data
             ) {
                 localStorage.setItem(

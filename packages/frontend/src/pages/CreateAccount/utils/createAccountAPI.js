@@ -11,7 +11,7 @@ const createAccountAPI = async (credentials) => {
             const responseJSON = await response.json();
             if (
                 responseJSON.data !== null &&
-                typeof responseJSON === "object" &&
+                typeof responseJSON.data === "object" &&
                 "token" in responseJSON.data
             ) {
                 localStorage.setItem(
