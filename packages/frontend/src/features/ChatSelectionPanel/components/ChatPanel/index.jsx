@@ -99,10 +99,10 @@ const ChatPanel = () => {
                                 /></li>
                             )
                         })
-                    :   <h5
+                    :   <p
                             className={styles["empty-chat-text"]}
                             aria-label="empty-chat-text"
-                        >There are no messages in this chat yet!</h5>}
+                        >There are no messages in this chat yet!</p>}
                 </ul>
             </div>
             <div

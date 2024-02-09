@@ -202,7 +202,7 @@ describe("UI/DOM Testing...", () => {
                 messages: [],
             });
             await act(() => renderComponent());
-            const emptyChatText = screen.getByRole("heading", { name: "empty-chat-text" });
+            const emptyChatText = screen.getByLabelText("empty-chat-text");
             expect(emptyChatText).toBeInTheDocument();
         });
     });
