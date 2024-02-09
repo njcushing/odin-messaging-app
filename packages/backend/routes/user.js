@@ -22,7 +22,7 @@ router.put(
     controller.friendRequestsDecline
 );
 router.get("/friend-requests", controller.friendRequestsGet);
-router.get("/chats", controller.chatsGet);
+router.get("/chats/:page", controller.chatsGet);
 router.get("/:username", controller.userGet);
 router.post("/", controller.userPost);
 

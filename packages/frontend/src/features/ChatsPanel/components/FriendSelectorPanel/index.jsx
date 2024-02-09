@@ -66,7 +66,8 @@ const FriendSelectorPanel = ({
                                 aria-label="friends-selected-list"
                             >
                                 {friendsList.map((friend) => {
-                                    if (friendsSelected.has(friend._id)) {
+                                    const user = friend.user;
+                                    if (friendsSelected.has(user._id)) {
                                         return(
                                             <li
                                                 className={styles["friend-selected"]}
@@ -77,15 +78,15 @@ const FriendSelectorPanel = ({
                                                     className={styles["friend-selected-name"]}
                                                     aria-label="friend-selected-name"
                                                 >{
-                                                    friend.displayName !== "" ?
-                                                    friend.displayName :
-                                                    friend.username
+                                                    user.preferences.displayName !== "" ?
+                                                    user.preferences.displayName :
+                                                    user.username
                                                 }</h5>
                                                 <button
                                                     className={styles["remove-button"]}
                                                     aria-label="remove-button"
                                                     onClick={(e) => {
-                                                        removeFromSelectedList(friend._id);
+                                                        removeFromSelectedList(user._id);
                                                         e.currentTarget.blur();
                                                         e.preventDefault();
                                                     }}
@@ -107,12 +108,13 @@ const FriendSelectorPanel = ({
                             aria-label="friends-list"
                         >
                             {friendsList.map((friend) => {
-                                if (!friendsSelected.has(friend._id)) {
+                                const user = friend.user;
+                                if (!friendsSelected.has(user._id)) {
                                     return(
                                         <li
                                             className={styles["friend"]}
                                             aria-label="friend"
-                                            key={friend._id}
+                                            key={user._id}
                                         >
                                             <div className={styles["profile-image"]}>
                                                 <ProfileImage
@@ -125,15 +127,15 @@ const FriendSelectorPanel = ({
                                                 className={styles["friend-name"]}
                                                 aria-label="friend-name"
                                             >{
-                                                friend.displayName !== "" ?
-                                                friend.displayName :
-                                                friend.username
+                                                user.preferences.displayName !== "" ?
+                                                user.preferences.displayName :
+                                                user.username
                                             }</h5>
                                             <button
                                                 className={styles["add-button"]}
                                                 aria-label="add-button"
                                                 onClick={(e) => {
-                                                    addToSelectedList(friend._id);
+                                                    addToSelectedList(user._id);
                                                     e.currentTarget.blur();
                                                     e.preventDefault();
                                                 }}

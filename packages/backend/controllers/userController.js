@@ -145,6 +145,27 @@ const validators = {
                     return value;
                 }
             }),
+        page: param("page")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                if (isNaN(value)) {
+                    throw new Error(
+                        "'page' field (Number) must be a valid numeric value."
+                    );
+                }
+                value = parseInt(value);
+                if (!Number.isInteger(value)) {
+                    throw new Error(
+                        "'page' field (Number) must be an integer."
+                    );
+                }
+                if (value < 0) {
+                    throw new Error(
+                        "'page' field (Number) must be greater than or equal to 0."
+                    );
+                }
+                return value;
+            }),
     },
 };
 
@@ -772,15 +793,23 @@ export const friendRequestsDecline = [
 
 export const chatsGet = [
     protectedRouteJWT,
+    validators.param.page,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
+        const page = req.params.page;
+
         const user = await User.findOne(
             { _id: req.user._id },
-            { chats: { $slice: [0, 10] } }
-        )
-            .select("chats")
-            .exec();
+            {
+                chats: {
+                    $slice: [
+                        Math.max(0, (page - 1) * 20),
+                        Math.max(0, page * 20),
+                    ],
+                },
+            }
+        ).exec();
         if (user === null) return selfNotFound(res, next, req.user._id);
 
         const chats = await Chat.find(
