@@ -360,14 +360,14 @@ export const friendsGet = [
 
 export const friendsPost = [
     protectedRouteJWT,
-    param("username", "'username' parameter (String) must not be empty")
+    body("username", "'username' parameter (String) must not be empty")
         .trim()
         .isLength({ min: 1 })
         .escape(),
     checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let friend = await User.findOne({ username: req.params.username })
+        let friend = await User.findOne({ username: req.body.username })
             .select("_id friendRequests")
             .populate({
                 path: "friendRequests",
@@ -376,7 +376,7 @@ export const friendsPost = [
             })
             .exec();
         if (friend === null) {
-            return userNotFound(res, next, req.params.username);
+            return userNotFound(res, next, req.body.username);
         }
         let user = await User.findById(req.user._id)
             .select("friends")
