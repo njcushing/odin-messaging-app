@@ -73,6 +73,7 @@ vi.mock('./components/AddFriendPanel', () => ({
 
 const friendsList = [
     {
+        _id: 0,
         username: "Friend 1",
         tagLine: "Friend 1 tagline",
         status: "online",
@@ -80,6 +81,7 @@ const friendsList = [
         imageAlt: "",
     },
     {
+        _id: 1,
         username: "Friend 2",
         tagLine: "Friend 2 tagline",
         status: "away",
@@ -87,6 +89,7 @@ const friendsList = [
         imageAlt: "",
     },
     {
+        _id: 2,
         username: "Friend 3",
         tagLine: "Friend 3 tagline",
         status: "busy",
@@ -101,24 +104,27 @@ const getFriendsList = vi.fn(() => {
         friends: friendsList,
     }
 });
-vi.mock('./utils/getFriendsList', async () => ({
+vi.mock('@/utils/getFriendsList', async () => ({
     default: () => getFriendsList(),
 }));
 
 const friendRequests = [
     {
+        _id: 3,
         username: "Friend 4",
         imageSrc: "",
         imageAlt: "",
         onSuccessHandler: () => {},
     },
     {
+        _id: 4,
         username: "Friend 5",
         imageSrc: "",
         imageAlt: "",
         onSuccessHandler: () => {},
     },
     {
+        _id: 5,
         username: "Friend 6",
         imageSrc: "",
         imageAlt: "",
@@ -174,8 +180,8 @@ describe("UI/DOM Testing...", () => {
         test(`Should have as many 'Friend' component children as there are
          friends returned by the 'getFriendsList' API function`, async () => {
             await act(async () => { await renderComponent("friends") });
-            const Friends = screen.getAllByRole("listitem", { name: "friend" });
-            expect(Friends.length).toBe(friendsList.length);
+            const friends = screen.getAllByRole("listitem", { name: "friend" });
+            expect(friends.length).toBe(friendsList.length);
         });
     });
     describe("The friend requests list...", () => {

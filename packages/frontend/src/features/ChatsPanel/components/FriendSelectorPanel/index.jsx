@@ -5,7 +5,7 @@ import styles from "./index.module.css";
 import OptionButton from "@/components/OptionButton";
 import ProfileImage from "@/components/ProfileImage";
 
-import getFriendsList from "../../utils/getFriendsList";
+import getFriendsList from "@/utils/getFriendsList";
 
 const FriendSelectorPanel = ({
     title,
@@ -23,11 +23,7 @@ const FriendSelectorPanel = ({
     useEffect(() => {
         (async () => {
             const response = await getFriendsList();
-            setFriendsList(
-                Array.isArray(response.friends) ?
-                response.friends :
-                []
-            );
+            setFriendsList(response.friends);
         })();
     }, []);
 

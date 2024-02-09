@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import styles from "./index.module.css";
 
 import OptionsSidebar from "@/features/OptionsSidebar";
-import ChatSelectionPanel from "@/features/ChatSelectionPanel";
+import FriendsPanel from "@/features/FriendsPanel";
+import ChatsPanel from "@/features/ChatsPanel";
 
 const Dashboard = () => {
     const [optionSelected, setOptionSelected] = useState("friends");
@@ -10,18 +11,17 @@ const Dashboard = () => {
     let mainDashboardContent = null;
     switch (optionSelected) {
         case "friends":
-        case "groups":
-        case "communities":
             mainDashboardContent = (
-                <>
-                <div className={styles["main-content-panel"]}>
-                    <ChatSelectionPanel
-                        chatType={optionSelected}
-                    />
-                </div>
-                </>
-            );
+                <FriendsPanel />
+            )
             break;
+        case "chats":
+            mainDashboardContent = (
+                <ChatsPanel />
+            )
+            break;
+        case "account":
+        case "settings":
         default:
             mainDashboardContent = null;
     }
