@@ -84,8 +84,7 @@ const CreateChatPanel = ({
                     :   <h5
                             className={styles["no-friends"]}
                             aria-label="no-friends"
-                        >You do not have any friends with whom there is not an
-                        existing chat</h5>
+                        >You do not have any friends to create a chat with</h5>
                     }
                 </div>
                 {createChatSubmissionErrors.length > 0
