@@ -8,7 +8,7 @@ import { BrowserRouter } from "react-router-dom"
 import Friend from './index.jsx'
 
 const renderComponent = (
-    name = "Test Name",
+    username = "Test Name",
     tagLine = "Test tag line",
     status = "online",
     imageSrc = "image_src",
@@ -16,7 +16,7 @@ const renderComponent = (
     onClickHandler = () => {},
 ) => {
     render(<Friend
-        name={name}
+        username={username}
         tagLine={tagLine}
         status={status}
         imageSrc={imageSrc}
@@ -24,6 +24,16 @@ const renderComponent = (
         onClickHandler={onClickHandler}
     />);
 }
+
+vi.mock('@/components/ProfileImage', () => ({ 
+    default: ({
+        src,
+        alt,
+        sizePx,
+    }) => {
+        return (<div aria-label="profile-image"></div>);
+    }
+}));
 
 describe("UI/DOM Testing...", () => {
     describe("The element...", () => {
@@ -73,7 +83,7 @@ describe("UI/DOM Testing...", () => {
         });
     });
     describe("The element displaying the name...", () => {
-        test(`Should have the same textContent as the provided 'name' prop's
+        test(`Should have the same textContent as the provided 'username' prop's
             value`, () => {
             renderComponent();
             const name = screen.getByRole("heading", { name: "display-name" });
