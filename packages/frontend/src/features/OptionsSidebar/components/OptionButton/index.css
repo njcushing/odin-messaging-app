@@ -1,0 +1,63 @@
+.option-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: transparent;
+    border: 3px solid transparent;
+    border-radius: 0.2rem;
+    outline: none;
+    text-decoration: none;
+
+    transition: border 0.24s ease-in-out 0s;
+
+    width: 64px;
+    height: 64px;
+    padding: 0rem;
+    margin: 0rem;
+}
+
+.option-button ul {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 0rem;
+    margin: 0rem;
+}
+
+.material-symbols-rounded {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 2.2rem;
+    text-align: center;
+    text-decoration: none;
+
+    transition: transform 0.24s ease-in-out 0s;
+
+    /* To prevent cursor highlighting of the icon */
+    -webkit-touch-callout: none;    /* iOS Safari */
+        -webkit-user-select: none;      /* Safari */
+        -khtml-user-select: none;       /* Konqueror HTML */
+        -moz-user-select: none;         /* Old versions of Firefox */
+        -ms-user-select: none;          /* Internet Explorer/Edge */
+        user-select: none;              /* Non-prefixed version, currently
+                                           supported by Chrome, Edge, Opera and Firefox */
+}
+
+@media (hover: hover) {
+    .option-button:hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+    }
+    .option-button:hover ul .material-symbols-rounded {
+        transform: scale(115%);
+    }
+}
+
+.option-button:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+.option-button:focus ul .material-symbols-rounded {
+    transform: scale(115%);
+}   
