@@ -488,8 +488,23 @@ export const friendsPost = [
             try {
                 session.startTransaction();
 
+                const chat = new Chat({
+                    type: "individual",
+                    participants: [{ user: user._id }, { user: friend._id }],
+                });
+                await chat.save().catch((error) => {
+                    error.message = "Unable to create Chat.";
+                    error.status = 500;
+                    throw error;
+                });
+
                 const updatedFriend = await User.findByIdAndUpdate(friend._id, {
-                    $push: { friends: user._id },
+                    $push: {
+                        friends: {
+                            user: user._id,
+                            chat: chat._id,
+                        },
+                    },
                 });
                 if (updatedFriend === null) {
                     const error = new Error(
@@ -500,7 +515,12 @@ export const friendsPost = [
                 }
 
                 const updatedUser = await User.findByIdAndUpdate(user._id, {
-                    $push: { friends: friend._id },
+                    $push: {
+                        friends: {
+                            user: friend._id,
+                            chat: chat._id,
+                        },
+                    },
                     $pull: { friendRequests: friend._id },
                 });
                 if (updatedUser === null) {
