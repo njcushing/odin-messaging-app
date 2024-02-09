@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
@@ -9,6 +9,7 @@ import CreateAccount from './index.jsx'
 
 import * as createAccountAPI from './utils/createAccountAPI.js'
 import * as validateUserFields from '../../../../../utils/validateUserFields.js'
+import * as redirectUserToLogin from '@/utils/redirectUserToLogin.js'
 
 // For 'Not implemented: navigation' error 
 let assignMock = vi.fn();
@@ -49,6 +50,11 @@ vi.mock('../../../../../utils/validateUserFields', async () => {
         password: () => password(),
     }
 });
+
+const redirectUserToLoginMock = vi.fn(() => {});
+vi.mock("@/utils/redirectUserToLogin.js", async () => ({
+    default: () => redirectUserToLoginMock(),
+}));
 
 describe("UI/DOM Testing...", () => {
     describe("The heading element displaying the title...", () => {
@@ -106,6 +112,42 @@ describe("UI/DOM Testing...", () => {
             await user.type(usernameInput, "a");
             const usernameError = screen.getByRole("heading", { name: "username-error" });
             expect(usernameError).toBeInTheDocument();
+        });
+    });
+    describe("The 'Email' input...", () => {
+        test(`Should be present in the document`, async () => {
+            await renderComponent();
+            const emailInput = screen.getByRole("textbox", { name: "email-input" });
+            expect(emailInput).toBeInTheDocument();
+        });
+        test(`On change, should invoke the email function`, async () => {
+            const user = userEvent.setup();
+            const emailSpy = vi.spyOn(validateUserFields, "email");
+            await renderComponent();
+            const emailInput = screen.getByRole("textbox", { name: "email-input" });
+            await user.type(emailInput, "a");
+            expect(emailSpy).toHaveBeenCalledTimes(1);
+        });
+    });
+    describe("The 'Email' error message...", () => {
+        test(`Should not be present in the document by default`, async () => {
+            await renderComponent();
+            const emailError = screen.queryByRole("heading", { name: "email-error" });
+            expect(emailError).toBeNull();
+        });
+        test(`Should be present if the value of the 'Email' input is changed and
+         the new value is invalid`, async () => {
+            const user = userEvent.setup();
+            email.mockReturnValueOnce({
+                status: false,
+                message: "Invalid Email.",
+            });
+            await renderComponent();
+
+            const emailInput = screen.getByRole("textbox", { name: "email-input" });
+            await user.type(emailInput, "a");
+            const emailError = screen.getByRole("heading", { name: "email-error" });
+            expect(emailError).toBeInTheDocument();
         });
     });
     describe("The label element for the 'Password' input...", () => {
@@ -251,10 +293,40 @@ describe("UI/DOM Testing...", () => {
                 status: false,
                 message: "Invalid Username",
             });
+            email.mockReturnValueOnce({
+                status: false,
+                message: "Invalid Email",
+            });
+            password.mockReturnValueOnce({
+                status: false,
+                message: "Invalid Password",
+            }).mockReturnValueOnce({
+                status: false,
+                message: "Invalid Confirm Password",
+            });
             await renderComponent();
 
             const createAccountButton = screen.getByRole("button", { name: "create-account-button" });
             await user.click(createAccountButton);
+            fireEvent.mouseLeave(createAccountButton);
+            expect(createAccountAPISpy).toHaveBeenCalledTimes(0);
+        });
+        test(`When clicked, should not invoke the 'createAccountAPI' function if
+         all fields are valid but the 'Password' and 'Confirm Password' fields
+         do not match`, async () => {
+            const user = userEvent.setup();
+            const createAccountAPISpy = vi.spyOn(createAccountAPI, "default");
+            await renderComponent();
+
+            const passwordInput = screen.getByLabelText("password-input");
+            await user.type(passwordInput, "a");
+
+            const confirmPasswordInput = screen.getByLabelText("confirm-password-input");
+            await user.type(confirmPasswordInput, "b");
+
+            const createAccountButton = screen.getByRole("button", { name: "create-account-button" });
+            await user.click(createAccountButton);
+            fireEvent.mouseLeave(createAccountButton);
             expect(createAccountAPISpy).toHaveBeenCalledTimes(0);
         });
         test(`When clicked, should invoke the 'createAccountAPI' function if all
@@ -266,6 +338,31 @@ describe("UI/DOM Testing...", () => {
             const createAccountButton = screen.getByRole("button", { name: "create-account-button" });
             await user.click(createAccountButton);
             expect(createAccountAPISpy).toHaveBeenCalledTimes(1);
+        });
+    });
+    describe("When receiving a response from the 'createAccountAPI' function...", () => {
+        test(`If the response has a status of >= 400, the username and email
+         used in the attempt should be retained in their inputs`, async () => {
+            const user = userEvent.setup();
+
+            createAccountAPIMock.mockReturnValueOnce({
+                status: 400,
+                message: "Bad data",
+            });
+
+            await renderComponent();
+
+            const usernameInput = screen.getByRole("textbox", { name: "username-input" });
+            await user.type(usernameInput, "a");
+
+            const emailInput = screen.getByRole("textbox", { name: "email-input" });
+            await user.type(emailInput, "b");
+
+            const createAccountButton = screen.getByRole("button", { name: "create-account-button" });
+            await user.click(createAccountButton);
+
+            expect(usernameInput.value).toBe("a");
+            expect(emailInput.value).toBe("b");
         });
     });
     describe("The create account error...", () => {
@@ -295,6 +392,16 @@ describe("UI/DOM Testing...", () => {
             await renderComponent();
             const returnToLogInButton = screen.getByRole("button", { name: "return-to-log-in" });
             expect(returnToLogInButton).toBeInTheDocument();
+        });
+        test(`When clicked, should invoke the 'redirectUserToLogin' function`, async () => {
+            const redirectUserToLoginSpy = vi.spyOn(redirectUserToLogin, "default");
+            const user = userEvent.setup();
+            await renderComponent();
+            const returnToLogInButton = screen.getByRole("button", { name: "return-to-log-in" });
+            expect(redirectUserToLoginSpy).not.toHaveBeenCalled();
+            await user.click(returnToLogInButton);
+            fireEvent.mouseLeave(returnToLogInButton);
+            expect(redirectUserToLoginSpy).toHaveBeenCalled();
         });
     });
 });
