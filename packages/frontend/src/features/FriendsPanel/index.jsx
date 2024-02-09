@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
+import ProfileImage from "@/components/ProfileImage";
 import OptionButton from "@/components/OptionButton";
 import Friend from "./components/Friend";
 import FriendRequest from "./components/FriendRequest";
@@ -9,6 +10,7 @@ import AddFriendPanel from "./components/AddFriendPanel";
 
 import getFriendsList from "@/utils/getFriendsList.js";
 import getFriendRequests from "./utils/getFriendRequests.js";
+import * as extractImage from "@/utils/extractImage";
 
 const FriendsPanel = ({
     defaultList,
@@ -161,8 +163,7 @@ const FriendsPanel = ({
                                 key={request._id}
                             ><FriendRequest
                                 username={request.username}
-                                imageSrc={""}
-                                imageAlt={""}
+                                profileImage={extractImage.fromUser(request).image}
                                 onSuccessHandler={() => {
                                     const reducedFriendRequests =
                                         friendRequests.currentValue.filter((friend) => {
@@ -226,8 +227,7 @@ const FriendsPanel = ({
                                 }
                                 tagLine={friend.user.preferences.tagLine}
                                 status={friend.user.status}
-                                imageSrc={friend.user.imageSrc}
-                                imageAlt={friend.user.imageAlt}
+                                profileImage={extractImage.fromUser(friend.user).image}
                                 onClickHandler={() => {}}
                             /></li>
                         );

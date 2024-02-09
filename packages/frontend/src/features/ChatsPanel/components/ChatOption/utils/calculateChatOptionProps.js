@@ -1,4 +1,18 @@
+import ProfileImage from "@/components/ProfileImage";
+
 import combineParticipantNames from "../../../utils/combineParticipantNames.js";
+import * as extractImage from "@/utils/extractImage.js";
+
+export const defaultProps = {
+    name: "",
+    recentMessage: null,
+    status: null,
+    image: {
+        src: new Uint8Array([]),
+        alt: "",
+        status: null,
+    },
+};
 
 const statusHeirarchy = {
     online: 3,
@@ -7,17 +21,13 @@ const statusHeirarchy = {
     offline: 0,
 };
 
-const calculateChatOptionProps = (chat, userId) => {
-    const chatProps = {
-        name: "",
-        recentMessage: null,
-        status: "offline",
-        imageSrc: "",
-        imageAlt: "",
-    };
+export const calculateProps = (chat, userId) => {
+    const chatProps = { ...defaultProps };
 
     const message = chat.messages.length > 0 ? chat.messages[0] : null;
     const participantNames = [];
+
+    chatProps.image = extractImage.fromChat(chat).image;
 
     for (let j = 0; j < chat.participants.length; j++) {
         const participant = chat.participants[j];
@@ -56,5 +66,3 @@ const calculateChatOptionProps = (chat, userId) => {
 
     return chatProps;
 };
-
-export default calculateChatOptionProps;

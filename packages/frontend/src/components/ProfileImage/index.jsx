@@ -59,8 +59,8 @@ ProfileImage.propTypes = {
     src: function(props, propName, componentName) {
         const propValue = props[propName]
         if (!ArrayBuffer.isView(propValue) || propValue instanceof DataView) {
-            return new Error(`${componentName} needs to be a Typed Array
-            (e.g. - Uint8Array); got ${typeof propValue}`);
+            return new Error(`'${propName}' prop in ${componentName} needs to be a
+            Typed Array (e.g. - Uint8Array); got ${typeof propValue}`);
         }
         return;
     },
@@ -70,7 +70,7 @@ ProfileImage.propTypes = {
 };
 
 ProfileImage.defaultProps = {
-    src: new Uint8Array(),
+    src: new Uint8Array([]),
     alt: "image",
     status: null,
     sizePx: 50,

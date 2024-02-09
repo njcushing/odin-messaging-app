@@ -190,8 +190,11 @@ const createCirclesFieldUpdater = (state, setter, labelText, context, fieldName,
 }
 
 const createImageFieldUpdater = (state, setter, labelText, context, fieldName, updater) => {
-    const blob = new Blob([Buffer.from(state.currentValue)], { type: "image/png" });
-    const imgSrc = URL.createObjectURL(blob);
+    let imgSrc = null;
+    if (Array.isArray(state.currentValue)) {
+        const blob = new Blob([Buffer.from(state.currentValue)], { type: "image/png" });
+        imgSrc = URL.createObjectURL(blob);
+    }
 
     const input = (
         <>

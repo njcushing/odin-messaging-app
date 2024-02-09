@@ -12,6 +12,7 @@ import getChat from "./utils/getChat";
 import combineParticipantNames from "../../utils/combineParticipantNames";
 import addFriendsToChat from "./utils/addFriendsToChat";
 import sendMessage from "./utils/sendMessage";
+import * as extractImage from "@/utils/extractImage";
 
 import mongoose from "mongoose";
 
@@ -237,27 +238,17 @@ const ChatPanel = ({
                     participantName = participant.user.username;
                 }
 
-                const profileImage = participant.user.preferences.profileImage;
-                let participantProfileImage = { ...ProfileImage.defaultProps };
-                if (typeof profileImage !== "undefined") {
-                    if ("img" in profileImage) {
-                        participantProfileImage.src = profileImage.img.data.data;
-                    }
-                    if ("alt" in profileImage) {
-                        participantProfileImage.alt = profileImage.alt;
-                    }
-                    participantProfileImage.status = participant.user.status;
-                }
-
                 participantInfoNew.set(participant.user._id, {
                     _id: participant.user._id,
                     name: participantName,
-                    profileImage: participantProfileImage,
+                    profileImage: extractImage.fromUser(participant.user).image,
                 });
             });
             setParticipantInfo(participantInfoNew);
         }
     }, [chat.currentValue]);
+
+    const chatImage = extractImage.fromChat(chat.currentValue).image;
 
     return (
         <div className={styles["wrapper"]}>
@@ -268,8 +259,9 @@ const ChatPanel = ({
                 ?   <>
                     <div className={styles["top-bar"]}>
                         <ProfileImage
-                            src={""}
-                            alt={""}
+                            src={chatImage.src}
+                            alt={chatImage.alt}
+                            status={null}
                             sizePx={50}
                         />
                         {chat.currentValue.name.length > 0

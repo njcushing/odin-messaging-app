@@ -4,23 +4,17 @@ import styles from "./index.module.css";
 
 import ProfileImage from "@/components/ProfileImage";
 
-import calculateChatOptionProps from "./utils/calculateChatOptionProps";
+import * as chatOptionProps from "./utils/calculateChatOptionProps";
 
 const ChatOption = ({
     chat,
     onClickHandler,
     userId,
 }) => {
-    const [chatProps, setChatProps] = useState({
-        name: "",
-        recentMessage: null,
-        status: "offline",
-        imageSrc: "",
-        imageAlt: "",
-    })
+    const [chatProps, setChatProps] = useState({...chatOptionProps.defaultProps });
 
     useEffect(() => {
-        const chatPropsNew = calculateChatOptionProps(chat, userId);
+        const chatPropsNew = chatOptionProps.calculateProps(chat, userId);
         setChatProps(chatPropsNew);
     }, [chat]);
 
@@ -40,8 +34,8 @@ const ChatOption = ({
         >   
             <div className={styles["image-container"]}>
                 <ProfileImage
-                    src={chatProps.imageSrc}
-                    alt={chatProps.imageAlt}
+                    src={chatProps.image.src}
+                    alt={chatProps.image.alt}
                     status={chatProps.status}
                     sizePx={50}
                 />

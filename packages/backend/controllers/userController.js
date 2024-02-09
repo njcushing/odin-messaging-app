@@ -232,6 +232,7 @@ export const userGet = [
     asyncHandler(async (req, res, next) => {
         let user = await User.findOne({ username: req.params.username })
             .select("_id username preferences")
+            .populate("preferences.profileImage")
             .exec();
         if (user === null) {
             userNotFound(res, next, req.param.username);
@@ -448,12 +449,17 @@ export const friendCanBeAdded = [
         const username = req.params.username;
 
         let friend = await User.findOne({ username: username })
-            .select("_id username friendRequests")
-            .populate({
-                path: "friendRequests",
-                select: "_id",
-                match: { _id: req.user._id },
-            })
+            .select("_id username friendRequests preferences.profileImage")
+            .populate([
+                {
+                    path: "friendRequests",
+                    select: "_id",
+                    match: { _id: req.user._id },
+                },
+                {
+                    path: "preferences.profileImage",
+                },
+            ])
             .exec();
         if (friend === null) return userNotFound(res, next, username);
 
@@ -509,6 +515,9 @@ export const friendCanBeAdded = [
             friend: {
                 _id: friend._id,
                 username: friend.username,
+                preferences: {
+                    profileImage: friend.preferences.profileImage,
+                },
             },
             token: token,
         });
@@ -544,6 +553,9 @@ export const friendsGet = [
                     preferences.setStatus
                     status
                 `, // Have to include 'setStatus' so the 'status' virtual property will populate
+                populate: {
+                    path: "preferences.profileImage",
+                },
             })
             .exec();
         if (user === null) return selfNotFound(res, next, req.user._id);
@@ -706,11 +718,14 @@ export const friendRequestsGet = [
             .populate({
                 path: "friendRequests",
                 select: `
-                _id
-                username
-                preferences.tagLine
-                preferences.profileImage
-            `,
+                    _id
+                    username
+                    preferences.tagLine
+                    preferences.profileImage
+                `,
+                populate: {
+                    path: "preferences.profileImage",
+                },
             })
             .exec();
         if (user === null) return selfNotFound(res, next, req.user._id);
@@ -911,6 +926,7 @@ export const chatsGet = [
         )
             .sort({ updatedAt: -1 })
             .populate([
+                { path: "image" },
                 {
                     path: "participants",
                     populate: {
