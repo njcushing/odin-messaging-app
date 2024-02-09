@@ -515,3 +515,133 @@ export const friendRequestsGet = [
         }
     }),
 ];
+
+export const friendRequestsAccept = [
+    protectedRouteJWT,
+    param("username", "'username' parameter (String) must not be empty")
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        let friend = await User.findOne({ username: req.params.username })
+            .select("_id username")
+            .exec();
+        if (friend === null) {
+            return userNotFound(res, next, req.params.username);
+        }
+        let user = await User.findById(req.user._id)
+            .select("friends")
+            .populate({
+                path: "friendRequests",
+                select: "_id",
+                match: { _id: friend._id },
+            })
+            .exec();
+        if (user === null) {
+            return userNotFound(res, next, req.user._id);
+        }
+        const token = await generateToken(req.user.username, req.user.password);
+        if (user.friendRequests.length === 0) {
+            sendResponse(
+                res,
+                404,
+                `${friend.username} does not exist within the currently
+                logged-in user's friend requests.`,
+                { token: token }
+            );
+        } else {
+            const updatedFriend = await User.findByIdAndUpdate(friend._id, {
+                $push: { friends: user._id },
+            });
+            if (updatedFriend === null) {
+                return sendResponse(
+                    res,
+                    404,
+                    `User not found in database: ${friend._id}.`,
+                    { token: token }
+                );
+            }
+            const updatedUser = await User.findByIdAndUpdate(user._id, {
+                $push: { friends: friend._id },
+                $pull: { friendRequests: friend._id },
+            });
+            if (updatedUser === null) {
+                return sendResponse(
+                    res,
+                    401,
+                    `User not found in database: ${user._id}.`,
+                    { token: token }
+                );
+            }
+            sendResponse(
+                res,
+                200,
+                `${friend.username} successfully accepted as a friend.`,
+                { token: token }
+            );
+        }
+    }),
+];
+
+export const friendRequestsDecline = [
+    protectedRouteJWT,
+    param("username", "'username' parameter (String) must not be empty")
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        let friend = await User.findOne({ username: req.params.username })
+            .select("_id username")
+            .exec();
+        if (friend === null) {
+            return userNotFound(res, next, req.params.username);
+        }
+        let user = await User.findById(req.user._id)
+            .select("friends")
+            .populate({
+                path: "friendRequests",
+                select: "_id",
+                match: { _id: friend._id },
+            })
+            .exec();
+        if (user === null) {
+            return userNotFound(res, next, req.user._id);
+        }
+        const token = await generateToken(req.user.username, req.user.password);
+        if (user.friendRequests.length === 0) {
+            sendResponse(
+                res,
+                404,
+                `${friend.username} does not exist within the currently
+                logged-in user's friend requests.`,
+                { token: token }
+            );
+        } else {
+            const token = await generateToken(
+                req.user.username,
+                req.user.password
+            );
+            const updatedUser = await User.findByIdAndUpdate(user._id, {
+                $pull: { friendRequests: friend._id },
+            });
+            if (updatedUser === null) {
+                return sendResponse(
+                    res,
+                    401,
+                    `User not found in database: ${user._id}.`,
+                    { token: token }
+                );
+            }
+            sendResponse(
+                res,
+                200,
+                `${friend.username} successfully declined as a friend.`,
+                { token: token }
+            );
+        }
+    }),
+];
