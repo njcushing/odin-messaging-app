@@ -11,29 +11,29 @@ const OptionsSidebar = ({
         <div className={styles["container"]}>
             <div className={styles["chat-options"]}>
                 <OptionButton
-                    text="Friends"
+                    text="mood"
                     onClickHandler={() => onOptionSelect("friends")}
                 />
                 <OptionButton
-                    text="Groups"
+                    text="groups"
                     onClickHandler={() => onOptionSelect("groups")}
                 />
                 <OptionButton
-                    text="Communities"
+                    text="communities"
                     onClickHandler={() => onOptionSelect("communities")}
                 />
             </div>
             <div className={styles["settings-options"]}>
                 <OptionButton
-                    text="Account"
+                    text="person"
                     onClickHandler={() => onOptionSelect("account")}
                 />
                 <OptionButton
-                    text="Settings"
+                    text="settings"
                     onClickHandler={() => onOptionSelect("settings")}
                 />
                 <OptionButton
-                    text="Sign Out"
+                    text="logout"
                     onClickHandler={() => onOptionSelect("sign-out")}
                 />
             </div>
