@@ -86,8 +86,6 @@ const ChatSelectionPanel = ({
         rightPanelContent = (
             <AddFriendPanel
                 onCloseHandler={() => setAddingFriend(false)}
-                addFriendHandler={() => {}}
-                addFriendSubmissionErrors={[]}
             />
         );
     } else if (creatingChat) {
@@ -240,7 +238,7 @@ const ChatSelectionPanel = ({
                 ?   <ul
                         className={styles["friend-request-list"]}
                         aria-label="friend-request-list"
-                        key={uuidv4()}
+                        key={"friend-request-list"}
                     >
                         {friendRequests.map((request) => {
                             return (
@@ -265,6 +263,7 @@ const ChatSelectionPanel = ({
                 :   <ul
                         className={styles["chat-list-options"]}
                         aria-label="chat-list-options"
+                        key={"chat-list-options"}
                     >
                         {chatList.map((chat) => {
                             return (
