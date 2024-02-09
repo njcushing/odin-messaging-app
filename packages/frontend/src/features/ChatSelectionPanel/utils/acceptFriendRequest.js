@@ -6,7 +6,7 @@ const acceptFriendRequest = async (username, abortController) => {
             import.meta.env.VITE_SERVER_DOMAIN
         }/user/friend-requests/${username}/accept`,
         {
-            signal: abortController.signal,
+            signal: abortController ? abortController.signal : null,
             method: "PUT",
             mode: "cors",
             headers: {

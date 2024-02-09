@@ -4,7 +4,7 @@ const getFriendsList = async (abortController) => {
     const data = await fetch(
         `${import.meta.env.VITE_SERVER_DOMAIN}/user/friends`,
         {
-            signal: abortController.signal,
+            signal: abortController ? abortController.signal : null,
             method: "GET",
             mode: "cors",
             headers: {

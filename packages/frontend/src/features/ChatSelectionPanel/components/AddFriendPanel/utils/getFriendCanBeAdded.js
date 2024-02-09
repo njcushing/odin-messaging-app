@@ -6,7 +6,7 @@ const getFriendCanBeAdded = async (username, abortController) => {
             import.meta.env.VITE_SERVER_DOMAIN
         }/user/friends/can-be-added/${username}`,
         {
-            signal: abortController.signal,
+            signal: abortController ? abortController.signal : null,
             method: "GET",
             mode: "cors",
             headers: {
