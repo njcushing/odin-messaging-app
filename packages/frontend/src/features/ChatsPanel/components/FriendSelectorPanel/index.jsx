@@ -20,7 +20,7 @@ const FriendSelectorPanel = ({
 }) => {
     const [friendsList, setFriendsList] = useState({
         currentValue: [],
-        abortController: null,
+        abortController: new AbortController(),
         attempting: true,
         appending: false,
     });
