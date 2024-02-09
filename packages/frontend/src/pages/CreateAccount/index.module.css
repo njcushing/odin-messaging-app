@@ -105,17 +105,22 @@
 }
 
 .username-label,
+.email-label,
 .password-label,
 .confirm-password-label {
     color: rgba(255, 255, 255, 0.92);
     font-size: 1.2rem;
     font-family: Gabarito;
+
+    width: 100%;
 }
 
 .username-input,
+.email-input,
 .password-input,
 .confirm-password-input,
 .username-input-error,
+.email-input-error,
 .password-input-error,
 .confirm-password-input-error {
     color: rgba(0, 0, 0, 1.0);
@@ -125,28 +130,32 @@
     border-radius: 2px;
     outline: none;
 
-    width: 100%;
+    width: calc(100% - 4px);
     height: 2.0rem;
 
     transition: border-radius 0.25s ease-in-out 0s;
 }
 
 .username-input,
+.email-input,
 .password-input,
 .confirm-password-input {
     background-color: rgba(255, 255, 255, 1.0);
 }
 
 .username-input-error,
+.email-input-error,
 .password-input-error,
 .confirm-password-input-error {
     background-color: rgb(252, 208, 208);
 }
 
 .username-input:focus,
+.email-input:focus,
 .password-input:focus,
 .confirm-password-input:focus,
 .username-input-error:focus,
+.email-input-error:focus,
 .password-input-error:focus,
 .confirm-password-input-error:focus {
     border-radius: 8px;
