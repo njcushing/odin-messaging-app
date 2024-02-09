@@ -136,7 +136,10 @@ const ChatsPanel = ({
                                     participants={chat.participants}
                                     recentMessage={
                                         chat.messages.length > 0 ?
-                                        chat.messages[0] :
+                                        {
+                                            author: chat.messages[0].author,
+                                            message: chat.messages[0].text,
+                                        } :
                                         null
                                     }
                                     status={chat.status}
