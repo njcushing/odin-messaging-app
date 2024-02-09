@@ -247,10 +247,9 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(500);
         });
-        test(`Should respond with status code 500 if, when trying to create a
-         chat for more than two users, any of the operations fail where the
-         participants' 'chat' array is being pushed with the new chat's '_id'
-         value`, async () => {
+        test(`Should respond with status code 404 if, when trying to create a
+         chat for more than two users, at least one of the participants is not
+         found in the database`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(null);
             await request(app)
@@ -258,7 +257,7 @@ describe("Route testing...", () => {
                 .send({ participants: [users[4]._id, users[1]._id] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(500);
+                .expect(404);
         });
         test(`Should respond with status code 201 on successful request when
          trying to create a chat for more than two users, with a valid token`, async () => {

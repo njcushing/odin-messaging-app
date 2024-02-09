@@ -252,17 +252,17 @@ export const chatPost = [
                 chat.participants.map((participant) => {
                     return new Promise(async (resolve, reject) => {
                         let updatedUser = await User.findByIdAndUpdate(
-                            participant,
+                            participant.user,
                             {
                                 $addToSet: { chats: chat._id },
                             }
                         );
                         if (updatedUser === null) {
-                            reject(
-                                new Error(
-                                    `User not found in database: ${participant}`
-                                )
+                            const error = new Error(
+                                `User not found in database: ${participant.user}.`
                             );
+                            error.status = 404;
+                            reject(error);
                         }
                         resolve(user);
                     });
