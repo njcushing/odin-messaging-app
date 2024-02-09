@@ -103,6 +103,7 @@ app.use("*", cors(getCorsOpts));
 import * as routes from "./routes/index.js";
 app.use("/", routes.index);
 app.use("/create-account", routes.createaccount);
+app.use("/dashboard", routes.dashboard);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
