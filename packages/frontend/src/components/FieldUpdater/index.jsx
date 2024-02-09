@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
+import Tooltip from "@/components/Tooltip";
+
 const createInputContainer = (state, setter, labelText, updater, input) => {
     return (
         <div className={styles["field-container"]}>
@@ -41,7 +43,7 @@ const createInputContainer = (state, setter, labelText, updater, input) => {
     );
 }
 
-const createTextFieldUpdater = (state, setter, labelText, fieldName, updater) => {
+const createTextFieldUpdater = (state, setter, labelText, context, fieldName, updater) => {
     const input = (
         <input
             className={styles[`text-input${state.error !== null ? "-error" : ""}`]}
@@ -64,7 +66,7 @@ const createTextFieldUpdater = (state, setter, labelText, fieldName, updater) =>
     return createInputContainer(state, setter, labelText, updater, input);
 }
 
-const createSelectFieldUpdater = (state, setter, labelText, options, fieldName, updater) => {
+const createSelectFieldUpdater = (state, setter, labelText, context, fieldName, updater) => {
     const input = (
         <select
             className={styles[`select${state.error !== null ? "-error" : ""}`]}
@@ -73,17 +75,17 @@ const createSelectFieldUpdater = (state, setter, labelText, options, fieldName, 
             defaultValue={state.currentValue}
             style={{ resize: "none" }}
             onChange={(e) => {
-                const validValue = state.validator(options[e.target.selectedIndex]);
+                const validValue = state.validator(context.options[e.target.selectedIndex]);
                 setter({
                     ...state,
                     error: !validValue.status ? validValue.message.front : null,
-                    currentValue: options[e.target.selectedIndex],
+                    currentValue: context.options[e.target.selectedIndex],
                 });
             }}
             disabled={state.attemptingUpdate}
             ref={state.inputRef}
         >
-            {options.map((option) => {
+            {context.options.map((option) => {
                 return (
                     <option
                         className={styles["select-option"]}
@@ -93,6 +95,71 @@ const createSelectFieldUpdater = (state, setter, labelText, options, fieldName, 
                 )
             })};
         </select>
+    );
+    return createInputContainer(state, setter, labelText, updater, input);
+}
+
+const createCirclesFieldUpdater = (state, setter, labelText, context, fieldName, updater) => {
+    const input = (
+        <div className={styles["circles-wrapper"]}>
+            {context.options.map((option) => {
+                return (
+                    <div
+                        className={styles["circle-container"]}
+                        style={{
+                            position: "relative", // Needed for Tooltip positioning
+                            display: "flex"
+                        }}
+                        key={option.name}
+                    >
+                        <button
+                            className={styles[`circle${state.currentValue === option.name ? "-selected" : ""}`]}
+                            aria-label={fieldName}
+                            onClick={(e) => {
+                                const validValue = state.validator(option.name);
+                                setter({
+                                    ...state,
+                                    error: !validValue.status ? validValue.message.front : null,
+                                    currentValue: option.name,
+                                });
+                                e.currentTarget.blur();
+                                e.preventDefault();
+                            }}
+                            onMouseEnter={() => {
+                                setter({
+                                    ...state,
+                                    tooltip: {
+                                        id: option.name,
+                                        element:
+                                            <Tooltip
+                                                text={option.tooltipText.charAt(0).toUpperCase() + option.tooltipText.slice(1)}
+                                                position={option.tooltipPosition}
+                                            />
+                                    }
+                                });
+                            }}
+                            onMouseLeave={(e) => {
+                                setter({
+                                    ...state,
+                                    tooltip: { id: "", element: null },
+                                });
+                            }}
+                            style={{
+                                backgroundColor: option.colour,
+
+                                width: `${context.widthPx}px`,
+                                height: `${context.heightPx}px`,
+                            }}
+                        ></button>
+                        {
+                            state.tooltip.element && state.tooltip.id === option.name
+                            ?   state.tooltip.element
+                            :   null
+                        }
+                    </div>
+                );
+            })}
+        </div>
     );
     return createInputContainer(state, setter, labelText, updater, input);
 }
@@ -128,6 +195,7 @@ const FieldUpdater = ({
             validator: validator,
             apiFunction: apiFunction,
             attemptingUpdate: false,
+            tooltip: { id: "", element: null },
             error: null,
         });
 
@@ -173,10 +241,13 @@ const FieldUpdater = ({
     let element = null;
     switch (context.type) {
         case "text":
-            element = createTextFieldUpdater(field, setField, labelText, fieldName, updater);
+            element = createTextFieldUpdater(field, setField, labelText, context, fieldName, updater);
             break;
         case "select":
-            element = createSelectFieldUpdater(field, setField, labelText, context.options, fieldName, updater);
+            element = createSelectFieldUpdater(field, setField, labelText, context, fieldName, updater);
+            break;
+        case "circles":
+            element = createCirclesFieldUpdater(field, setField, labelText, context, fieldName, updater);
             break;
         default:
     }
@@ -209,6 +280,18 @@ FieldUpdater.propTypes = {
         PropTypes.shape({ // 'select'-type input
             type: "select",
             options: PropTypes.arrayOf(PropTypes.string),
+        }),
+        PropTypes.shape({ // Any number of circular 'buttons'
+            type: "circles",
+            options: PropTypes.arrayOf(PropTypes.shape({
+                name: PropTypes.string,
+                colour: PropTypes.string,
+                image: null,
+                tooltipText: PropTypes.string,
+                tooltipPosition: PropTypes.oneOf(["bottom", "top", "left", "right"]),
+            })),
+            widthPx: PropTypes.string,
+            heightPx: PropTypes.string,
         }),
     ]).isRequired,
     onUpdateHandler: PropTypes.func,
