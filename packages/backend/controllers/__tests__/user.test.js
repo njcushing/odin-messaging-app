@@ -973,7 +973,7 @@ describe("Route testing...", () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
             await request(app)
                 .put(`/preferences/profileImage`)
-                .send({ profileImage: new ArrayBuffer() })
+                .send({ profileImage: [] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(400);
@@ -987,7 +987,7 @@ describe("Route testing...", () => {
             );
             await request(app)
                 .put(`/preferences/profileImage`)
-                .send({ profileImage: new ArrayBuffer() })
+                .send({ profileImage: [] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(401);
@@ -999,7 +999,7 @@ describe("Route testing...", () => {
             vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(null);
             await request(app)
                 .put(`/preferences/profileImage`)
-                .send({ profileImage: new ArrayBuffer() })
+                .send({ profileImage: [] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(401);
@@ -1010,7 +1010,7 @@ describe("Route testing...", () => {
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
                 .put(`/preferences/profileImage`)
-                .send({ profileImage: new ArrayBuffer() })
+                .send({ profileImage: [] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(200)

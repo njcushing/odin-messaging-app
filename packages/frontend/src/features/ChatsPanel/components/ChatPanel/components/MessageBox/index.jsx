@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
+import * as validateMessage from "../../../../../../../../../utils/validateMessageFields.js";
+
 const MessageBox = ({
     text,
     placeholder,
@@ -9,20 +11,16 @@ const MessageBox = ({
     onSubmitHandler,
     sending,
 }) => {
-    const formRef = useRef(null);
     const textareaRef = useRef(null);
 
     useEffect(() => {
-        textareaRef.current.value = text;
+        if (textareaRef.current) textareaRef.current.value = text;
     }, [text]);
 
     return (    
-        <form
+        <div
             className={styles["message-box"]}
-            aria-label="message-form"
-            method="POST"
-            action=""
-            ref={formRef}
+            aria-label="message-box"
         >
             <textarea
                 className={styles["message-text-box"]}
@@ -35,21 +33,60 @@ const MessageBox = ({
                 style={{
                     resize: "none"
                 }}
+                disabled={sending}
                 ref={textareaRef}
             ></textarea>
-            <button
-                className={styles["send-message-button"]}
-                aria-label="send-message-button"
-                type="submit"
-                onClick={(e) => {
-                    onSubmitHandler(formRef.current);
-                    e.currentTarget.blur();
-                    e.preventDefault();
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.blur();
-                }}
-            >Send</button>
+            <div className={styles["send-options-container"]}>
+                <label
+                    className={styles[`browse-button`]}
+                    aria-label="browse-images"
+                    onClick={(e) => {
+                        e.currentTarget.blur();
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.blur();
+                    }}
+                >Upload
+                    <input
+                        className={styles["image-input"]}
+                        type="file"
+                        accept="image/*"
+                        disabled={sending}
+                        onChange={(e) => {
+                            const file = new FileReader();
+                            file.readAsArrayBuffer(e.target.files[0]);
+                            file.onloadend = (e) => {
+                                if (e.target.error) return;
+                                const imgArray = Array.from(new Uint8Array(e.target.result));
+                                const validValue = validateMessage.image(imgArray);
+                                if (validValue) {
+                                    onSubmitHandler({
+                                        type: "image",
+                                        value: imgArray,
+                                    });
+                                }
+                            }
+                        }}
+                    ></input>
+                </label>
+                <button
+                    className={styles["send-message-button"]}
+                    aria-label="send-message-button"
+                    type="submit"
+                    disabled={sending}
+                    onClick={(e) => {
+                        onSubmitHandler({
+                            type: "text",
+                            value: textareaRef.current.value,
+                        });
+                        e.currentTarget.blur();
+                        e.preventDefault();
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.blur();
+                    }}
+                >Send</button>
+            </div>
             {submissionErrors.length > 0
             ?   <div className={styles["message-submission-errors"]}>
                     <h4
@@ -70,7 +107,7 @@ const MessageBox = ({
                     </ul>
                 </div>
             :   null}
-        </form>
+        </div>
     );
 };
 

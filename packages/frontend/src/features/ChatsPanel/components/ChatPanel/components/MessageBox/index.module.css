@@ -55,13 +55,30 @@
     font-family: Gabarito;
 }
 
-.send-message-button {
+.message-text-box:disabled,
+.message-text-box:disabled ::placeholder {
+    color: rgba(128, 128, 128, 0.5);
+    outline-width: 1px;
+    border-radius: 1px;
+    background-color: rgba(128, 128, 128, 0.2);
+    
+    cursor: default;
+}
+
+.send-options-container {
     grid-area: 1 / 2 / -1 / -1;
 
-    align-self: end;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    gap: 0.44rem;
+}
 
+.send-message-button,
+.browse-button {
     color: rgba(0, 0, 0, 0.87);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-family: Gabarito;
     text-align: center;
     text-decoration: none;
@@ -72,14 +89,17 @@
     outline-color: var(--color-outline-primary);
     background-color: rgb(224, 224, 224);
 
-    padding: 0.3rem 0.8rem;
+    padding: 0.18rem 0rem;
+
+    width: 6rem;
 
     transition: border-radius 0.25s ease-in-out 0s,
                 transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) 0s;
 }
 
 @media (hover: hover) {
-    .send-message-button:hover {
+    .send-message-button:hover,
+    .browse-button:hover {
         border-radius: 8px;
         background-color: rgb(255, 255, 255);
         transform: scale(92%);
@@ -88,12 +108,23 @@
     }
 }
 
-.send-message-button:focus {
+.send-message-button:focus,
+.browse-button:focus {
     border-radius: 8px;
     background-color: rgb(192, 192, 192);
     transform: scale(84%);
     
     cursor: pointer;
+}
+
+.send-message-button:disabled,
+.browse-button:has(.image-input:disabled) {
+    color: rgba(128, 128, 128, 0.5);
+    border-radius: 2px;
+    background-color: rgba(128, 128, 128, 0.2);
+    transform: scale(100%);
+    
+    cursor: default;
 }
 
 .message-submission-errors {
@@ -122,4 +153,24 @@
     font-size: 0.9rem;
     font-family: Gabarito;
     font-weight: normal;
+}
+
+.waiting-wheel-container {
+    display: flex;
+    justify-content: center;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s 1 normal forwards scale-in;
+}
+
+.waiting-wheel {
+    border: 6px solid rgba(128, 128, 128, 0.9);
+    border-top: 6px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+
+    width: 40px;
+    height: 40px;
+
+    animation: spin 1.2s linear infinite;
 }

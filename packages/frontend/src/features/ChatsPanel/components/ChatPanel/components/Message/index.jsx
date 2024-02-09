@@ -8,6 +8,7 @@ import formatDate from "./utils/formatDate";
 
 const Message = ({
     text,
+    image,
     name,
     dateSent,
     profileImage,
@@ -35,19 +36,38 @@ const Message = ({
         gridArea: position === "left" ? "2 / 2 / -1 / -1" : "2 / 1 / -1 / 3",
     }
 
+    let imageSrc = null;
+    if (image && image.constructor === Object) {
+        const blob = new Blob([Buffer.from(image.src)], { type: "image/png" });
+        imageSrc = URL.createObjectURL(blob);
+    }
+
+    let replyingToImageSrc = null;
+    if (replyingTo && replyingTo.constructor === Object){
+        if (replyingTo.image && replyingTo.image.constructor === Object) {
+            const blob = new Blob([Buffer.from(replyingTo.image.src)], { type: "image/png" });
+            replyingToImageSrc = URL.createObjectURL(blob);
+        }
+    }
+
     let replyingToElement = null;
-    if (
-        replyingTo !== null &&
-        typeof replyingTo === "object" &&
-        "author" in replyingTo &&
-        "text" in replyingTo
-    ) {
+    if (replyingTo && replyingTo.constructor === Object) {
         replyingToElement = (
-            <div className={styles["replying-to-text-container"]}>
+            <div className={styles["replying-to-message-container"]}>
                 <p
-                    className={styles["replying-to-text"]}
-                    aria-label="replying-to-text"
-                >{`${replyingTo.author}: ${replyingTo.text}`}</p>
+                    className={styles["replying-to-message-text"]}
+                    aria-label="replying-to-message-text"
+                >{`${replyingTo.author}: ${replyingTo.text ? replyingTo.text : ""}`}</p>
+                {replyingTo.image && replyingTo.image.constructor === Object
+                ?   <div className={styles["replying-to-message-image-container"]}>
+                        <img
+                            className={styles["replying-to-message-image"]}
+                            aria-label="replying-to-message-image"
+                            src={replyingToImageSrc}
+                            alt={image.alt}
+                        ></img>
+                    </div>
+                :   null}
             </div>
         );
     }
@@ -70,15 +90,27 @@ const Message = ({
                 />
             </div>
             <div
-                className={styles["message-text-container"]}
+                className={styles["message-container"]}
                 style={{ ...messageTextContainerStyleRules }}
             >
-                <p
-                    className={styles["message-text"]}
-                    aria-label="message-text"
-                >
-                    {text}
-                </p>
+                {text.length > 0
+                ?   <p
+                        className={styles["message-text"]}
+                        aria-label="message-text"
+                    >
+                        {text}
+                    </p>
+                :   null}
+                {image && image.constructor === Object
+                ?   <div className={styles["message-image-container"]}>
+                        <img
+                            className={styles["message-image"]}
+                            aria-label="message-image"
+                            src={imageSrc}
+                            alt={image.alt}
+                        ></img>
+                    </div>
+                :   null}
                 {replyingToElement}
             </div>
             <div
@@ -110,19 +142,31 @@ const Message = ({
 
 Message.propTypes = {
     text: PropTypes.string,
+    image: PropTypes.oneOf([
+        PropTypes.number,
+        PropTypes.shape({ ...ProfileImage.propTypes }),
+    ]),
     name: PropTypes.string,
     dateSent: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    profileImage: PropTypes.shape({ ...ProfileImage.propTypes }),
+    profileImage: PropTypes.oneOf([
+        PropTypes.number,
+        PropTypes.shape({ ...ProfileImage.propTypes }),
+    ]),
     position: PropTypes.oneOf(["left", "right"]),
     replyingTo: PropTypes.oneOfType([PropTypes.shape({
         author: PropTypes.string,
         text: PropTypes.string,
+        image: PropTypes.oneOf([
+            PropTypes.number,
+            PropTypes.shape({ ...ProfileImage.propTypes }),
+        ]),
     }), PropTypes.number]),
     onReplyToHandler: PropTypes.func,
 };
 
 Message.defaultProps = {
     text: "",
+    image: null,
     name: "",
     dateSent: "",
     profileImage: { ...ProfileImage.defaultProps },

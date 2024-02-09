@@ -5,11 +5,13 @@ import { body, param, query } from "express-validator";
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
 import Message from "../models/message.js";
+import Image from "../models/image.js";
 
 import sendResponse from "../utils/sendResponse.js";
 import checkRequestValidationError from "../utils/checkRequestValidationError.js";
 import protectedRouteJWT from "../utils/protectedRouteJWT.js";
 import generateToken from "../utils/generateToken.js";
+import * as validateMessage from "../../../utils/validateMessageFields.js";
 
 const validateUserId = (res, next, userId) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -28,6 +30,37 @@ const validateChatId = (res, next, chatId) => {
                 `Provided chat id is not a valid id: ${chatId}`
             )
         );
+    }
+};
+
+const checkUserAuthorisedToPostMessage = (res, user, chat, token) => {
+    const userIdString = user._id.toString();
+    for (let i = 0; i < chat.participants.length; i++) {
+        if (chat.participants[i].user._id.toString() === userIdString) {
+            if (chat.participants[i].muted) {
+                return sendResponse(
+                    res,
+                    403,
+                    `Currently logged-in user is muted in the specified chat.`,
+                    {
+                        message: null,
+                        token: token,
+                    }
+                );
+            }
+            break;
+        }
+        if (i === chat.participants.length - 1) {
+            return sendResponse(
+                res,
+                403,
+                `Currently logged-in user is not a participant in the specified chat.`,
+                {
+                    message: null,
+                    token: token,
+                }
+            );
+        }
     }
 };
 
@@ -69,22 +102,36 @@ const validators = {
                 return value;
             }
         ),
-        messageText: body(
-            "messageText",
-            "'messageText' field (String) must not be empty"
-        )
+        messageText: body("text")
             .trim()
-            .isLength({ min: 1, max: 1000 }),
-        messageReplyingTo: body("messageReplyingTo")
+            .custom((value, { req, loc, path }) => {
+                const valid = validateMessage.text(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
+        messageImage: body("image")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                const valid = validateMessage.image(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
+                }
+            }),
+        messageReplyingTo: body("replyingTo")
+            .trim()
             .optional({ nullable: true })
             .custom((value, { req, loc, path }) => {
-                if (value && !mongoose.Types.ObjectId.isValid(value)) {
-                    throw new Error(
-                        `'messageReplyingTo' field (String), when not empty, must be
-                        a valid MongoDB ObjectId.`
-                    );
+                const valid = validateMessage.replyingTo(value);
+                if (!valid.status) {
+                    throw new Error(valid.message.back);
+                } else {
+                    return value;
                 }
-                return value;
             }),
     },
     param: {
@@ -200,13 +247,23 @@ export const chatGet = [
                 },
                 {
                     path: "messages",
-                    populate: {
-                        path: "replyingTo",
-                        populate: {
-                            path: "author",
-                            select: "username preferences.displayName",
+                    populate: [
+                        {
+                            path: "replyingTo",
+                            populate: [
+                                {
+                                    path: "author",
+                                    select: "username preferences.displayName",
+                                },
+                                {
+                                    path: "image",
+                                },
+                            ],
                         },
-                    },
+                        {
+                            path: "image",
+                        },
+                    ],
                 },
             ])
             .exec();
@@ -443,7 +500,7 @@ export const chatPost = [
     }),
 ];
 
-export const messagePost = [
+export const messageTextPost = [
     protectedRouteJWT,
     validators.body.messageText,
     validators.body.messageReplyingTo,
@@ -459,36 +516,7 @@ export const messagePost = [
 
         const token = await generateToken(req.user.username, req.user.password);
 
-        // Ensure currently logged-in user is a participant in the chat and has
-        // the appropriate privileges to post messages
-        const userIdString = user._id.toString();
-        for (let i = 0; i < chat.participants.length; i++) {
-            if (chat.participants[i].user._id.toString() === userIdString) {
-                if (chat.participants[i].muted) {
-                    return sendResponse(
-                        res,
-                        403,
-                        `Currently logged-in user is muted in the specified chat.`,
-                        {
-                            message: null,
-                            token: token,
-                        }
-                    );
-                }
-                break;
-            }
-            if (i === chat.participants.length - 1) {
-                return sendResponse(
-                    res,
-                    403,
-                    `Currently logged-in user is not a participant in the specified chat.`,
-                    {
-                        message: null,
-                        token: token,
-                    }
-                );
-            }
-        }
+        checkUserAuthorisedToPostMessage(res, user, chat, token);
 
         // Create and save new message
         const session = await mongoose.startSession();
@@ -497,8 +525,8 @@ export const messagePost = [
 
             const message = new Message({
                 author: user._id,
-                text: req.body.messageText,
-                replyingTo: req.body.messageReplyingTo,
+                text: req.body.text,
+                replyingTo: req.body.replyingTo,
             });
             await message.save().catch((error) => {
                 error.message = "Unable to create Message.";
@@ -506,13 +534,115 @@ export const messagePost = [
                 throw error;
             });
 
-            if (req.body.messageReplyingTo !== null) {
+            if (req.body.replyingTo !== null) {
                 await Message.populate(message, {
                     path: "replyingTo",
                     populate: {
                         path: "author",
                         select: "username preferences.displayName",
                     },
+                });
+            }
+
+            const updatedChat = await Chat.findByIdAndUpdate(chat._id, {
+                $push: {
+                    messages: {
+                        $each: [message._id],
+                        $position: 0,
+                    },
+                },
+            });
+            if (updatedChat === null) {
+                const error = new Error(
+                    `Chat not found in database: ${chat._id}.`
+                );
+                error.status = 404;
+                throw error;
+            }
+
+            session.commitTransaction();
+
+            sendResponse(
+                res,
+                201,
+                `Message successfully created at: ${message._id} in chat ${chat._id}.`,
+                {
+                    message: message,
+                    token: token,
+                }
+            );
+        } catch (error) {
+            return sendResponse(
+                res,
+                error.status,
+                error.message,
+                {
+                    message: null,
+                    token: token,
+                },
+                error
+            );
+        } finally {
+            session.endSession();
+        }
+    }),
+];
+
+export const messageImagePost = [
+    protectedRouteJWT,
+    validators.body.messageImage,
+    validators.body.messageReplyingTo,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        const user = await User.findById(req.user._id).exec();
+        if (user === null) return selfNotFound(res, next, req.user._id);
+
+        validateChatId(res, next, req.params.chatId);
+        const chat = await Chat.findById(req.params.chatId).exec();
+        if (chat === null) return chatNotFound(res, next, req.params.chatId);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        checkUserAuthorisedToPostMessage(res, user, chat, token);
+
+        // Create and save new message
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+
+            const image = new Image({
+                "img.data": req.body.image,
+                "img.contentType": "image/png",
+            });
+            await image.save().catch((error) => {
+                error.message = "Unable to save new image.";
+                throw error;
+            });
+
+            const message = new Message({
+                author: user._id,
+                image: image._id,
+                replyingTo: req.body.replyingTo,
+            });
+            await message.save().catch((error) => {
+                error.message = "Unable to create Message.";
+                error.status = 500;
+                throw error;
+            });
+
+            await Message.populate(message, { path: "image" });
+
+            if (req.body.replyingTo !== null) {
+                await Message.populate(message, {
+                    path: "replyingTo",
+                    populate: [
+                        { path: "image" },
+                        {
+                            path: "author",
+                            select: "username preferences.displayName",
+                        },
+                    ],
                 });
             }
 

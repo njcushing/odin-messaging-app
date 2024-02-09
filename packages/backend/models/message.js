@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+import * as validate from "../../../utils/validateMessageFields.js";
+
 const Schema = mongoose.Schema;
 
 const MessageSchema = new Schema(
@@ -12,10 +14,14 @@ const MessageSchema = new Schema(
         text: {
             type: String,
             trim: true,
-            minLength: 1,
-            maxLength: 1000,
-            required: true,
+            validate: {
+                validator: function (value) {
+                    return validate.text(value).status;
+                },
+                message: (props) => validate.status(props.value).message.back,
+            },
         },
+        image: { type: Schema.Types.ObjectId, ref: "Image" },
         replyingTo: { type: Schema.Types.ObjectId, ref: "Message" },
         deleted: { type: Boolean, default: false },
     },

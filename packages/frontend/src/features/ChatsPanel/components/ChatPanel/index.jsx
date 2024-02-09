@@ -11,8 +11,9 @@ import MessageBox from "./components/MessageBox";
 import getChat from "./utils/getChat";
 import combineParticipantNames from "../../utils/combineParticipantNames";
 import addFriendsToChat from "./utils/addFriendsToChat";
-import sendMessage from "./utils/sendMessage";
+import * as sendMessage from "./utils/sendMessage.js";
 import * as extractImage from "@/utils/extractImage";
+import * as validateMessage from "../../../../../../../utils/validateMessageFields.js";
 
 import mongoose from "mongoose";
 
@@ -39,11 +40,15 @@ const ChatPanel = ({
         submissionErrors: [],
     });
 
-    const [sendingMessageAC, setSendingMessageAC] = useState(null);
-    const [attemptingSendMessage, setAttemptingSendMessage] = useState(false);
-    const [currentMessage, setCurrentMessage] = useState("");
-    const [replyingTo, setReplyingTo] = useState(null);
-    const [messageSubmissionErrors, setMessageSubmissionErrors] = useState([]);
+    const [sendingMessage, setSendingMessage] = useState({
+        currentType: "text",
+        currentText: "",
+        currentImage: null,
+        replyingTo: null,
+        abortController: null,
+        attempting: false,
+        submissionErrors: [],
+    });
 
     useEffect(() => {
         if (chat.abortController) chat.abortController.abort;
@@ -92,28 +97,51 @@ const ChatPanel = ({
         }
     }, [chatId]);
     
-    const attemptSendMessage = useCallback(async (form) => {
-        const formData = new FormData(form);
-        const formFields = Object.fromEntries(formData);
-
+    const attemptSendMessage = (info) => {
         // Client-side validation
         let validCredentials = true;
         const messageSubmissionErrorsNew = [];
-        if (formFields.text.length < 1 || formFields.text.length > 1000) {
-            validCredentials = false;
-            messageSubmissionErrorsNew.push("Message text must not be empty and cannot exceed 1000 characters in length.");
-        }
-        if (replyingTo && !mongoose.Types.ObjectId.isValid(replyingTo)) {
-            validCredentials = false;
-            messageSubmissionErrorsNew.push("Cannot reply to this message as the id of its author is invalid.")
+
+        if (sendingMessage.replyingTo) {
+            const validReplyingTo = validateMessage.replyingTo(sendingMessage.replyingTo._id);
+            if (!validReplyingTo.status) {
+                validCredentials = false;
+                messageSubmissionErrorsNew.push(validReplyingTo.message.front);
+            }
         }
 
-        setMessageSubmissionErrors(messageSubmissionErrorsNew);
-        if (!validCredentials) return;
+        switch (info.type) {
+            case "text":
+                const validText = validateMessage.text(info.value);
+                if (!validText.status) {
+                    validCredentials = false;
+                    messageSubmissionErrorsNew.push(validText.message.front);
+                }
+                break;
+            case "image":
+                const validImage = validateMessage.image(info.value);
+                if (!validImage.status) {
+                    validCredentials = false;
+                    messageSubmissionErrorsNew.push(validImage.message.front);
+                }
+                break;
+        }
 
-        setAttemptingSendMessage(true);
-        setCurrentMessage(formFields.text);
-    }, []);
+        if (!validCredentials) {
+            setSendingMessage({
+                ...sendingMessage,
+                submissionErrors: messageSubmissionErrorsNew,
+            });
+            return;
+        }
+        setSendingMessage({
+            ...sendingMessage,
+            currentType: info.type,
+            currentText: info.type === "text" ? info.value : sendingMessage.currentText,
+            currentImage: info.type === "image" ? info.value : sendingMessage.currentImage,
+            attempting: true,
+        });
+    };
     
     const attemptAddingFriendsToChat = (userIds) => {
         // Client-side validation
@@ -140,17 +168,46 @@ const ChatPanel = ({
     };
 
     useEffect(() => {
-        if (sendingMessageAC) sendingMessageAC.abort;
-        const sendingMessageACNew = new AbortController();
-        if (attemptingSendMessage) {
-            setSendingMessageAC(sendingMessageACNew);
+        if (sendingMessage.abortController) sendingMessage.abortController.abort;
+        const abortControllerNew = new AbortController();
+        if (sendingMessage.attempting) {
+            setSendingMessage({
+                ...sendingMessage,
+                abortController: abortControllerNew,
+            });
             (async () => {
-                const response = await sendMessage(chatId, {
-                    messageText: currentMessage,
-                    messageReplyingTo: replyingTo ? replyingTo._id : null,
-                }, sendingMessageACNew);
+                let response;
+                switch (sendingMessage.currentType) {
+                    case "text":
+                        response = await sendMessage.text(chatId, {
+                            text: sendingMessage.currentText,
+                            replyingTo: sendingMessage.replyingTo
+                                ? sendingMessage.replyingTo._id
+                                : null,
+                        }, abortControllerNew);
+                        break;
+                    case "image":
+                        response = await sendMessage.image(chatId, {
+                            image: sendingMessage.currentImage,
+                            replyingTo: sendingMessage.replyingTo
+                                ? sendingMessage.replyingTo._id
+                                : null,
+                        }, abortControllerNew);
+                        break;
+                    default:
+                        response = {
+                            status: 400,
+                            message: "Invalid message type (expecting 'text' or 'image')",
+                        }
+                }
                 if (response.status >= 400) {
-                    setMessageSubmissionErrors([response.message]);
+                    setSendingMessage({
+                        ...sendingMessage,
+                        currentImage: null,
+                        attempting: false,
+                        abortController: null,
+                        submissionErrors: [response.message],
+                    });
                 } else {
                     const messages = [...chat.currentValue.messages];
                     messages.unshift(response.newMessage);
@@ -161,21 +218,29 @@ const ChatPanel = ({
                             messages: messages,
                         }
                     });
-                    setCurrentMessage("");
-                    setReplyingTo(null);
+                    setSendingMessage({
+                        ...sendingMessage,
+                        currentText: sendingMessage.currentType === "text" ? "" : sendingMessage.currentText,
+                        currentImage: null,
+                        replyingTo: null,
+                        attempting: false,
+                        abortController: null,
+                        submissionErrors: [],
+                    });
                     messageSentHandler(response.newMessage);
                 }
-                setAttemptingSendMessage(false);
-                setSendingMessageAC(null);
             })();
         } else {
-            setSendingMessageAC(null);
+            setSendingMessage({
+                ...sendingMessage,
+                abortController: null,
+            });
         }
 
         return () => {
-            if (sendingMessageAC) sendingMessageAC.abort;
+            if (sendingMessage.abortController) sendingMessage.abortController.abort;
         }
-    }, [attemptingSendMessage]);
+    }, [sendingMessage.attempting]);
 
     useEffect(() => {
         if (addingFriendsToChat.abortController) addingFriendsToChat.abortController.abort;
@@ -221,7 +286,7 @@ const ChatPanel = ({
         }
 
         return () => {
-            if (sendingMessageAC) sendingMessageAC.abort;
+            if (addingFriendsToChat.abortController) addingFriendsToChat.abortController.abort;
         }
     }, [addingFriendsToChat.attempting]);
 
@@ -341,13 +406,18 @@ const ChatPanel = ({
                             >
                                 {chat.currentValue.messages && Array.isArray(chat.currentValue.messages) && chat.currentValue.messages.length > 0
                                 ?   <>
-                                    {chat.currentValue.messages.map((message) => {
+                                    {chat.currentValue.messages.map((message, i) => {
                                         return (
                                             <li
                                                 aria-label="chat-message"
                                                 key={message._id}
                                             ><Message
                                                 text={message.text}
+                                                image={
+                                                    typeof message.image !== "undefined"
+                                                        ? extractImage.fromMessage(message).image
+                                                        : null
+                                                }
                                                 name={
                                                     participantInfo.get(message.author) ?
                                                     participantInfo.get(message.author).name :
@@ -372,21 +442,32 @@ const ChatPanel = ({
                                                         participantInfo.get(message.replyingTo.author._id).name :
                                                         "User",
                                                     text: message.replyingTo.text,
+                                                    image: typeof message.replyingTo.image !== "undefined"
+                                                        ? extractImage.fromMessage(message.replyingTo).image
+                                                        : null,
                                                 }
                                                 : null}
                                                 onReplyToHandler={(e) => {
-                                                    if (replyingTo && replyingTo._id.toString() === message._id.toString()) {
-                                                        setReplyingTo(null);
-                                                    } else {
-                                                        setReplyingTo({
-                                                            _id: message._id,
-                                                            authorId: message.author,
-                                                            authorName:
-                                                                participantInfo.get(message.author) ?
-                                                                participantInfo.get(message.author).name :
-                                                                "user",
-                                                            text: message.text
-                                                        });
+                                                    if (!sendMessage.attempting) {
+                                                        if (sendingMessage.replyingTo && sendingMessage.replyingTo._id.toString() === message._id.toString()) {
+                                                            setSendingMessage({
+                                                                ...sendingMessage,
+                                                                replyingTo: null,
+                                                            });
+                                                        } else {
+                                                            setSendingMessage({
+                                                                ...sendingMessage,
+                                                                replyingTo: {
+                                                                    _id: message._id,
+                                                                    authorId: message.author,
+                                                                    authorName:
+                                                                        participantInfo.get(message.author) ?
+                                                                        participantInfo.get(message.author).name :
+                                                                        "user",
+                                                                    text: message.text
+                                                                },
+                                                            });
+                                                        }
                                                     }
                                                 }}
                                             /></li>
@@ -445,23 +526,23 @@ const ChatPanel = ({
                             submissionErrors={addingFriendsToChat.submissionErrors}
                         />
                     }
-                    {replyingTo
+                    {sendingMessage.replyingTo
                     ?   <div className={styles["replying-to-container"]}>
-                            {`Replying to ${replyingTo.author}...`}
+                            {`Replying to ${sendingMessage.replyingTo.authorName}...`}
                         </div>
                     :   null}
                     <div
                         className={styles["text-editor-container"]}
                     >
                         <MessageBox
-                            text={currentMessage}
-                            submissionErrors={messageSubmissionErrors}
-                            onSubmitHandler={(form) => {
-                                if (!attemptingSendMessage) {
-                                    attemptSendMessage(form);
+                            text={sendingMessage.currentText}
+                            submissionErrors={sendingMessage.submissionErrors}
+                            onSubmitHandler={(info) => {
+                                if (!sendingMessage.attempting) {
+                                    attemptSendMessage(info);
                                 }
                             }}
-                            sending={attemptingSendMessage}
+                            sending={sendingMessage.attempting}
                         />
                     </div>
                     </>
