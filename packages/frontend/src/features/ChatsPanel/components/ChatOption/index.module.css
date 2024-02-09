@@ -61,7 +61,6 @@
 }
 
 .chat-name,
-.chat-name-participants,
 .most-recent-message {
     font-family: Gabarito;
     white-space: nowrap;
@@ -72,8 +71,7 @@
     margin: 0rem;
 }
 
-.chat-name,
-.chat-name-participants {
+.chat-name {
     color: rgba(255, 255, 255, 0.87);
     font-size: 1.2rem;
 }

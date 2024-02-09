@@ -13,6 +13,7 @@ import getFriendRequests from "./utils/getFriendRequests.js";
 const FriendsPanel = ({
     defaultList,
     addingFriendDefault,
+    userId,
 }) => {
     const [listViewing, setListViewing] = useState(defaultList);
     const [friendsList, setFriendsList] = useState([]);
@@ -211,11 +212,13 @@ const FriendsPanel = ({
 FriendsPanel.propTypes = {
     defaultList: PropTypes.oneOf(["friends", "requests"]),
     addingFriendDefault: PropTypes.bool,
+    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 }
 
 FriendsPanel.defaultProps = {
     defaultList: "friends",
     addingFriendDefault: false,
+    userId: null,
 }
 
 export default FriendsPanel;
