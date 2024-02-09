@@ -1,3 +1,14 @@
+@keyframes fade-in {
+    from {
+        opacity: 0%;
+        transform: translateY(0.5rem);
+    }
+    to {
+        opacity: 100%;
+        transform: translateY(0rem);
+    }
+}
+
 .wrapper {
     container-type: inline-size;
 
@@ -62,6 +73,10 @@
 
     padding: 0.1rem 0.3rem;
     margin: 0rem;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0.15s 1 normal forwards fade-in;
 }
 
 .chat-panel {

@@ -13,6 +13,8 @@ import FriendRequest from "./components/FriendRequest";
 import * as getChatListFromAPI from "./utils/getChatListFromAPI.js";
 import getFriendRequests from "./utils/getFriendRequests.js";
 
+import { v4 as uuidv4 } from 'uuid';
+
 const ChatSelectionPanel = ({
     chatType,
 }) => {
@@ -222,6 +224,7 @@ const ChatSelectionPanel = ({
                 ?   <ul
                         className={styles["friend-request-list"]}
                         aria-label="friend-request-list"
+                        key={uuidv4()}
                     >
                         {friendRequests.map((request) => {
                             return (
@@ -246,8 +249,9 @@ const ChatSelectionPanel = ({
                 :   <ul
                         className={styles["chat-list-options"]}
                         aria-label="chat-list-options"
+                        key={uuidv4()}
                     >
-                        {chatList.map((chat) => {
+                        {chatList.map((chat, i) => {
                             return (
                                 <li
                                     aria-label="chat-option"
