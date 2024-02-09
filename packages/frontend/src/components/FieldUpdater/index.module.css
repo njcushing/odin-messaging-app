@@ -57,7 +57,7 @@ label,
 
 label input[type="file"] {
     position: absolute;
-    top: -99999px;
+    top: -9999px;
 }
 
 .text-input-and-button-container {

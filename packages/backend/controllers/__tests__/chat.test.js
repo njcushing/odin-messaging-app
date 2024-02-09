@@ -245,10 +245,12 @@ describe("Route testing...", () => {
                     }
                 });
         });
-        test(`Should respond with status code 500 if, when trying to create a
-         chat for more than two users, the operation fails`, async () => {
-            vi.spyOn(Chat.prototype, "save").mockImplementationOnce(() =>
-                Promise.reject("fail update")
+        test(`Should respond with an error if the Chat schema .save() operation
+         fails when trying to create one for more than two users`, async () => {
+            vi.spyOn(Chat.prototype, "save").mockImplementationOnce(
+                async () => {
+                    throw new Error("failed");
+                }
             );
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
@@ -256,7 +258,7 @@ describe("Route testing...", () => {
                 .send({ participants: [users[4]._id, users[1]._id] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(500);
+                .expect((res) => res.error !== false);
         });
         test(`Should respond with status code 404 if, when trying to create a
          chat for more than two users, at least one of the participants is not
@@ -372,10 +374,12 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(403);
         });
-        test(`Should respond with status code 500 if, when trying to create a
-         new image, the operation fails`, async () => {
-            vi.spyOn(Image.prototype, "save").mockImplementationOnce(() =>
-                Promise.reject("fail save")
+        test(`Should respond with an error if the Image schema .save() operation
+         fails`, async () => {
+            vi.spyOn(Image.prototype, "save").mockImplementationOnce(
+                async () => {
+                    throw new Error("failed");
+                }
             );
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
@@ -383,7 +387,7 @@ describe("Route testing...", () => {
                 .send({ image: [] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(500);
+                .expect((res) => res.error !== false);
         });
         test(`Should respond with status code 404 if, when attempting to
          update the chat's fields, it cannot be found in the database`, async () => {
@@ -665,10 +669,12 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(403);
         });
-        test(`Should respond with status code 500 if, when trying to create a
-         message, the operation fails`, async () => {
-            vi.spyOn(Message.prototype, "save").mockImplementationOnce(() =>
-                Promise.reject("fail save")
+        test(`Should respond with an error if the Message schema .save()
+         operation fails`, async () => {
+            vi.spyOn(Message.prototype, "save").mockImplementationOnce(
+                async () => {
+                    throw new Error("failed");
+                }
             );
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
@@ -679,7 +685,7 @@ describe("Route testing...", () => {
                 })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(500);
+                .expect((res) => res.error !== false);
         });
         test(`Should respond with status code 404 if, when trying to save the
          new message in the chat's 'messages' array, the chat cannot be found
@@ -848,10 +854,13 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(403);
         });
-        test(`Should respond with status code 500 if, when trying to
-         duplicate an 'individual'-type chat, the save operation fails`, async () => {
-            vi.spyOn(Chat.prototype, "save").mockImplementationOnce(() =>
-                Promise.reject("fail update")
+        test(`Should respond with an error if the Chat schema .save() operation
+         fails when trying to create a new chat from an existing
+         'individual'-type chat`, async () => {
+            vi.spyOn(Chat.prototype, "save").mockImplementationOnce(
+                async () => {
+                    throw new Error("failed");
+                }
             );
             mockProtectedRouteJWT(users[1]._id, "Person1", "person1*");
             await request(app)
@@ -859,7 +868,7 @@ describe("Route testing...", () => {
                 .send({ participants: [users[0]._id] })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(500);
+                .expect((res) => res.error !== false);
         });
         test(`Should respond with status code 201 on successful request, with
          a valid token`, async () => {

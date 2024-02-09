@@ -142,13 +142,23 @@ const Message = ({
 
 Message.propTypes = {
     text: PropTypes.string,
-    image: PropTypes.oneOf([
+    image: PropTypes.oneOfType([
         PropTypes.number,
-        PropTypes.shape({ ...ProfileImage.propTypes }),
+        PropTypes.shape({
+            src: function(props, propName, componentName) {
+                const propValue = props[propName]
+                if (!ArrayBuffer.isView(propValue) || propValue instanceof DataView) {
+                    return new Error(`'${propName}' prop in ${componentName} needs to be a
+                    Typed Array (e.g. - Uint8Array); got ${typeof propValue}`);
+                }
+                return;
+            },
+            alt: PropTypes.string,
+        }),
     ]),
     name: PropTypes.string,
     dateSent: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    profileImage: PropTypes.oneOf([
+    profileImage: PropTypes.oneOfType([
         PropTypes.number,
         PropTypes.shape({ ...ProfileImage.propTypes }),
     ]),
@@ -156,9 +166,19 @@ Message.propTypes = {
     replyingTo: PropTypes.oneOfType([PropTypes.shape({
         author: PropTypes.string,
         text: PropTypes.string,
-        image: PropTypes.oneOf([
+        image: PropTypes.oneOfType([
             PropTypes.number,
-            PropTypes.shape({ ...ProfileImage.propTypes }),
+            PropTypes.shape({
+                src: function(props, propName, componentName) {
+                    const propValue = props[propName]
+                    if (!ArrayBuffer.isView(propValue) || propValue instanceof DataView) {
+                        return new Error(`'${propName}' prop in ${componentName} needs to be a
+                        Typed Array (e.g. - Uint8Array); got ${typeof propValue}`);
+                    }
+                    return;
+                },
+                alt: PropTypes.string,
+            }),
         ]),
     }), PropTypes.number]),
     onReplyToHandler: PropTypes.func,

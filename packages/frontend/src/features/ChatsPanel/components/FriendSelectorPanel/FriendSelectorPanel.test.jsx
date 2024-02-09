@@ -56,28 +56,43 @@ vi.mock('@/components/ProfileImage', () => ({
 
 const friendsList = [
     {
-        _id: 0,
-        username: "Friend 1",
-        tagLine: "Friend 1 tagline",
-        status: "online",
-        imageSrc: "",
-        imageAlt: "",
+        user: {
+            _id: 0,
+            username: "Friend 1",
+            preferences: {
+                displayName: "Friend 1",
+                tagLine: "Friend 1 tagline",
+            },
+            status: "online",
+            imageSrc: "",
+            imageAlt: "",
+        }
     },
     {
-        _id: 1,
-        username: "Friend 2",
-        tagLine: "Friend 2 tagline",
-        status: "away",
-        imageSrc: "",
-        imageAlt: "",
+        user: {
+            _id: 1,
+            username: "Friend 2",
+            preferences: {
+                displayName: "Friend 2",
+                tagLine: "Friend 2 tagline",
+            },
+            status: "online",
+            imageSrc: "",
+            imageAlt: "",
+        }
     },
     {
-        _id: 2,
-        username: "Friend 3",
-        tagLine: "Friend 3 tagline",
-        status: "busy",
-        imageSrc: "",
-        imageAlt: "",
+        user: {
+            _id: 2,
+            username: "Friend 3",
+            preferences: {
+                displayName: "Friend 3",
+                tagLine: "Friend 3 tagline",
+            },
+            status: "online",
+            imageSrc: "",
+            imageAlt: "",
+        }
     },
 ];
 const getFriendsList = vi.fn(() => {
@@ -112,16 +127,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
@@ -148,16 +154,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
@@ -170,16 +167,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
@@ -191,16 +179,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
@@ -214,16 +193,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
@@ -277,16 +247,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const friend = screen.getByRole("listitem", { name: "friend" });
@@ -307,16 +268,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const friendProfileImage = screen.getByRole("generic", { name: "profile-image" });
@@ -326,16 +278,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const friendName = screen.getByRole("heading", { name: "friend-name" });
@@ -344,16 +287,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
@@ -365,16 +299,7 @@ describe("UI/DOM Testing...", () => {
             getFriendsList.mockReturnValueOnce({
                 status: 200,
                 message: "Found",
-                friends: [
-                    {
-                        _id: 0,
-                        username: "Friend 1",
-                        tagLine: "Friend 1 tagline",
-                        status: "online",
-                        imageSrc: "",
-                        imageAlt: "",
-                    },
-                ]
+                friends: [friendsList[0]],
             });
             await renderComponent();
             const addButton = screen.getByRole("button", { name: "add-button" });
@@ -423,12 +348,12 @@ describe("UI/DOM Testing...", () => {
     });
     describe("The submission errors list title...", () => {
         test(`Should not be present in the document if there are no errors`, async () => {
-            renderComponent();
+            await act(async () => renderComponent());
             const submissionErrorsList = screen.queryByRole("heading", { name: "submission-errors-title" });
             expect(submissionErrorsList).toBeNull();
         });
         test(`Should be present in the document if there are errors`, async () => {
-            await act(() => renderComponent(
+            await act(async () => renderComponent(
                 "Title",
                 "Remove",
                 "Add",
@@ -438,18 +363,18 @@ describe("UI/DOM Testing...", () => {
                 () => {},
                 ["error_1", "error_2", "error_3"],
             ));
-            const submissionErrorsList = screen.queryByRole("heading", { name: "submission-errors-title" });
+            const submissionErrorsList = screen.getByRole("heading", { name: "submission-errors-title" });
             expect(submissionErrorsList).toBeInTheDocument();
         });
     });
     describe("The submission errors list...", () => {
         test(`Should not be present in the document if there are no errors`, async () => {
-            renderComponent();
+            await act(async () => renderComponent());
             const submissionErrorsList = screen.queryByRole("list", { name: "submission-errors-list" });
             expect(submissionErrorsList).toBeNull();
         });
         test(`Should be present in the document if there are errors`, async () => {
-            await act(() => renderComponent(
+            await act(async () => renderComponent(
                 "Title",
                 "Remove",
                 "Add",
@@ -464,7 +389,7 @@ describe("UI/DOM Testing...", () => {
         });
         test(`Should have a number of list item children equivalent to the
          number of errors`, async () => {
-            await act(() => renderComponent(
+            await act(async () => renderComponent(
                 "Title",
                 "Remove",
                 "Add",

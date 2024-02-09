@@ -8,7 +8,7 @@ import { BrowserRouter } from "react-router-dom"
 import ProfileImage from './index.jsx'
 
 const renderComponent = (
-    src = "image_src",
+    src = new Uint8Array(),
     alt = "image alt",
     status = null,
     sizePx = 50,
@@ -20,6 +20,8 @@ const renderComponent = (
         sizePx={sizePx}
     />);
 }
+
+global.URL.createObjectURL = vi.fn(() => 'image');
 
 describe("UI/DOM Testing...", () => {
     describe("The <img> element...", () => {
@@ -34,7 +36,7 @@ describe("UI/DOM Testing...", () => {
     describe("The status indicator...", () => {
         test(`Should be present in the document if the value provided to the
          'status' prop is not equal to 'null'`, () => {
-            renderComponent("image_src", "image alt", "online", 50);
+            renderComponent(new Uint8Array(), "image alt", "online", 50);
             const statusIndicator = screen.getByRole("generic", { name: "status-indicator" });
             expect(statusIndicator).toBeInTheDocument();
         });

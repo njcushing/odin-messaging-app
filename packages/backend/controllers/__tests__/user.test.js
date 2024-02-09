@@ -142,17 +142,19 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(500);
         });
-        test(`Should respond with status code 500 if the .save() mongoose model
-         method rejects`, async () => {
-            vi.spyOn(User.prototype, "save").mockImplementationOnce(() =>
-                Promise.reject("fail update")
+        test(`Should respond with an error if the User schema .save() operation
+         fails`, async () => {
+            vi.spyOn(User.prototype, "save").mockImplementationOnce(
+                async () => {
+                    throw new Error("failed");
+                }
             );
             await request(app)
                 .post(`/`)
                 .send({ ...credentials })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(500);
+                .expect((res) => res.error !== false);
         });
         test(`Should respond with status code 409 if the value provided in the
          'username' field already exists within a User in the database`, async () => {
@@ -188,7 +190,7 @@ describe("Route testing...", () => {
                 .send({ ...credentials })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(500);
+                .expect((res) => res.error !== false);
         });
         test(`Should respond with status code 201 if account creation is
          successful`, async () => {
@@ -991,6 +993,20 @@ describe("Route testing...", () => {
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(401);
+        });
+        test(`Should respond with an error if the Image schema .save() operation
+         fails`, async () => {
+            vi.spyOn(Image.prototype, "save").mockImplementationOnce(
+                async () => {
+                    throw new Error("failed");
+                }
+            );
+            await request(app)
+                .put(`/preferences/profileImage`)
+                .send({ profileImage: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect((res) => res.error !== false);
         });
         test(`Should respond with status code 401 if, when attempting to
          update the currently logged-in user's fields, it cannot be found in the

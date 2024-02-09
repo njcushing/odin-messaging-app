@@ -9,20 +9,32 @@ import Message from './index.jsx'
 
 const renderComponent = (
     text = "Sample Text",
+    image = {
+        src: new Uint8Array(),
+        alt: "body image alt text",
+    },
     name = "My Name",
     dateSent = "2023-01-01T00:00:00",
-    imageSrc = "image_src",
-    imageAlt = "image alt",
+    profileImage = {
+        src: new Uint8Array(),
+        alt: "body image alt text",
+        status: null,
+    },
     position = "right",
+    replyingTo = {
+        author: "Friend 1",
+        message: "Message text",
+    },
     onReplyToHandler = () => {},
 ) => {
     render(<Message
         text={text}
+        image={image}
         name={name}
         dateSent={dateSent}
-        imageSrc={imageSrc}
-        imageAlt={imageAlt}
+        profileImage={profileImage}
         position={position}
+        replyingTo={replyingTo}
         onReplyToHandler={onReplyToHandler}
     />);
 }
@@ -36,6 +48,8 @@ vi.mock('@/components/ProfileImage', () => ({
         return (<></>);
     }
 }));
+
+global.URL.createObjectURL = vi.fn(() => 'image');
 
 describe("UI/DOM Testing...", () => {
     describe("The <p> element displaying the message text...", () => {

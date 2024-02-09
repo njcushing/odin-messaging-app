@@ -73,30 +73,66 @@ vi.mock('./components/AddFriendPanel', () => ({
 
 const friendsList = [
     {
-        _id: 0,
-        username: "Friend 1",
-        tagLine: "Friend 1 tagline",
-        status: "online",
-        imageSrc: "",
-        imageAlt: "",
+        user: {
+            _id: 0,
+            username: "Friend 1",
+            preferences: {
+                displayName: "Friend 1",
+                tagLine: "Friend 1 tagline",
+                profileImage: {
+                    img: {
+                        data: {
+                            data: [],
+                        }
+                    }
+                },
+            },
+            status: "online",
+            imageSrc: "",
+            imageAlt: "",
+        },
     },
     {
-        _id: 1,
-        username: "Friend 2",
-        tagLine: "Friend 2 tagline",
-        status: "away",
-        imageSrc: "",
-        imageAlt: "",
+        user: {
+            _id: 1,
+            username: "Friend 2",
+            preferences: {
+                displayName: "Friend 2",
+                tagLine: "Friend 2 tagline",
+                profileImage: {
+                    img: {
+                        data: {
+                            data: [],
+                        }
+                    }
+                },
+            },
+            status: "online",
+            imageSrc: "",
+            imageAlt: "",
+        },
     },
     {
-        _id: 2,
-        username: "Friend 3",
-        tagLine: "Friend 3 tagline",
-        status: "busy",
-        imageSrc: "",
-        imageAlt: "",
+        user: {
+            _id: 2,
+            username: "Friend 3",
+            preferences: {
+                displayName: "Friend 3",
+                tagLine: "Friend 3 tagline",
+                profileImage: {
+                    img: {
+                        data: {
+                            data: [],
+                        }
+                    }
+                },
+            },
+            status: "online",
+            imageSrc: "",
+            imageAlt: "",
+        },
     },
-];
+]
 const getFriendsList = vi.fn(() => {
     return {
         status: 200,
@@ -112,22 +148,43 @@ const friendRequests = [
     {
         _id: 3,
         username: "Friend 4",
-        imageSrc: "",
-        imageAlt: "",
+        preferences: {
+            profileImage: {
+                img: {
+                    data: {
+                        data: [],
+                    }
+                }
+            },
+        },
         onSuccessHandler: () => {},
     },
     {
         _id: 4,
         username: "Friend 5",
-        imageSrc: "",
-        imageAlt: "",
+        preferences: {
+            profileImage: {
+                img: {
+                    data: {
+                        data: [],
+                    }
+                }
+            },
+        },
         onSuccessHandler: () => {},
     },
     {
         _id: 5,
         username: "Friend 6",
-        imageSrc: "",
-        imageAlt: "",
+        preferences: {
+            profileImage: {
+                img: {
+                    data: {
+                        data: [],
+                    }
+                }
+            },
+        },
         onSuccessHandler: () => {},
     },
 ];

@@ -33,19 +33,26 @@ vi.mock('../../utils/combineParticipantNames.js', async () => ({
 }));
 
 const chatProps = {
-    name: "Chat",
+    name: "",
     recentMessage: {
-        author: "Friend",
-        message: "Message",
+        author: "Friend 1",
+        message: "Recent message",
     },
-    status: "offline",
-    imageSrc: "",
-    imageAlt: "",
+    status: null,
+    image: {
+        src: new Uint8Array([]),
+        alt: "",
+        status: null,
+    },
 };
-const calculateChatOptionProps = vi.fn(() => chatProps);
-vi.mock('./utils/calculateChatOptionProps.js', async () => ({
-    default: () => calculateChatOptionProps(),
-}));
+const calculateProps = vi.fn(() => chatProps);
+vi.mock("./utils/calculateChatOptionProps.js", async () => {
+    const actual = await vi.importActual("./utils/calculateChatOptionProps.js");
+    return {
+        ...actual,
+        calculateProps: () => calculateProps(),
+    };
+});
 
 describe("UI/DOM Testing...", () => {
     describe("The element...", () => {
@@ -82,7 +89,7 @@ describe("UI/DOM Testing...", () => {
         });
         test(`Should not be present in the document if the 'recentMessage' prop
          has a value of 'null'`, async () => {
-            calculateChatOptionProps.mockReturnValueOnce({
+            calculateProps.mockReturnValueOnce({
                 ...chatProps,
                 recentMessage: null,
             });
