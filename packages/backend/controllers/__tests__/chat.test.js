@@ -46,19 +46,64 @@ vi.mock("../../utils/generateToken", async () => ({
     default: () => generateToken(),
 }));
 
-let users;
+let users, chats;
 beforeAll(async () => {
-    [users] = await initialiseMongoServer();
+    [users, chats] = await initialiseMongoServer();
 });
 
 afterAll(() => mongoose.connection.close());
 
 describe("Route testing...", () => {
     describe("/chat/:chatId GET route...", () => {
-        test(`Should respond with status code 200 on successful request`, async () => {
-            await request(app).get(`/thisChatExists`).expect(200);
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(null, "Person1", "person1*");
+            await request(app).get(`/${chats[0]._id}`).expect(400);
+        });
+        test(`Should respond with status code 404 if the currently-logged in
+         user is not found in the database`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app).get(`/${chats[0]._id}`).expect(404);
+        });
+        test(`Should respond with status code 400 if the chatId from the request
+         parameters is not a valid MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/${null}`).expect(400);
+        });
+        test(`Should respond with status code 404 if the chat is not found in
+         the database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .get(`/${new mongoose.Types.ObjectId()}`)
+                .expect(404);
+        });
+        test(`Should respond with status code 401 if the user is not authorised
+         to receive the chat because it is not found in their chats array`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/${chats[2]._id}`).expect(401);
+        });
+        test(`Should respond with status code 200 on successful request, with a
+         valid token`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .get(`/${chats[0]._id}`)
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
         });
     });
+
+    generateToken.mockReturnValueOnce("Bearer token");
 
     describe("/chat POST route...", () => {
         test(`Should respond with status code 400 if the body object in the
@@ -155,7 +200,6 @@ describe("Route testing...", () => {
          user cannot be found in the database when attempting to update its
          fields`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
-            // generateToken.mockReturnValueOnce("Bearer token");
             vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(null);
             await request(app)
                 .post(`/`)
@@ -163,6 +207,26 @@ describe("Route testing...", () => {
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(401);
+        });
+        test(`Should respond with status code 201 on successful request, with a
+         valid token`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(
+                users[0]._id
+            );
+            await request(app)
+                .post(`/`)
+                .send({ participants: [users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(201)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
         });
     });
 });
