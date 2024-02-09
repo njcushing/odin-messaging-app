@@ -89,6 +89,7 @@ const FriendSelectorPanel = ({
                             onClickHandler={(e) => onCloseHandler(e)}
                         />
                     </div>
+                    <div className={styles["box-content"]}>
                         {friendsSelected.size > 0
                         ?   <div className={styles["friends-selected-container"]}>
                                 <ul
@@ -131,123 +132,124 @@ const FriendSelectorPanel = ({
                                 </ul>
                             </div>
                         :   null}
-                    <div className={styles["friends-list-container"]}>
-                        {friendsList.currentValue.length > 0
-                        ?   <ul
-                                className={styles["friends-list"]}
-                                aria-label="friends-list"
-                            >
-                                {friendsList.currentValue.map((friend) => {
-                                    const user = friend.user;
-                                    if (!friendsSelected.has(user._id)) {
-                                        const profileImage = extractImage.fromUser(user).image;
-                                        return(
-                                            <li
-                                                className={styles["friend"]}
-                                                aria-label="friend"
-                                                key={user._id}
-                                            >
-                                                <div className={styles["profile-image"]}>
-                                                    <ProfileImage
-                                                        src={profileImage.src}
-                                                        alt={profileImage.alt}
-                                                        status={profileImage.status}
-                                                        sizePx={60}
-                                                    />
-                                                </div>
-                                                <h5
-                                                    className={styles["friend-name"]}
-                                                    aria-label="friend-name"
-                                                >{
-                                                    user.preferences.displayName !== "" ?
-                                                    user.preferences.displayName :
-                                                    user.username
-                                                }</h5>
-                                                <button
-                                                    className={styles["add-button"]}
-                                                    aria-label="add-button"
-                                                    onClick={(e) => {
-                                                        addToSelectedList(user._id);
-                                                        e.currentTarget.blur();
-                                                        e.preventDefault();
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.currentTarget.blur();
-                                                    }}
-                                                >{addButtonText}</button>
-                                            </li>
-                                        );
-                                    }
-                                })}
-                                <button
-                                    className={styles["load-more-button"]}
-                                    aria-label="load-more"
-                                    onClick={(e) => {
-                                        if (!friendsList.appending) {
-                                            setFriendsList({
-                                                ...friendsList,
-                                                appending: true,
-                                            });
+                        <div className={styles["friends-list-container"]}>
+                            {friendsList.currentValue.length > 0
+                            ?   <ul
+                                    className={styles["friends-list"]}
+                                    aria-label="friends-list"
+                                >
+                                    {friendsList.currentValue.map((friend) => {
+                                        const user = friend.user;
+                                        if (!friendsSelected.has(user._id)) {
+                                            const profileImage = extractImage.fromUser(user).image;
+                                            return(
+                                                <li
+                                                    className={styles["friend"]}
+                                                    aria-label="friend"
+                                                    key={user._id}
+                                                >
+                                                    <div className={styles["profile-image"]}>
+                                                        <ProfileImage
+                                                            src={profileImage.src}
+                                                            alt={profileImage.alt}
+                                                            status={profileImage.status}
+                                                            sizePx={60}
+                                                        />
+                                                    </div>
+                                                    <h5
+                                                        className={styles["friend-name"]}
+                                                        aria-label="friend-name"
+                                                    >{
+                                                        user.preferences.displayName !== "" ?
+                                                        user.preferences.displayName :
+                                                        user.username
+                                                    }</h5>
+                                                    <button
+                                                        className={styles["add-button"]}
+                                                        aria-label="add-button"
+                                                        onClick={(e) => {
+                                                            addToSelectedList(user._id);
+                                                            e.currentTarget.blur();
+                                                            e.preventDefault();
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.blur();
+                                                        }}
+                                                    >{addButtonText}</button>
+                                                </li>
+                                            );
                                         }
+                                    })}
+                                    <button
+                                        className={styles["load-more-button"]}
+                                        aria-label="load-more"
+                                        onClick={(e) => {
+                                            if (!friendsList.appending) {
+                                                setFriendsList({
+                                                    ...friendsList,
+                                                    appending: true,
+                                                });
+                                            }
+                                            e.currentTarget.blur();
+                                            e.preventDefault();
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.blur();
+                                        }}
+                                        key="load-more-button"
+                                    >{!friendsList.appending
+                                    ?   "Load More"
+                                    :   <div className={styles["load-more-button-waiting-wheel-container"]}>
+                                            <div
+                                                className={styles["load-more-button-waiting-wheel"]}
+                                                aria-label="waiting"
+                                            ></div>
+                                        </div>
+                                    }</button>
+                                </ul>
+                            :   <h5
+                                    className={styles["no-friends"]}
+                                    aria-label="no-friends"
+                                >{noFriendsText}</h5>
+                            }
+                        </div>
+                        {friendsSelected.size > 0
+                        ?   <div className={styles["submit-button-container"]}>
+                                <button
+                                    className={styles["submit-button"]}
+                                    aria-label="submit-button"
+                                    onClick={(e) => {
+                                        onSubmitHandler(friendsSelected);
                                         e.currentTarget.blur();
                                         e.preventDefault();
                                     }}
                                     onMouseLeave={(e) => {
                                         e.currentTarget.blur();
                                     }}
-                                    key="load-more-button"
-                                >{!friendsList.appending
-                                ?   "Load More"
-                                :   <div className={styles["load-more-button-waiting-wheel-container"]}>
-                                        <div
-                                            className={styles["load-more-button-waiting-wheel"]}
-                                            aria-label="waiting"
-                                        ></div>
-                                    </div>
-                                }</button>
-                            </ul>
-                        :   <h5
-                                className={styles["no-friends"]}
-                                aria-label="no-friends"
-                            >{noFriendsText}</h5>
-                        }
-                    </div>
-                    {friendsSelected.size > 0
-                    ?   <div className={styles["submit-button-container"]}>
-                            <button
-                                className={styles["submit-button"]}
-                                aria-label="submit-button"
-                                onClick={(e) => {
-                                    onSubmitHandler(friendsSelected);
-                                    e.currentTarget.blur();
-                                    e.preventDefault();
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.blur();
-                                }}
-                            >{submitButtonText}</button>
+                                >{submitButtonText}</button>
+                            </div>
+                        :   null}
+                        {submissionErrors.length > 0
+                        ?   <div className={styles["submission-errors"]}>
+                                <h4
+                                    className={styles["submission-errors-title"]}
+                                    aria-label="submission-errors-title"
+                                >Error(s):</h4>
+                                <ul
+                                    className={styles["submission-errors-list"]}
+                                    aria-label="submission-errors-list"
+                                >
+                                    {submissionErrors.map((error, i) => {
+                                        return <li
+                                            className={styles["submission-error-item"]}
+                                            aria-label="submission-error-item"
+                                            key={i}
+                                        >{error}</li>
+                                    })}
+                                </ul>
+                            </div>
+                        :   null}
                         </div>
-                    :   null}
-                    {submissionErrors.length > 0
-                    ?   <div className={styles["submission-errors"]}>
-                            <h4
-                                className={styles["submission-errors-title"]}
-                                aria-label="submission-errors-title"
-                            >Error(s):</h4>
-                            <ul
-                                className={styles["submission-errors-list"]}
-                                aria-label="submission-errors-list"
-                            >
-                                {submissionErrors.map((error, i) => {
-                                    return <li
-                                        className={styles["submission-error-item"]}
-                                        aria-label="submission-error-item"
-                                        key={i}
-                                    >{error}</li>
-                                })}
-                            </ul>
-                        </div>
-                    :   null}
                     </>
                 :   <div className={styles["waiting-wheel-container"]}>
                         <div

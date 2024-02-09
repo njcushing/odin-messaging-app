@@ -8,6 +8,7 @@ import ProfileImage from "@/components/ProfileImage";
 import getFriendCanBeAdded from "./utils/getFriendCanBeAdded.js";
 import addFriend from "./utils/addFriend";
 import * as extractImage from "@/utils/extractImage";
+import * as validateUser from "../../../../../../../utils/validateUserFields.js";
 
 const AddFriendPanel = ({
     onCloseHandler,
@@ -24,15 +25,21 @@ const AddFriendPanel = ({
         if (searchUsername.length > 0) {
             const abortControllerNew = new AbortController();
             setAbortController(abortControllerNew);
-            (async () => {
-                const response = await getFriendCanBeAdded(searchUsername, abortControllerNew);
-                setResultFound(response.friend);
-                if (response.status >= 400) {
-                    setResponseMessage(response.message);
-                } else {
-                    setResponseMessage(null);
-                }
-            })();
+
+            const validUsername = validateUser.username(searchUsername);
+            if (validUsername.status) {
+                (async () => {
+                    const response = await getFriendCanBeAdded(searchUsername, abortControllerNew);
+                    setResultFound(response.friend);
+                    if (response.status >= 400) {
+                        setResponseMessage(response.message);
+                    } else {
+                        setResponseMessage(null);
+                    }
+                })();
+            } else {
+                setResponseMessage(validUsername.message.front);
+            }
         }
         return () => {
             if (abortController) abortController.abort;
@@ -77,68 +84,70 @@ const AddFriendPanel = ({
                             onClickHandler={(e) => onCloseHandler(e)}
                         />
                     </div>
-                    <div className={styles["find-friend-container"]}>
-                        <label
-                            className={styles["friend-name-label"]}
-                            htmlFor="friend-name"
-                        >Name: </label>
-                        <input
-                            className={styles["friend-name-input"]}
-                            aria-label="friend-name-input"
-                            id="friend-name"
-                            name="friendName"
-                            required
-                            defaultValue={searchUsername}
-                            style={{
-                                resize: "none"
-                            }}
-                            onChange={(e) => setSearchUsername(e.target.value)}
-                        ></input>
-                    </div>
-                    <div className={styles["result-found-container"]}>
-                        {resultFound !== null
-                        ?   <div
-                                className={styles["result-found"]}
-                                aria-label="result-found"
-                            >
-                                <div className={styles["profile-image"]}>
-                                    <ProfileImage
-                                        src={profileImage.src}
-                                        alt={profileImage.alt}
-                                        status={null}
-                                        sizePx={60}
-                                    />
+                    <div className={styles["box-content"]}>
+                        <div className={styles["find-friend-container"]}>
+                            <label
+                                className={styles["friend-name-label"]}
+                                htmlFor="friend-name"
+                            >Name: </label>
+                            <input
+                                className={styles["friend-name-input"]}
+                                aria-label="friend-name-input"
+                                id="friend-name"
+                                name="friendName"
+                                required
+                                defaultValue={searchUsername}
+                                style={{
+                                    resize: "none"
+                                }}
+                                onChange={(e) => setSearchUsername(e.target.value)}
+                            ></input>
+                        </div>
+                        <div className={styles["result-found-container"]}>
+                            {resultFound !== null
+                            ?   <div
+                                    className={styles["result-found"]}
+                                    aria-label="result-found"
+                                >
+                                    <div className={styles["profile-image"]}>
+                                        <ProfileImage
+                                            src={profileImage.src}
+                                            alt={profileImage.alt}
+                                            status={null}
+                                            sizePx={60}
+                                        />
+                                    </div>
+                                    <p
+                                        className={styles["result-found-name"]}
+                                        aria-label="result-found-name"
+                                    >{resultFound.username}</p>
+                                    <button
+                                        className={styles["add-friend-button"]}
+                                        aria-label="add-friend-button"
+                                        onClick={(e) => {
+                                            setAddingFriend(true);
+                                            e.currentTarget.blur();
+                                            e.preventDefault();
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.blur();
+                                        }}
+                                    >Add Friend</button>
                                 </div>
-                                <p
-                                    className={styles["result-found-name"]}
-                                    aria-label="result-found-name"
-                                >{resultFound.username}</p>
-                                <button
-                                    className={styles["add-friend-button"]}
-                                    aria-label="add-friend-button"
-                                    onClick={(e) => {
-                                        setAddingFriend(true);
-                                        e.currentTarget.blur();
-                                        e.preventDefault();
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.blur();
-                                    }}
-                                >Add Friend</button>
-                            </div>
-                        :   <>
-                            {responseMessage
-                            ?   <h5
-                                    className={styles["response-message"]}
-                                    aria-label="response-message"
-                                >{responseMessage}</h5>
-                            :   <h5
-                                    className={styles["no-result-found"]}
-                                    aria-label="no-result-found"
-                                >No result found.</h5>
+                            :   <>
+                                {responseMessage
+                                ?   <h5
+                                        className={styles["response-message"]}
+                                        aria-label="response-message"
+                                    >{responseMessage}</h5>
+                                :   <h5
+                                        className={styles["no-result-found"]}
+                                        aria-label="no-result-found"
+                                    >No result found.</h5>
+                                }
+                                </>
                             }
-                            </>
-                        }
+                        </div>
                     </div>
                     </>
                 :   <div className={styles["waiting-wheel-container"]}>

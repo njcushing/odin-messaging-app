@@ -6,7 +6,7 @@ export const username = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Username must not be empty.",
+                front: "Username must not be empty.",
                 back: "'username' field (String) be at least 5 characters in length",
             },
         };
@@ -15,7 +15,7 @@ export const username = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Username must only contain alphanumeric characters.",
+                front: "Username must only contain alphanumeric characters.",
                 back: "'username' field (String) must only contain alphanumeric characters",
             },
         };
@@ -24,7 +24,7 @@ export const username = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Username must be at least 5 characters in length.",
+                front: "Username must be at least 5 characters in length.",
                 back: "'username' field (String) must be at least 5 characters in length",
             },
         };
@@ -45,7 +45,7 @@ export const email = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Email must not be empty.",
+                front: "Email must not be empty.",
                 back: "'email' field (String) must not be empty",
             },
         };
@@ -54,7 +54,7 @@ export const email = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Email must be in the format: 'name@company.com'.",
+                front: "Email must be in the format: 'name@company.com'.",
                 back: "'email' field (String) be in the format: 'name@company.com'",
             },
         };
@@ -75,7 +75,7 @@ export const password = (value, confirming = false) => {
         return {
             status: false,
             message: {
-                front: `Your ${
+                front: `${
                     confirming ? "Confirm " : ""
                 }Password must not be empty.`,
                 back: `'${
@@ -88,7 +88,7 @@ export const password = (value, confirming = false) => {
         return {
             status: false,
             message: {
-                front: `Your ${confirming ? "Confirm " : ""}Password must
+                front: `${confirming ? "Confirm " : ""}Password must
                 contain at least 8 characters, including at least one letter
                 from a-z, at least one number from 0-9, and at least one of the
                 following symbols: @$!%*#?&`,
@@ -116,7 +116,7 @@ export const displayName = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Display Name must only contain alphanumeric characters.",
+                front: "Display Name must only contain alphanumeric characters.",
                 back: "'displayName' field (String) must only contain alphanumeric characters",
             },
         };
@@ -125,7 +125,7 @@ export const displayName = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Display Name must be fewer than 30 characters in length.",
+                front: "Display Name must be fewer than 30 characters in length.",
                 back: "'displayName' field (String) must be fewer than 30 characters in length",
             },
         };
@@ -144,7 +144,7 @@ export const tagLine = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Tag Line must be fewer than 100 characters in length.",
+                front: "Tag Line must be fewer than 100 characters in length.",
                 back: "'tagLine' field (String) must be fewer than 100 characters in length",
             },
         };
@@ -169,7 +169,7 @@ export const status = (value) => {
         return {
             status: false,
             message: {
-                front: "Your Status must be one of the following: 'default', 'online', 'away', 'busy', 'offline'.",
+                front: "Status must be one of the following: 'default', 'online', 'away', 'busy', 'offline'.",
                 back: "'status' field (String) must be one of the following: null (default), 'online', 'away', 'busy', 'offline'.",
             },
         };
@@ -188,7 +188,7 @@ export const profileImage = (value) => {
         return {
             status: false,
             message: {
-                front: `Your Profile Image must be an Array.`,
+                front: `Profile Image must be an Array.`,
                 back: `'profileImage' field must be an Array.`,
             },
         };
@@ -197,7 +197,7 @@ export const profileImage = (value) => {
         return {
             status: false,
             message: {
-                front: `Your Profile Image must be smaller than 5MB.`,
+                front: `Profile Image must be smaller than 5MB.`,
                 back: `'profileImage' field (Array) must be smaller than 5MB.`,
             },
         };
@@ -216,7 +216,7 @@ export const theme = (value) => {
         return {
             status: false,
             message: {
-                front: `Your Theme must be one of the following: ${themes}.`,
+                front: `Theme must be one of the following: ${themes}.`,
                 back: `'theme' field (String) must be one of the following: ${themes}.`,
             },
         };

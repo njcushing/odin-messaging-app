@@ -16,6 +16,13 @@ delete window.location;
 window.location = { assign: assignMock };
 afterEach(() => { assignMock.mockClear(); });
 
+// For 'ResizeObserver is not defined' error
+class ResizeObserver {
+    observe() {}
+    unobserve() {}
+}
+window.ResizeObserver = ResizeObserver;
+
 const renderComponent = async (
     defaultList = "friends",
     addingFriendDefault = false,

@@ -43,8 +43,8 @@
 
     background-color: var(--color-background-front);
 
-    width: auto;
-    height: 100%;
+    height: calc(100% - (2 * 3rem));
+    padding: 3rem 0.6rem;
 }
 
 .box {
@@ -58,12 +58,18 @@
 
     background-color: var(--color-background-front);
 
+    height: min-content;
+    max-height: 100%;
     width: 320px;
     padding: 0.9rem;
 
     opacity: 0%;
     transform: translateY(0.5rem);
     animation: 0.2s ease-in-out 0.15s 1 normal forwards fade-in;
+}
+
+.box-content {
+    overflow-y: auto;
 }
 
 .title {
@@ -110,7 +116,7 @@
     outline-style: solid;
     outline-color: var(--color-outline-primary);
 
-    max-height: 12rem;
+    max-height: 120px;
     padding: 0.8rem;
     margin: 0rem;
 }
@@ -207,7 +213,7 @@
 
     list-style: none;
 
-    max-height: 16rem;
+    max-height: 160px;
     padding: 0.1rem 0.2rem;
     margin: 0rem;
 }
@@ -268,6 +274,7 @@
     align-self: center;
 
     display: flex;
+    justify-content: center;
 
     margin: 1rem 0rem 0rem 0rem;
 

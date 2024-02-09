@@ -68,6 +68,18 @@ vi.mock('./utils/getFriendCanBeAdded', async () => ({
     default: () => getFriendCanBeAdded(),
 }));
 
+const validateUsername = vi.fn(() => ({
+    status: true,
+    message: "Valid Username.",
+}));
+vi.mock('../../../../../../../utils/validateUserFields', async () => {
+    const actual = await vi.importActual("../../../../../../../utils/validateUserFields");
+    return {
+        ...actual,
+        username: () => validateUsername(),
+    }
+});
+
 const addFriendMock = vi.fn(() => {
     return {
         status: 200,

@@ -20,32 +20,34 @@ const Settings = ({
                     className={styles["title"]}
                     aria-label="settings-panel"
                 >Settings</h1>
-                <div className={styles["settings-container"]}>
-                    <FieldUpdater
-                        labelText="Theme"
-                        fieldName="theme"
-                        initialValue={userSettings.theme}
-                        validator={validateUserFields.theme}
-                        apiFunction={{
-                            func: updateUserFields.theme,
-                            args: [],
-                        }}
-                        context={{
-                            type: "circles",
-                            options: themes.options().map((theme) => {
-                                return {
-                                    name: theme.name,
-                                    colour: theme.colour,
-                                    image: null,
-                                    tooltipText: theme.name,
-                                    tooltipPosition: "bottom",
-                                }
-                            }),
-                            widthPx: 64,
-                            heightPx: 64,
-                        }}
-                        onUpdateHandler={() => onUpdateHandler()}
-                    />
+                <div className={styles["scrollable-wrapper"]}>
+                    <ul className={styles["fields-list"]}>
+                        <FieldUpdater
+                            labelText="Theme"
+                            fieldName="theme"
+                            initialValue={userSettings.theme}
+                            validator={validateUserFields.theme}
+                            apiFunction={{
+                                func: updateUserFields.theme,
+                                args: [],
+                            }}
+                            context={{
+                                type: "circles",
+                                options: themes.options().map((theme) => {
+                                    return {
+                                        name: theme.name,
+                                        colour: theme.colour,
+                                        image: null,
+                                        tooltipText: theme.name,
+                                        tooltipPosition: "bottom",
+                                    }
+                                }),
+                                widthPx: 64,
+                                heightPx: 64,
+                            }}
+                            onUpdateHandler={() => onUpdateHandler()}
+                        />
+                    </ul>
                 </div>
             </div>
         </div>

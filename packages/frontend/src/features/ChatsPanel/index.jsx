@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
@@ -14,6 +14,8 @@ const ChatsPanel = ({
     createChatPanelOpenDefault,
     userId,
 }) => {
+    const [toggling, setToggling] = useState(false);
+    const [toggledPanel, setToggledPanel] = useState("left");
     const [chatsList, setChatsList] = useState({
         currentValue: [],
         abortController: new AbortController(),
@@ -28,6 +30,21 @@ const ChatsPanel = ({
         submissionErrors: [],
     });
     const [chatSelectedId, setChatSelectedId] = useState(null);
+
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const observer = new ResizeObserver(entries => {
+            if(!toggling && entries[0].contentRect.width < 540) {
+                setToggling(true);
+            }
+            if(toggling && entries[0].contentRect.width >= 540) {
+                setToggling(false);
+            }
+        })
+        observer.observe(containerRef.current)
+        return () => containerRef.current && observer.unobserve(containerRef.current)
+    }, [toggling]);
 
     useEffect(() => {
         if (chatsList.abortController) chatsList.abortController.abort;
@@ -91,6 +108,25 @@ const ChatsPanel = ({
 
     const chatPanelElement = (
         <div className={styles["chat-panel"]}>
+            <>
+            {toggling && toggledPanel === "right" ?
+                <div className={styles["return-to-chat-list-option-button"]}>
+                    <OptionButton
+                        text="arrow_back"
+                        label="return to chat list"
+                        tooltipText="Return to Chat List"
+                        tooltipPosition="right"
+                        widthPx={36}
+                        heightPx={36}
+                        fontSizePx={23}
+                        borderType="circular"
+                        onClickHandler={() => {
+                            if (!creatingChat.attempting) setToggledPanel("left");
+                        }}
+                    />
+                </div>
+            :   null
+            }
             <ChatPanel
                 chatId={chatSelectedId}
                 userId={userId}
@@ -131,72 +167,78 @@ const ChatsPanel = ({
                 }}
                 key={chatSelectedId}
             />
+            </>
         </div>
     );
 
     const friendSelectorPanelElement = (
-        <FriendSelectorPanel
-            title="Create New Chat"
-            removeButtonText="Remove"
-            addButtonText="Add"
-            submitButtonText="Create Chat"
-            noFriendsText="You have no friends with whom you can create a chat"
-            onCloseHandler={() => setCreatingChat({
-                ...creatingChat,
-                panelOpen: false,
-            })}
-            onSubmitHandler={(participants) => {
-                if (!creatingChat.attempting) {
+        <div className={styles["create-new-chat-panel"]}>
+            <FriendSelectorPanel
+                title="Create New Chat"
+                removeButtonText="Remove"
+                addButtonText="Add"
+                submitButtonText="Create Chat"
+                noFriendsText="You have no friends with whom you can create a chat"
+                onCloseHandler={() => {
                     setCreatingChat({
                         ...creatingChat,
-                        currentValue: participants,
-                        attempting: true,
-                    })
-                }
-            }}
-            submissionErrors={creatingChat.submissionErrors}
-        />
+                        panelOpen: false,
+                    });
+                    if (toggling) setToggledPanel("left");
+                }}
+                onSubmitHandler={(participants) => {
+                    if (!creatingChat.attempting) {
+                        setCreatingChat({
+                            ...creatingChat,
+                            currentValue: participants,
+                            attempting: true,
+                        })
+                    }
+                }}
+                submissionErrors={creatingChat.submissionErrors}
+            />
+        </div>
     );
-
-    return (
-        <div className={styles["wrapper"]}>
-        <div className={styles["container"]}>
-            <div className={styles["chats-panel"]}>
-                <h3
-                    className={styles["chats-panel-title"]}
-                    aria-label="chats-panel-title"
-                >Chats</h3>
-                <ul
-                    className={styles["chats-panel-options"]}
-                    aria-label="chats-panel-options"
+    
+    const leftSideContent = (
+        <div className={styles["chats-panel"]}>
+            <h3
+                className={styles["chats-panel-title"]}
+                aria-label="chats-panel-title"
+            >Chats</h3>
+            <ul
+                className={styles["chats-panel-options"]}
+                aria-label="chats-panel-options"
+            >
+                <li
+                    className={styles["create-chat-button"]}
+                    aria-label="create-chat-button"
                 >
-                    <li
-                        className={styles["create-chat-button"]}
-                        aria-label="create-chat-button"
-                    >
-                        <OptionButton
-                            text="add"
-                            label="create-chat"
-                            tooltipText="Create New Chat"
-                            tooltipPosition="bottom"
-                            widthPx={50}
-                            heightPx={50}
-                            fontSizePx={24}
-                            borderType="circular"
-                            onClickHandler={() => {
-                                if (!creatingChat.attempting) {
-                                    setCreatingChat({
-                                        ...creatingChat,
-                                        panelOpen: !creatingChat.panelOpen,
-                                        submissionErrors: [],
-                                    });
-                                }
-                            }}
-                        />
-                    </li>
-                </ul>
-                {!chatsList.attempting
-                ?   <ul
+                    <OptionButton
+                        text="add"
+                        label="create-chat"
+                        tooltipText="Create New Chat"
+                        tooltipPosition="bottom"
+                        widthPx={50}
+                        heightPx={50}
+                        fontSizePx={24}
+                        borderType="circular"
+                        onClickHandler={() => {
+                            if (!creatingChat.attempting) {
+                                setCreatingChat({
+                                    ...creatingChat,
+                                    panelOpen: !creatingChat.panelOpen,
+                                    submissionErrors: [],
+                                });
+                                if (toggling) setToggledPanel(toggledPanel === "left" ? "right" : "left");
+                            }
+                        }}
+                    />
+                </li>
+            </ul>
+            {!chatsList.attempting
+            ?   <div className={styles["scrollable-wrapper"]}>
+                    <ul
                         className={styles["chat-options-list"]}
                         aria-label="chat-options-list"
                         key={"chat-options-list"}
@@ -215,6 +257,7 @@ const ChatsPanel = ({
                                                 ...creatingChat,
                                                 panelOpen: false,
                                             });
+                                            if (toggling) setToggledPanel("right");
                                         }
                                     }}
                                     userId={userId}
@@ -247,27 +290,41 @@ const ChatsPanel = ({
                             </div>
                         }</button>
                     </ul>
-                :   <div className={styles["waiting-wheel-container"]}>
-                        <div
-                            className={styles["waiting-wheel"]}
-                            aria-label="attempting-create-account"
-                        ></div>
-                    </div>
-                }
-            </div>
-            {creatingChat.panelOpen
-            ?   friendSelectorPanelElement   
-            :   chatPanelElement
+                </div>
+            :   <div className={styles["waiting-wheel-container"]}>
+                    <div
+                        className={styles["waiting-wheel"]}
+                        aria-label="attempting-create-account"
+                    ></div>
+                </div>
             }
+        </div>
+    );
+
+    const rightSideContent = creatingChat.panelOpen ? friendSelectorPanelElement : chatPanelElement;
+
+    let allContent = null;
+    if (toggling) {
+        if (toggledPanel === "left") allContent = leftSideContent;
+        if (toggledPanel === "right") allContent = rightSideContent;
+    } else {
+        allContent = (
+            <>
+            {leftSideContent}
+            {rightSideContent}
+            </>
+        );
+    }
+
+    return (
+        <div className={styles["wrapper"]}>
+        <div className={styles["container"]} ref={containerRef}>
+            {allContent}
         </div>
         </div>
     );
 };
 
-ChatsPanel.propTypes = {
-    createChatPanelOpenDefault: PropTypes.bool,
-    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-}
 
 ChatsPanel.defaultProps = {
     createChatPanelOpenDefault: false,

@@ -12,15 +12,24 @@
 .wrapper {
     container-type: inline-size;
 
-    width: 100%;
-    height: 100%;
+    display: flex;
+    flex-direction: column;
+    
+    width: calc(100% - (0.6rem * 2));
+    height: calc(var(--max-height) - (0.6rem * 2));
+    padding: 0.6rem;
     margin: auto;
 }
 
 .container {
     display: grid;
+    grid-template-rows: 100%;
     grid-template-columns: auto 1fr;
     gap: 0.75rem;
+
+    width: calc(100% - (0.6rem * 2));
+    height: 100%;
+    padding: 0.6rem;
 
     opacity: 0%;
     transform: translateY(0.5rem);
@@ -29,9 +38,12 @@
 
 .options-sidebar {
     grid-area: 1 / 1 / -1 / 2;
+}
 
-    height: 100%;
+.main-dashboard-content {
+    min-height: 0;
     width: 100%;
+    height: 100%;
 }
 
 .waiting-wheel-container {
@@ -54,13 +66,16 @@
     animation: spin 1.2s linear infinite;
 }
 
-@container (width < calc(640px - 2.8rem)) {
+@container (width < 640px) {
     .container {
-        display: flex;
+        grid-template-rows: 1fr auto;
+        grid-template-columns: 100%;
     }
 
     .options-sidebar {
-        position: fixed;
-        z-index: 100;
+        grid-area: 2 / 1 / -1 / -1;
+    
+        height: 100%;
+        width: 100%;
     }
 }

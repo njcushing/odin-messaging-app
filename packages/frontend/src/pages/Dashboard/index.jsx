@@ -135,7 +135,9 @@ const Dashboard = ({
                         onOptionSelect={(option) => setOptionSelected(option)}
                     />
                 </div>
-                {mainDashboardContent}
+                <div className={styles["main-dashboard-content"]}>
+                    {mainDashboardContent}
+                </div>
                 </>
             :   <div className={styles["waiting-wheel-container"]}>
                     <div

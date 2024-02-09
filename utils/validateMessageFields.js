@@ -5,7 +5,7 @@ export const text = (value) => {
         return {
             status: false,
             message: {
-                front: "Your message text must not be empty.",
+                front: "Message text must not be empty.",
                 back: "'text' field (String) be not be empty",
             },
         };
@@ -14,7 +14,7 @@ export const text = (value) => {
         return {
             status: false,
             message: {
-                front: "Your message text must be fewer than 1000 characters in length.",
+                front: "Message text must be fewer than 1000 characters in length.",
                 back: "'text' field (String) be fewer than 1000 characters in length",
             },
         };
@@ -33,7 +33,7 @@ export const image = (value) => {
         return {
             status: false,
             message: {
-                front: `Your message image must be an Array.`,
+                front: `Message image must be an Array.`,
                 back: `'image' field must be an Array.`,
             },
         };
@@ -42,7 +42,7 @@ export const image = (value) => {
         return {
             status: false,
             message: {
-                front: `Your message image must be smaller than 5MB.`,
+                front: `Message image must be smaller than 5MB.`,
                 back: `'image' field (Array) must be smaller than 5MB.`,
             },
         };

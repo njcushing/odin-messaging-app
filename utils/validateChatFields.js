@@ -3,7 +3,7 @@ export const image = (value) => {
         return {
             status: false,
             message: {
-                front: `Your Image must be an Array.`,
+                front: `Image must be an Array.`,
                 back: `'image' field must be an Array.`,
             },
         };
@@ -12,7 +12,7 @@ export const image = (value) => {
         return {
             status: false,
             message: {
-                front: `Your Image must be smaller than 5MB.`,
+                front: `Image must be smaller than 5MB.`,
                 back: `'image' field (Array) must be smaller than 5MB.`,
             },
         };

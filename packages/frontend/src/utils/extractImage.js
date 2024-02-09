@@ -2,7 +2,7 @@ import ProfileImage from "@/components/ProfileImage";
 
 import * as validate from "../../../../utils/validateUserFields.js";
 
-const defaultProps = () => ({
+export const defaultProps = () => ({
     src: new Uint8Array(),
     alt: "",
     status: null,

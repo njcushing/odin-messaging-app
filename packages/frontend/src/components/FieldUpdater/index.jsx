@@ -42,29 +42,41 @@ const createUpdateButton = (state, setter, updater) => {
 
 const createInputContainer = (state, setter, labelText, updater, input) => {
     return (
-        <div className={styles["field-container"]}>
+        <>
         <label className={styles["label"]}
         >{labelText}:
-            <div className={styles["text-input-and-button-container"]}>
+            <div className={styles["input-container"]}>
                 {input}
                 {createUpdateButton(state, setter, updater)}
             </div>
         </label>
         {createErrorMessageContainer(state)}
-        </div>
+        </>
     );
 }
 
 const createOtherFieldContainer = (state, setter, title, updater, input) => {
     return (
-        <div className={styles["field-container"]}>
+        <>
         <h2 className={styles["title"]}>{title}:</h2>
-        <div className={styles["text-input-and-button-container"]}>
+        <div className={styles["other-field-container"]}>
             {input}
             {createUpdateButton(state, setter, updater)}
         </div>
         {createErrorMessageContainer(state)}
+        </>
+    );
+}
+
+const createImageFieldContainer = (state, title, input) => {
+    return (
+        <>
+        <h2 className={styles["title"]}>{title}:</h2>
+        <div className={styles["other-field-container"]}>
+            {input}
         </div>
+        {createErrorMessageContainer(state)}
+        </>
     );
 }
 
@@ -201,45 +213,48 @@ const createImageFieldUpdater = (state, setter, labelText, context, fieldName, u
         <img
             className={styles["image-container"]}
             src={imgSrc}
-        ></img>    
-        <label
-            className={styles[`browse-button`]}
-            aria-label="browse-images"
-            onClick={(e) => {
-                e.currentTarget.blur();
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.blur();
-            }}
-        >Browse
-            <input
-                className={styles[`image-input${state.error !== null ? "-error" : ""}`]}
-                id={fieldName}
-                name={fieldName}
-                type="file"
-                accept="image/*"
-                style={{ resize: "none" }}
-                onChange={(e) => {
-                    const file = new FileReader();
-                    file.readAsArrayBuffer(e.target.files[0]);
-                    file.onloadend = (e) => {
-                        if (e.target.error) return;
-                        const imgArray = Array.from(new Uint8Array(e.target.result));
-                        const validValue = state.validator(imgArray);
-                        setter({
-                            ...state,
-                            error: !validValue.status ? validValue.message.front : null,
-                            currentValue: validValue.status ? imgArray : state.currentValue,
-                        });
-                    }
+        ></img>
+        <div className={styles["image-field-buttons-container"]}>
+            <label
+                className={styles[`browse-button`]}
+                aria-label="browse-images"
+                onClick={(e) => {
+                    e.currentTarget.blur();
                 }}
-                disabled={state.attemptingUpdate}
-                ref={state.inputRef}
-            ></input>
-        </label>
+                onMouseLeave={(e) => {
+                    e.currentTarget.blur();
+                }}
+            >Browse
+                <input
+                    className={styles[`image-input${state.error !== null ? "-error" : ""}`]}
+                    id={fieldName}
+                    name={fieldName}
+                    type="file"
+                    accept="image/*"
+                    style={{ resize: "none" }}
+                    onChange={(e) => {
+                        const file = new FileReader();
+                        file.readAsArrayBuffer(e.target.files[0]);
+                        file.onloadend = (e) => {
+                            if (e.target.error) return;
+                            const imgArray = Array.from(new Uint8Array(e.target.result));
+                            const validValue = state.validator(imgArray);
+                            setter({
+                                ...state,
+                                error: !validValue.status ? validValue.message.front : null,
+                                currentValue: validValue.status ? imgArray : state.currentValue,
+                            });
+                        }
+                    }}
+                    disabled={state.attemptingUpdate}
+                    ref={state.inputRef}
+                ></input>
+            </label>
+            {createUpdateButton(state, setter, updater)}
+        </div>
         </>
     );
-    return createOtherFieldContainer(state, setter, labelText, updater, input);
+    return createImageFieldContainer(state, labelText, input);
 }
 
 const FieldUpdater = ({
