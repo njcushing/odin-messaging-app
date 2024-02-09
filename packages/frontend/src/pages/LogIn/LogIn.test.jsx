@@ -56,11 +56,15 @@ describe("UI/DOM Testing...", () => {
     });
     describe("The 'Username' input...", () => {
         test(`Should be present in the document`, async () => {
+            await renderComponent();
+            const usernameInput = screen.getByRole("textbox", { name: "username-input" });
+            expect(usernameInput).toBeInTheDocument();
+        });
+        test(`On change, should invoke the validateUsername function`, async () => {
             const user = userEvent.setup();
             const validateUsernameSpy = vi.spyOn(validateFields, "validateUsername");
             await renderComponent();
             const usernameInput = screen.getByRole("textbox", { name: "username-input" });
-            expect(usernameInput).toBeInTheDocument();
             await user.type(usernameInput, "a");
             expect(validateUsernameSpy).toHaveBeenCalledTimes(1);
         });
