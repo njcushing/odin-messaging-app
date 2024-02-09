@@ -140,18 +140,20 @@ const CreateGroupPanel = ({
                     }
                 </div>
                 {friendsAdding.size > 0
-                ?   <button
-                        className={styles["create-group-button"]}
-                        aria-label="create-group-button"
-                        onClick={(e) => {
-                            createGroupHandler(friendsAdding);
-                            e.currentTarget.blur();
-                            e.preventDefault();
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.blur();
-                        }}
-                    >Create Group</button>
+                ?   <div className={styles["create-group-button-container"]}>
+                        <button
+                            className={styles["create-group-button"]}
+                            aria-label="create-group-button"
+                            onClick={(e) => {
+                                createGroupHandler(friendsAdding);
+                                e.currentTarget.blur();
+                                e.preventDefault();
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.blur();
+                            }}
+                        >Create Group</button>
+                    </div>
                 :   null}
                 {createGroupSubmissionErrors.length > 0
                 ?   <div className={styles["create-group-submission-errors"]}>
