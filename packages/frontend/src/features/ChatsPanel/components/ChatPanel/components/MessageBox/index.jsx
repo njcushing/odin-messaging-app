@@ -40,15 +40,10 @@ const MessageBox = ({
                 <label
                     className={styles[`browse-button`]}
                     aria-label="browse-images"
-                    onClick={(e) => {
-                        e.currentTarget.blur();
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.blur();
-                    }}
                 >Upload
                     <input
                         className={styles["image-input"]}
+                        aria-label="upload-image"
                         type="file"
                         accept="image/*"
                         disabled={sending}
@@ -56,10 +51,9 @@ const MessageBox = ({
                             const file = new FileReader();
                             file.readAsArrayBuffer(e.target.files[0]);
                             file.onloadend = (e) => {
-                                if (e.target.error) return;
                                 const imgArray = Array.from(new Uint8Array(e.target.result));
                                 const validValue = validateMessage.image(imgArray);
-                                if (validValue) {
+                                if (validValue.status) {
                                     onSubmitHandler({
                                         type: "image",
                                         value: imgArray,
