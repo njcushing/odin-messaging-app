@@ -69,7 +69,6 @@ const ChatsPanel = ({
                 const chatNew = await createChat(Array.from(creatingChat.currentValue), abortControllerNew);
                 setCreatingChat({
                     panelOpen: false,
-                    currentValue: [],
                     abortController: null,
                     attempting: false,
                     submissionErrors: chatNew.status >= 400 ? [chatNew.message] : []
@@ -77,6 +76,7 @@ const ChatsPanel = ({
                 if (chatNew.status < 400) {
                     setChatsList({
                         ...chatsList,
+                        currentValue: [],
                         attempting: true,
                     })
                     setChatSelectedId(chatNew.chatId);
@@ -110,6 +110,7 @@ const ChatsPanel = ({
                 addedFriendsHandler={(chatId) => {
                     setChatsList({
                         ...chatsList,
+                        currentValue: [],
                         attempting: true,
                     })
                     setChatSelectedId(chatId);
