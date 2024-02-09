@@ -1,4 +1,6 @@
-export const updateDisplayName = async (displayName, abortController) => {
+import saveTokenFromResponseJSON from "./saveTokenFromResponseJSON.js";
+
+export const displayName = async (value, abortController) => {
     const data = await fetch(
         `${import.meta.env.VITE_SERVER_DOMAIN}/user/preferences/displayName`,
         {
@@ -12,7 +14,7 @@ export const updateDisplayName = async (displayName, abortController) => {
                 ),
             },
             body: JSON.stringify({
-                displayName: displayName,
+                displayName: value,
             }),
         }
     )
@@ -38,7 +40,7 @@ export const updateDisplayName = async (displayName, abortController) => {
     return data;
 };
 
-export const updateTagLine = async (tagLine, abortController) => {
+export const tagLine = async (value, abortController) => {
     const data = await fetch(
         `${import.meta.env.VITE_SERVER_DOMAIN}/user/preferences/tagLine`,
         {
@@ -52,7 +54,7 @@ export const updateTagLine = async (tagLine, abortController) => {
                 ),
             },
             body: JSON.stringify({
-                tagLine: tagLine,
+                tagLine: value,
             }),
         }
     )
@@ -78,7 +80,7 @@ export const updateTagLine = async (tagLine, abortController) => {
     return data;
 };
 
-export const updateStatus = async (status, abortController) => {
+export const status = async (value, abortController) => {
     const data = await fetch(
         `${import.meta.env.VITE_SERVER_DOMAIN}/user/preferences/setStatus`,
         {
@@ -92,7 +94,7 @@ export const updateStatus = async (status, abortController) => {
                 ),
             },
             body: JSON.stringify({
-                setStatus: status,
+                setStatus: value,
             }),
         }
     )
@@ -118,7 +120,7 @@ export const updateStatus = async (status, abortController) => {
     return data;
 };
 
-export const updateProfileImage = (profileImage, abortController) => {
+export const profileImage = (value, abortController) => {
     return {
         status: 200,
         message: "Done.",
