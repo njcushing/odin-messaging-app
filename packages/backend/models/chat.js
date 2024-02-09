@@ -20,7 +20,7 @@ const ChatSchema = new Schema({
             muted: { type: Boolean, default: false },
         },
     ],
-    name: { type: String, trim: true },
+    name: { type: String, trim: true, default: "" },
     image: { type: Schema.Types.ObjectId, ref: "Image" },
     messages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
 });
