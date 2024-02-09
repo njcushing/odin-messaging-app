@@ -9,6 +9,7 @@
     --color-text-tooltip: rgba(255, 255, 255, 0.92);
     --color-outline-primary: rgba(0, 0, 0, 0.8);
     --color-outline-secondary: rgba(0, 0, 0, 0.5);
+    --color-outline-input: var(--color-outline-primary);
     --color-scrollbar-track: transparent;
     --color-scrollbar-track-hovered: rgba(0, 0, 0, 0.1);
     --color-scrollbar-thumb: rgba(0, 0, 0, 0.7);
@@ -25,6 +26,7 @@
     --color-text-tooltip: rgba(0, 0, 0, 0.92);
     --color-outline-primary: rgba(255, 255, 255, 0.8);
     --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-outline-input: transparent;
     --color-scrollbar-track: transparent;
     --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
     --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
@@ -40,6 +42,7 @@
     --color-text-tooltip: rgba(0, 0, 0, 0.92);
     --color-outline-primary: rgba(255, 255, 255, 0.8);
     --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-outline-input: transparent;
     --color-scrollbar-track: transparent;
     --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
     --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
@@ -55,6 +58,7 @@
     --color-text-tooltip: rgba(0, 0, 0, 0.92);
     --color-outline-primary: rgba(255, 255, 255, 0.8);
     --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-outline-input: var(--color-outline-primary);
     --color-scrollbar-track: transparent;
     --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
     --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
@@ -70,6 +74,7 @@
     --color-text-tooltip: rgba(0, 0, 0, 0.92);
     --color-outline-primary: rgba(255, 255, 255, 0.8);
     --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-outline-input: transparent;
     --color-scrollbar-track: transparent;
     --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
     --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
@@ -85,6 +90,7 @@
     --color-text-tooltip: rgba(0, 0, 0, 0.92);
     --color-outline-primary: rgba(255, 255, 255, 0.8);
     --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-outline-input: transparent;
     --color-scrollbar-track: transparent;
     --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
     --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
@@ -100,6 +106,7 @@
     --color-text-tooltip: rgba(255, 255, 255, 0.92);
     --color-outline-primary: rgba(0, 0, 0, 0.8);
     --color-outline-secondary: rgba(0, 0, 0, 0.5);
+    --color-outline-input: var(--color-outline-primary);
     --color-scrollbar-track: transparent;
     --color-scrollbar-track-hovered: rgba(0, 0, 0, 0.1);
     --color-scrollbar-thumb: rgba(0, 0, 0, 0.7);
@@ -115,6 +122,7 @@
     --color-text-tooltip: rgba(0, 0, 0, 0.92);
     --color-outline-primary: rgba(255, 255, 255, 0.8);
     --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-outline-input: transparent;
     --color-scrollbar-track: transparent;
     --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
     --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
@@ -131,6 +139,7 @@
         --color-text-tooltip: rgba(255, 255, 255, 0.92);
         --color-outline-primary: rgba(0, 0, 0, 0.8);
         --color-outline-secondary: rgba(0, 0, 0, 0.5);
+        --color-outline-input: var(--color-outline-primary);
         --color-scrollbar-track: transparent;
         --color-scrollbar-track-hovered: rgba(0, 0, 0, 0.1);
         --color-scrollbar-thumb: rgba(0, 0, 0, 0.7);
@@ -148,6 +157,7 @@
         --color-text-tooltip: rgba(0, 0, 0, 0.92);
         --color-outline-primary: rgba(255, 255, 255, 0.8);
         --color-outline-secondary: rgba(255, 255, 255, 0.5);
+        --color-outline-input: transparent;
         --color-scrollbar-track: transparent;
         --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
         --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
