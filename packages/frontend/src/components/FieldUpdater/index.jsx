@@ -4,6 +4,42 @@ import styles from "./index.module.css";
 
 import Tooltip from "@/components/Tooltip";
 
+const createErrorMessageContainer = (state) => {
+    return (
+        state.error !== null
+        ?   <h3
+                className={styles["error"]}
+                aria-label="text-input-error"
+            >{state.error}</h3>
+        :   null
+    );
+}
+
+const createUpdateButton = (state, setter, updater) => {
+    return (
+        <button
+            className={styles[`update-button${state.attemptingUpdate ? "-waiting" : ""}`]}
+            aria-label="update"
+            onClick={(e) => {
+                updater(state, setter);
+                e.currentTarget.blur();
+                e.preventDefault();
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.blur();
+            }}
+        >{!state.attemptingUpdate
+        ?   "Update"
+        :   <div className={styles["update-button-waiting-wheel-container"]}>
+                <div
+                    className={styles["update-button-waiting-wheel"]}
+                    aria-label="waiting"
+                ></div>
+            </div>
+        }</button>
+    );
+}
+
 const createInputContainer = (state, setter, labelText, updater, input) => {
     return (
         <div className={styles["field-container"]}>
@@ -11,34 +47,23 @@ const createInputContainer = (state, setter, labelText, updater, input) => {
         >{labelText}:
             <div className={styles["text-input-and-button-container"]}>
                 {input}
-                <button
-                    className={styles[`update-button${state.attemptingUpdate ? "-waiting" : ""}`]}
-                    aria-label="update"
-                    onClick={(e) => {
-                        updater(state, setter);
-                        e.currentTarget.blur();
-                        e.preventDefault();
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.blur();
-                    }}
-                >{!state.attemptingUpdate
-                ?   "Update"
-                :   <div className={styles["update-button-waiting-wheel-container"]}>
-                        <div
-                            className={styles["update-button-waiting-wheel"]}
-                            aria-label="waiting"
-                        ></div>
-                    </div>
-                }</button>
+                {createUpdateButton(state, setter, updater)}
             </div>
         </label>
-        {state.error !== null
-        ?   <h3
-                className={styles["error"]}
-                aria-label="text-input-error"
-            >{state.error}</h3>
-        :   null}
+        {createErrorMessageContainer(state)}
+        </div>
+    );
+}
+
+const createOtherFieldContainer = (state, setter, title, updater, input) => {
+    return (
+        <div className={styles["field-container"]}>
+        <h2 className={styles["title"]}>{title}:</h2>
+        <div className={styles["text-input-and-button-container"]}>
+            {input}
+            {createUpdateButton(state, setter, updater)}
+        </div>
+        {createErrorMessageContainer(state)}
         </div>
     );
 }
@@ -161,7 +186,7 @@ const createCirclesFieldUpdater = (state, setter, labelText, context, fieldName,
             })}
         </div>
     );
-    return createInputContainer(state, setter, labelText, updater, input);
+    return createOtherFieldContainer(state, setter, labelText, updater, input);
 }
 
 const FieldUpdater = ({
