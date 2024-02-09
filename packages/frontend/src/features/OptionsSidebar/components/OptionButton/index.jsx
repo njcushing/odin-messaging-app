@@ -1,26 +1,25 @@
 import PropTypes from 'prop-types';
-import styles from './index.module.css';
+import './index.css';
 
 const OptionButton = ({
     text,
     onClickHandler,
 }) => {
     return (
-        <div className={styles["wrapper"]}>
-        <div className={styles["container"]}>
-            <button
-                className={styles["button"]}
-                onClick={(e) => {
-                    onClickHandler(e);
-                    e.target.blur();
-                    e.preventDefault();
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.blur();
-                }}
-            >{text}</button>
-        </div>
-        </div>
+        <button
+            className="option-button"
+            aria-label={"option-button"}
+            onClick={(e) => {
+                onClickHandler(e);
+                e.currentTarget.blur();
+                e.preventDefault();
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.blur();
+            }}
+        >
+            <ul><li className="material-symbols-rounded">{text}</li></ul>
+        </button>
     )
 };
 

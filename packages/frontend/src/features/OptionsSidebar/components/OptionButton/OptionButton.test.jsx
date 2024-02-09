@@ -19,7 +19,7 @@ describe("UI/DOM Testing...", () => {
         test(`Should have the same textContent as the provided 'text' prop's
          value`, () => {
             renderComponent();
-            const button = screen.getByRole("button", { name: /Button/i });
+            const button = screen.getByRole("listitem", { name: /Button/i });
             expect(button).toBeInTheDocument();
         });
         test(`When clicked, should invoke the provided 'onClickHandler' prop
