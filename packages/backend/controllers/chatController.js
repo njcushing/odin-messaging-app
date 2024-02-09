@@ -64,6 +64,24 @@ const validators = {
         }
         return value;
     }),
+    messageText: body(
+        "messageText",
+        "'messageText' field (String) must not be empty"
+    )
+        .trim()
+        .isLength({ min: 1, max: 1000 })
+        .escape(),
+    replyingTo: body("messageReplyingTo")
+        .trim()
+        .custom((value, { req, loc, path }) => {
+            if (value.length > 0 && !mongoose.Types.ObjectId.isValid(value)) {
+                throw new Error(
+                    `'messageReplyingTo' field (String), when not empty, must be
+                    a valid MongoDB ObjectId.`
+                );
+            }
+            return value;
+        }),
 };
 
 export const chatGet = [
@@ -323,6 +341,108 @@ export const chatPost = [
             );
         } finally {
             sessionGroup.endSession();
+        }
+    }),
+];
+
+export const messagePost = [
+    protectedRouteJWT,
+    validators.messageText,
+    validators.replyingTo,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        const user = await User.findById(req.user._id).exec();
+        if (user === null) return selfNotFound(res, next, req.user._id);
+
+        validateChatId(res, next, req.params.chatId);
+        const chat = await Chat.findById(req.params.chatId).exec();
+        if (chat === null) return chatNotFound(res, next, req.params.chatId);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        // Ensure currently logged-in user is a participant in the chat and has
+        // the appropriate privileges to post messages
+        const userIdString = user._id.toString();
+        for (let i = 0; i < chat.participants.length; i++) {
+            if (chat.participants[i].user._id.toString() === userIdString) {
+                if (chat.participants[i].muted) {
+                    return sendResponse(
+                        res,
+                        403,
+                        `Currently logged-in user is muted in the specified chat.`,
+                        {
+                            message: null,
+                            token: token,
+                        }
+                    );
+                }
+                break;
+            }
+            if (i === chat.participants.length - 1) {
+                return sendResponse(
+                    res,
+                    403,
+                    `Currently logged-in user is not a participant in the specified chat.`,
+                    {
+                        message: null,
+                        token: token,
+                    }
+                );
+            }
+        }
+
+        // Create and save new message
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+
+            const message = new Message({
+                author: user._id,
+                text: req.body.messageText,
+                replyingTo: req.body.messageReplyingTo,
+            });
+            await message.save().catch((error) => {
+                error.message = "Unable to create Message.";
+                error.status = 500;
+                throw error;
+            });
+
+            const updatedChat = await Chat.findByIdAndUpdate(chat._id, {
+                $push: { messages: message._id },
+            });
+            if (updatedChat === null) {
+                const error = new Error(
+                    `Chat not found in database: ${chat._id}.`
+                );
+                error.status = 404;
+                throw error;
+            }
+
+            session.commitTransaction();
+
+            sendResponse(
+                res,
+                201,
+                `Message successfully created at: ${message._id} in chat ${chat._id}.`,
+                {
+                    message: message,
+                    token: token,
+                }
+            );
+        } catch (error) {
+            return sendResponse(
+                res,
+                error.status,
+                error.message,
+                {
+                    message: null,
+                    token: token,
+                },
+                error
+            );
+        } finally {
+            session.endSession();
         }
     }),
 ];
