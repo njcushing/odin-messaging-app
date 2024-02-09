@@ -3,7 +3,7 @@ const router = express.Router();
 
 import * as controller from "../controllers/chatController.js";
 
-router.get("/:userId", controller.chatGet);
-router.post("/:userId", controller.chatPost);
+router.get("/:chatId", controller.chatGet);
+router.post("/", controller.chatPost);
 
 export default router;
