@@ -551,21 +551,24 @@ export const addFriendsPost = [
             );
         }
 
-        // Check currently logged-in user's privileges
-        const userInChatInfo = chat.participants.find(
-            (participant) => participant.user.toString() === user._id.toString()
-        );
-        if (
-            userInChatInfo.role !== "admin" &&
-            userInChatInfo.role !== "moderator"
-        ) {
-            return sendResponse(
-                res,
-                403,
-                `$The currently logged-in user does not have the authority to
-                perform this operation on this chat.`,
-                { token: token }
+        // Check currently logged-in user's privileges ('group'-type chats only)
+        if (chat.type === "group") {
+            const userInChatInfo = chat.participants.find(
+                (participant) =>
+                    participant.user.toString() === user._id.toString()
             );
+            if (
+                userInChatInfo.role !== "admin" &&
+                userInChatInfo.role !== "moderator"
+            ) {
+                return sendResponse(
+                    res,
+                    403,
+                    `$The currently logged-in user does not have the authority to
+                    perform this operation on this chat.`,
+                    { token: token }
+                );
+            }
         }
 
         const session = await mongoose.startSession();
@@ -584,9 +587,21 @@ export const addFriendsPost = [
                     messages: [...chat.messages],
                 });
 
+                // Set currently logged-in user as admin of new chat
+                const userInChatInfo = newChat.participants.find(
+                    (participant) =>
+                        participant.user.toString() === user._id.toString()
+                );
+                userInChatInfo.role = "admin";
+
                 // Add new chat _id to existing participants' 'chats' arrays
+                const existingParticipantsIds = chat.participants.map(
+                    (participant) => {
+                        return participant.user.toString();
+                    }
+                );
                 await User.updateMany(
-                    { _id: { $in: chat.participants } },
+                    { _id: { $in: existingParticipantsIds } },
                     { $addToSet: { chats: newChatId } }
                 ).catch((error) => {
                     error.message =
@@ -617,17 +632,20 @@ export const addFriendsPost = [
             });
 
             // Add new participants to chat
-            const friendsObjectIds = friendsFiltered.map((friendStringId) => {
-                return new mongoose.Types.ObjectId(friendStringId);
+            const friendsObjects = friendsFiltered.map((friendStringId) => {
+                return { user: new mongoose.Types.ObjectId(friendStringId) };
             });
             await Chat.findByIdAndUpdate(chatId, {
-                $addToSet: { participants: { $each: friendsObjectIds } },
+                $push: { participants: { $each: friendsObjects } },
             }).catch((error) => {
                 error.message =
                     "Unable to add new participants to chat's participants.";
                 error.status = 500;
                 throw error;
             });
+
+            const test = await Chat.findById(chatId);
+            console.log(test);
 
             session.commitTransaction();
 
