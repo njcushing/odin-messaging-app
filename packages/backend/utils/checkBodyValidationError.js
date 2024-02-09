@@ -1,3 +1,7 @@
+import { validationResult } from "express-validator";
+
+import sendResponse from "./sendResponse.js";
+
 const compileValidationErrors = (arr) => {
     const reducedErrorArray = [];
     arr.forEach((error) => {
@@ -10,11 +14,10 @@ const checkBodyValidationError = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const errorString = compileValidationErrors(errors.array());
-        return next(
-            createError(
-                400,
-                `Cannot complete request due to invalid fields: ${errorString}`
-            )
+        return sendResponse(
+            res,
+            400,
+            `Cannot complete request due to invalid fields: ${errorString}`
         );
     }
     return next();
