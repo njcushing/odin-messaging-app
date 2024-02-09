@@ -15,6 +15,26 @@
     position: absolute;
     align-self: end;
 
+    outline-color: transparent;
+    outline-style: solid;
+    background-color: transparent;
     border-radius: 9999px;
     border: none;
+}
+
+.status-indicator[statusid |= "online"] {
+    outline-color: var(--color-background-front);
+    background-color: rgb(46, 196, 0);
+}
+.status-indicator[statusid |= "away"] {
+    outline-color: var(--color-background-front);
+    background-color: rgb(196, 118, 0);
+}
+.status-indicator[statusid |= "busy"] {
+    outline-color: var(--color-background-front);
+    background-color: rgb(192, 6, 0);
+}
+.status-indicator[statusid |= "offline"] {
+    outline-color: var(--color-background-front);
+    background-color: rgb(170, 170, 170);
 }

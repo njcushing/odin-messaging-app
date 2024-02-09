@@ -7,22 +7,6 @@ const ProfileImage = ({
     status,
     sizePx,
 }) => {
-    let statusIndicatorBackgroundColor;
-    switch (status) {
-        case "online":
-            statusIndicatorBackgroundColor = "rgb(46, 196, 0)";
-            break;
-        case "away":
-            statusIndicatorBackgroundColor = "rgb(196, 118, 0)";
-            break;
-        case "busy":
-            statusIndicatorBackgroundColor = "rgb(192, 6, 0)";
-            break;
-        case "offline":
-            statusIndicatorBackgroundColor = "rgb(170, 170, 170)";
-            break;
-    }
-
     const blob = new Blob([Buffer.from(src)], { type: "image/png" });
     const imgSrc = URL.createObjectURL(blob);
 
@@ -43,12 +27,12 @@ const ProfileImage = ({
                 className={styles["status-indicator"]}
                 aria-label="status-indicator"
                 style={{
-                    outline: `${Math.floor(sizePx / 11)}px solid var(--color-background-front)`,
-                    backgroundColor: statusIndicatorBackgroundColor,
+                    outlineWidth: `${Math.floor(sizePx / 11)}px`,
 
                     height: `${Math.floor(sizePx / 3)}px`,
                     width: `${Math.floor(sizePx / 3)}px`,
                 }}
+                statusid={status}
             ></div>
         :   null}
         </div>
@@ -59,7 +43,7 @@ ProfileImage.propTypes = {
     src: function(props, propName, componentName) {
         const propValue = props[propName]
         if (!ArrayBuffer.isView(propValue) || propValue instanceof DataView) {
-            return new Error(`'${propName}' prop in ${componentName} needs to be a
+            throw new Error(`'${propName}' prop in ${componentName} needs to be a
             Typed Array (e.g. - Uint8Array); got ${typeof propValue}`);
         }
         return;
