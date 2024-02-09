@@ -116,7 +116,7 @@ export const createaccountPost = [
                                         res,
                                         201,
                                         "Account created successfully.",
-                                        { token: token }
+                                        { token: `Bearer ${token}` }
                                     );
                                 }
                             }
