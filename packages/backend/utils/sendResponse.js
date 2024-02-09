@@ -26,7 +26,7 @@ const sendResponse = (
             status: statusValue,
             stack: stackString,
             message: message,
-            data: null,
+            data: data,
         });
     } else {
         return res.status(status).send({
