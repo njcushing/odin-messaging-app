@@ -18,6 +18,7 @@ const Dashboard = () => {
         setGetUserInfoAC(getUserInfoACNew);
         (async () => {
             const response = await getSelf(getUserInfoACNew);
+            if (!response.user) window.location.href = "/log-in";
             setUserInfo(response.user);
             setGetUserInfoAC(null);
         })();
