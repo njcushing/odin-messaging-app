@@ -29,7 +29,13 @@ const ChatSchema = new Schema(
         image: { type: Schema.Types.ObjectId, ref: "Image" },
         messages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
     },
-    { timestamps: true }
+    {
+        getters: true,
+        timestamps: true,
+    }
 );
+
+ChatSchema.set("toObject", { virtuals: true });
+ChatSchema.set("toJSON", { virtuals: true });
 
 export default mongoose.model("Chat", ChatSchema);

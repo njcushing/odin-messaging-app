@@ -98,7 +98,8 @@ const validators = {
                 } else {
                     return value;
                 }
-            }),
+            })
+            .optional({ values: "falsy" }),
         tagLine: body("tagLine")
             .trim()
             .custom((value, { req, loc, path }) => {
@@ -108,7 +109,8 @@ const validators = {
                 } else {
                     return value;
                 }
-            }),
+            })
+            .optional({ values: "falsy" }),
         setStatus: body("setStatus")
             .trim()
             .custom((value, { req, loc, path }) => {
@@ -118,7 +120,8 @@ const validators = {
                 } else {
                     return value;
                 }
-            }),
+            })
+            .optional({ nullable: true }),
     },
     param: {
         username: param("username")
@@ -432,35 +435,20 @@ export const friendsGet = [
                 select: `
                     _id
                     username
+                    email
                     preferences.displayName
                     preferences.tagLine
                     preferences.setStatus
-                    email
                     status
-                `,
+                `, // Have to include 'setStatus' so the 'status' virtual property will populate
             })
             .exec();
         if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
-        const friends = user.friends.map((friend) => ({
-            _id: friend.user._id,
-            username: friend.user.username,
-            email: friend.user.email,
-            displayName: friend.user.preferences.displayName,
-            tagLine: friend.user.preferences.tagLine,
-            status:
-                friend.user.preferences.setStatus !== null
-                    ? friend.user.preferences.setStatus
-                    : friend.user.status,
-            chat: friend.user.chat,
-            friendStatus: friend.user.friendStatus,
-            becameFriendsDate: friend.user.becameFriendsDate,
-        }));
-
         sendResponse(res, 200, "Friends found.", {
-            friends: friends,
+            friends: user.friends,
             token: token,
         });
     }),

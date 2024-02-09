@@ -11,7 +11,13 @@ const ImageSchema = new Schema(
             contentType: String,
         },
     },
-    { timestamps: true }
+    {
+        getters: true,
+        timestamps: true,
+    }
 );
+
+ImageSchema.set("toObject", { virtuals: true });
+ImageSchema.set("toJSON", { virtuals: true });
 
 export default mongoose.model("Image", ImageSchema);
