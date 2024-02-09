@@ -12,7 +12,7 @@ import getSelf from "@/utils/getSelf.js";
 
 const Dashboard = () => {
     const [userInfo, setUserInfo] = useState({
-        value: null,
+        currentValue: null,
         abortController: null,
         attempting: true,
     })
@@ -30,7 +30,7 @@ const Dashboard = () => {
                 const response = await getSelf(abortControllerNew);
                 setUserInfo({
                     ...userInfo,
-                    value: response.user,
+                    currentValue: response.user,
                     abortController: null,
                     attempting: false,
                 });
@@ -54,14 +54,14 @@ const Dashboard = () => {
         case "friends":
             mainDashboardContent = (
                 <FriendsPanel
-                    userId={userInfo.value ? userInfo.value._id : null}
+                    userId={userInfo.currentValue ? userInfo.currentValue._id : null}
                 />
             )
             break;
         case "chats":
             mainDashboardContent = (
                 <ChatsPanel
-                    userId={userInfo.value ? userInfo.value._id : null}
+                    userId={userInfo.currentValue ? userInfo.currentValue._id : null}
                 />
             )
             break;
@@ -71,10 +71,10 @@ const Dashboard = () => {
                     userInfo={(() => {
                         try {
                             return {
-                                displayName: userInfo.value.preferences.displayName,
-                                tagLine: userInfo.value.preferences.tagLine,
-                                status: userInfo.value.preferences.setStatus,
-                                profileImage: userInfo.value.preferences.image,
+                                displayName: userInfo.currentValue.preferences.displayName,
+                                tagLine: userInfo.currentValue.preferences.tagLine,
+                                status: userInfo.currentValue.preferences.setStatus,
+                                profileImage: userInfo.currentValue.preferences.image,
                             }
                         } catch (error) {
                             return {
@@ -102,7 +102,7 @@ const Dashboard = () => {
                     userSettings={(() => {
                         try {
                             return {
-                                theme: userInfo.value.preferences.theme,
+                                theme: userInfo.currentValue.preferences.theme,
                             }
                         } catch (error) {
                             return {
@@ -128,12 +128,22 @@ const Dashboard = () => {
     return (
         <div className={styles["wrapper"]}>
         <div className={styles["container"]}>
-            <div className={styles["options-sidebar"]}>
-                <OptionsSidebar
-                    onOptionSelect={(option) => setOptionSelected(option)}
-                />
-            </div>
-            {mainDashboardContent}
+            {!userInfo.attempting
+            ?   <>
+                <div className={styles["options-sidebar"]}>
+                    <OptionsSidebar
+                        onOptionSelect={(option) => setOptionSelected(option)}
+                    />
+                </div>
+                {mainDashboardContent}
+                </>
+            :   <div className={styles["waiting-wheel-container"]}>
+                    <div
+                        className={styles["waiting-wheel"]}
+                        aria-label="attempting-create-account"
+                    ></div>
+                </div>
+            }
         </div>
         </div>
     )
