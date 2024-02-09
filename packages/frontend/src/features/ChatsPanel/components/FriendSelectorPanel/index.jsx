@@ -85,7 +85,7 @@ const FriendSelectorPanel = ({
                             widthPx={30}
                             heightPx={30}
                             fontSizePx={22}
-                            borderStyle="rectangular"
+                            borderType="rectangular"
                             onClickHandler={(e) => onCloseHandler(e)}
                         />
                     </div>

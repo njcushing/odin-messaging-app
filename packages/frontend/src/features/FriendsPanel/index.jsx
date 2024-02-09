@@ -286,7 +286,7 @@ const FriendsPanel = ({
                             widthPx={50}
                             heightPx={50}
                             fontSizePx={24}
-                            borderStyle="circular"
+                            borderType="circular"
                             onClickHandler={() => {
                                 setAddingFriend(!addingFriend);
                             }}
@@ -310,7 +310,7 @@ const FriendsPanel = ({
                             widthPx={50}
                             heightPx={50}
                             fontSizePx={24}
-                            borderStyle="circular"
+                            borderType="circular"
                             onClickHandler={() => {
                                 setListViewing(
                                     listViewing === "friends" ?

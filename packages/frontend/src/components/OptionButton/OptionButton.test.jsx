@@ -1,18 +1,31 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import {render, screen} from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom";
 import OptionButton from './index.jsx'
 
-const renderComponent = () => {
+const renderComponent = (
+    text = "Button",
+    tooltipText = "tooltip",
+    tooltipPosition = "bottom",
+    widthPx = 50,
+    heightPx = 50,
+    fontSizePx = 30,
+    borderType = "rectangular",
+    onClickHandler = () => {},
+) => {
     render(<OptionButton
-        text="Button"
-        tooltipText="tooltip"
-        tooltipPosition="bottom"
-        onClickHandler={() => {}}
+        text={text}
+        tooltipText={tooltipText}
+        tooltipPosition={tooltipPosition}
+        widthPx={widthPx}
+        heightPx={heightPx}
+        fontSizePx={fontSizePx}
+        borderType={borderType}
+        onClickHandler={onClickHandler}
     />);
 }
 
@@ -47,6 +60,7 @@ describe("UI/DOM Testing...", () => {
             />);
             const button = screen.getByRole("button", "option-button");
 
+            fireEvent.mouseLeave(button);
             await user.click(button);
 
             expect(callback).toHaveBeenCalled();

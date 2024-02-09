@@ -40,6 +40,10 @@
                                            supported by Chrome, Edge, Opera and Firefox */
 }
 
+.option-button[bordertype |= "rectangular"] { border-radius: 0rem; }
+.option-button[bordertype |= "circular"] { border-radius: 50%; }
+.option-button[bordertype |= "rounded"] { border-radius: 0.2rem; }
+
 @media (hover: hover) {
     .option-button:hover {
         border-color: var(--color-outline-primary);
