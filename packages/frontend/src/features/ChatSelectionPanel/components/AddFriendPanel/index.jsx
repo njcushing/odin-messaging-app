@@ -25,7 +25,7 @@ const AddFriendPanel = ({
             <div className={styles["box"]}>
                 <h4
                     className={styles["title"]}
-                    aria-label="add-friend-modal"
+                    aria-label="add-friend-panel"
                 >Add a New Friend</h4>
                 <div className={styles["option-button"]}>
                     <OptionButton
