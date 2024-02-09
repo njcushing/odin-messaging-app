@@ -1,0 +1,156 @@
+/* Default */
+:root,
+:root[theme |= "default"] {
+    --color-background-base: rgb(194, 244, 250);
+    --color-background-front: rgb(240, 255, 255);
+    --color-background-tooltip: rgb(0, 0, 0);
+    --color-text-primary: rgb(0, 0, 0, 0.92);
+    --color-text-secondary: rgba(0, 0, 0, 0.8);
+    --color-text-tooltip: rgba(255, 255, 255, 0.92);
+    --color-outline-primary: rgba(0, 0, 0, 0.8);
+    --color-outline-secondary: rgba(0, 0, 0, 0.5);
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-track-hovered: rgba(0, 0, 0, 0.1);
+    --color-scrollbar-thumb: rgba(0, 0, 0, 0.7);
+    --color-scrollbar-thumb-hovered: rgba(0, 0, 0, 0.9);
+}
+
+/* Custom */
+:root[theme |= "red"] {
+    --color-background-base: rgb(187, 0, 0);
+    --color-background-front: rgb(231, 40, 40);
+    --color-background-tooltip: rgb(255, 255, 255);
+    --color-text-primary: rgb(255, 255, 255);
+    --color-text-secondary: rgba(255, 255, 255, 0.8);
+    --color-text-tooltip: rgba(0, 0, 0, 0.92);
+    --color-outline-primary: rgba(255, 255, 255, 0.8);
+    --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
+    --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
+    --color-scrollbar-thumb-hovered: rgba(255, 255, 255, 0.9);
+}
+
+:root[theme |= "orange"] {
+    --color-background-base: rgb(150, 80, 0);
+    --color-background-front: rgb(202, 109, 3);
+    --color-background-tooltip: rgb(255, 255, 255);
+    --color-text-primary: rgb(255, 255, 255);
+    --color-text-secondary: rgba(255, 255, 255, 0.8);
+    --color-text-tooltip: rgba(0, 0, 0, 0.92);
+    --color-outline-primary: rgba(255, 255, 255, 0.8);
+    --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
+    --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
+    --color-scrollbar-thumb-hovered: rgba(255, 255, 255, 0.9);
+}
+
+:root[theme |= "green"] {
+    --color-background-base: rgb(7, 90, 18);
+    --color-background-front: rgb(4, 131, 21);
+    --color-background-tooltip: rgb(255, 255, 255);
+    --color-text-primary: rgb(255, 255, 255);
+    --color-text-secondary: rgba(255, 255, 255, 0.8);
+    --color-text-tooltip: rgba(0, 0, 0, 0.92);
+    --color-outline-primary: rgba(255, 255, 255, 0.8);
+    --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
+    --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
+    --color-scrollbar-thumb-hovered: rgba(255, 255, 255, 0.9);
+}
+
+:root[theme |= "blue"] {
+    --color-background-base: rgb(8, 44, 122);
+    --color-background-front: rgb(36, 81, 177);
+    --color-background-tooltip: rgb(255, 255, 255);
+    --color-text-primary: rgb(255, 255, 255);
+    --color-text-secondary: rgba(255, 255, 255, 0.8);
+    --color-text-tooltip: rgba(0, 0, 0, 0.92);
+    --color-outline-primary: rgba(255, 255, 255, 0.8);
+    --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
+    --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
+    --color-scrollbar-thumb-hovered: rgba(255, 255, 255, 0.9);
+}
+
+:root[theme |= "purple"] {
+    --color-background-base: rgb(65, 9, 138);
+    --color-background-front: rgb(98, 33, 182);
+    --color-background-tooltip: rgb(255, 255, 255);
+    --color-text-primary: rgb(255, 255, 255);
+    --color-text-secondary: rgba(255, 255, 255, 0.8);
+    --color-text-tooltip: rgba(0, 0, 0, 0.92);
+    --color-outline-primary: rgba(255, 255, 255, 0.8);
+    --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
+    --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
+    --color-scrollbar-thumb-hovered: rgba(255, 255, 255, 0.9);
+}
+
+:root[theme |= "light"] {
+    --color-background-base: rgb(222, 222, 222);
+    --color-background-front: rgb(255, 255, 255);
+    --color-background-tooltip: rgb(0, 0, 0);
+    --color-text-primary: rgb(0, 0, 0, 0.92);
+    --color-text-secondary: rgba(0, 0, 0, 0.8);
+    --color-text-tooltip: rgba(255, 255, 255, 0.92);
+    --color-outline-primary: rgba(0, 0, 0, 0.8);
+    --color-outline-secondary: rgba(0, 0, 0, 0.5);
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-track-hovered: rgba(0, 0, 0, 0.1);
+    --color-scrollbar-thumb: rgba(0, 0, 0, 0.7);
+    --color-scrollbar-thumb-hovered: rgba(0, 0, 0, 0.9);
+}
+
+:root[theme |= "dark"] {
+    --color-background-base: rgb(44, 44, 44);
+    --color-background-front: rgb(22, 22, 22);
+    --color-background-tooltip: rgb(255, 255, 255);
+    --color-text-primary: rgb(255, 255, 255, 0.92);
+    --color-text-secondary: rgba(255, 255, 255, 0.8);
+    --color-text-tooltip: rgba(0, 0, 0, 0.92);
+    --color-outline-primary: rgba(255, 255, 255, 0.8);
+    --color-outline-secondary: rgba(255, 255, 255, 0.5);
+    --color-scrollbar-track: transparent;
+    --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
+    --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
+    --color-scrollbar-thumb-hovered: rgba(255, 255, 255, 0.9);
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --color-background-base: rgb(222, 222, 222);
+        --color-background-front: rgb(255, 255, 255);
+        --color-background-tooltip: rgb(0, 0, 0);
+        --color-text-primary: rgb(0, 0, 0, 0.92);
+        --color-text-secondary: rgba(0, 0, 0, 0.8);
+        --color-text-tooltip: rgba(255, 255, 255, 0.92);
+        --color-outline-primary: rgba(0, 0, 0, 0.8);
+        --color-outline-secondary: rgba(0, 0, 0, 0.5);
+        --color-scrollbar-track: transparent;
+        --color-scrollbar-track-hovered: rgba(0, 0, 0, 0.1);
+        --color-scrollbar-thumb: rgba(0, 0, 0, 0.7);
+        --color-scrollbar-thumb-hovered: rgba(0, 0, 0, 0.9);
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-background-base: rgb(44, 44, 44);
+        --color-background-front: rgb(22, 22, 22);
+        --color-background-tooltip: rgb(255, 255, 255);
+        --color-text-primary: rgb(255, 255, 255, 0.92);
+        --color-text-secondary: rgba(255, 255, 255, 0.8);
+        --color-text-tooltip: rgba(0, 0, 0, 0.92);
+        --color-outline-primary: rgba(255, 255, 255, 0.8);
+        --color-outline-secondary: rgba(255, 255, 255, 0.5);
+        --color-scrollbar-track: transparent;
+        --color-scrollbar-track-hovered: rgba(255, 255, 255, 0.1);
+        --color-scrollbar-thumb: rgba(255, 255, 255, 0.7);
+        --color-scrollbar-thumb-hovered: rgba(255, 255, 255, 0.9);
+    }
+}

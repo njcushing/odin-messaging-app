@@ -24,7 +24,7 @@
 }
 
 .material-symbols-rounded {
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     text-align: center;
     text-decoration: none;
 
@@ -42,7 +42,7 @@
 
 @media (hover: hover) {
     .option-button:hover {
-        border-color: rgba(255, 255, 255, 0.5);
+        border-color: var(--color-outline-primary);
         cursor: pointer;
     }
     .option-button:hover ul .material-symbols-rounded {
@@ -51,7 +51,7 @@
 }
 
 .option-button:focus {
-    border-color: rgba(255, 255, 255, 0.5);
+    border-color: var(--color-outline-primary);
     cursor: pointer;
 }
 .option-button:focus ul .material-symbols-rounded {

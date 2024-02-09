@@ -38,7 +38,7 @@
 .container {
     display: flex;
 
-    background-color: rgb(22, 22, 22);
+    background-color: var(--color-background-front);
 
     width: auto;
 }
@@ -47,7 +47,7 @@ label,
 .title {
     align-self: start;
 
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     font-size: 1.2rem;
     font-family: Gabarito;
 }
@@ -64,7 +64,9 @@ label,
     font-family: Gabarito;
     border: none;
     border-radius: 2px;
-    outline: none;
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
 
     width: calc(360px - 4px);
     height: 2.0rem;
@@ -100,7 +102,9 @@ label,
     border: none;
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
-    outline: none;
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
     text-align: center;
 
     min-width: calc(160px - 4px);
@@ -140,8 +144,10 @@ label,
     background-color: #580886;
 
     border: none;
-    outline: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 0 0 3px rgb(22, 22, 22) inset;
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
+    box-shadow: 0 0 0 3px var(--color-background-front) inset;
     box-sizing: border-box;
 
     transition: outline 0.1s ease-in-out 0s,
@@ -151,7 +157,7 @@ label,
 @media (hover: hover) {
     .circle:hover,
     .circle-selected {
-        outline: 4px solid white;
+        outline-width: 4px;
         transform: scale(92%);
     
         cursor: pointer;
@@ -160,7 +166,7 @@ label,
 
 .circle:focus,
 .circle-error:focus {
-    outline: 4px solid white;
+    outline-width: 4px;
     transform: scale(84%);
     
     cursor: pointer;
@@ -179,7 +185,7 @@ label,
 .update-button-waiting {
     align-self: center;
 
-    color: rgba(255, 255, 255, 1.0);
+    color: var(--color-text-primary);
     font-size: 1.0rem;
     font-family: Gabarito;
     text-align: center;

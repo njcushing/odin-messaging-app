@@ -24,12 +24,12 @@
 }
 
 .text {
-    color: rgba(0, 0, 0, 0.92);
+    color: var(--color-text-tooltip);
     font-size: 1.06rem;
     font-family: Gabarito;
     text-align: center;
     line-height: 1.32rem;
-    background-color: rgba(255, 255, 255, 1.0);
+    background-color: var(--color-background-tooltip);
     border-radius: 6px;
     
     padding: 0.4rem;
@@ -39,6 +39,8 @@
 }
 
 .arrow {
+    border-color: var(--color-background-tooltip);
+
     opacity: 0%;
     animation: 0.1s ease-in-out 0.15s 1 normal forwards fade-in;
 }

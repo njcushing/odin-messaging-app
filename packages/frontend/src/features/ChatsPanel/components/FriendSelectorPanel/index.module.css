@@ -32,7 +32,7 @@
     justify-content: center;
     align-items: center;
 
-    background-color: rgb(22, 22, 22);
+    background-color: var(--color-background-front);
 
     width: auto;
     height: 100%;
@@ -42,9 +42,12 @@
     display: flex;
     flex-direction: column;
 
-    background-color: rgb(22, 22, 22);
-    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
     border-radius: 8px;
+
+    background-color: var(--color-background-front);
 
     width: 320px;
     padding: 0.9rem;
@@ -59,11 +62,12 @@
     top: -1.5rem;
     left: 0.6rem;
 
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     font-size: 1.2rem;
     font-family: Gabarito;
     text-align: center;
-    background-color: rgb(22, 22, 22);
+
+    background-color: var(--color-background-front);
 
     padding: 0.6rem;
     margin: 0rem;
@@ -75,7 +79,7 @@
     left: calc(100% - 2.4rem);
     z-index: 100;
 
-    background-color: rgb(22, 22, 22);
+    background-color: var(--color-background-front);
 }
 
 .friends-selected-container {
@@ -93,7 +97,9 @@
 
     border: none;
     border-radius: 8px;
-    outline: 1px solid rgba(255, 255, 255, 0.5);
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
 
     max-height: 12rem;
     padding: 0.8rem;
@@ -114,7 +120,7 @@
 
 .friend-selected-name,
 .friend-name {
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     font-size: 1.1rem;
     font-family: Gabarito;
 
@@ -205,7 +211,9 @@
 
     border: none;
     border-radius: 8px;
-    outline: 1px solid rgba(255, 255, 255, 0.5);
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
 
     width: calc(100% - (0.8rem * 2));
     padding: 0.8rem;
@@ -299,7 +307,7 @@
 }
 
 .submission-error-item {
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     font-size: 0.9rem;
     font-family: Gabarito;
     font-weight: normal;

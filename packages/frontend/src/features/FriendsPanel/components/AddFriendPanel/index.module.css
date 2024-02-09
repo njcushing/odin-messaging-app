@@ -41,7 +41,7 @@
     justify-content: center;
     align-items: center;
 
-    background-color: rgb(22, 22, 22);
+    background-color: var(--color-background-front);
 
     width: auto;
     height: 100%;
@@ -51,9 +51,11 @@
     display: grid;
     grid-template-rows: auto 1fr auto;
 
-    background-color: rgb(22, 22, 22);
-    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
     border-radius: 8px;
+    background-color: var(--color-background-front);
 
     width: 320px;
     padding: 0.9rem;
@@ -68,11 +70,12 @@
     top: -1.5rem;
     left: 0.6rem;
 
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     font-size: 1.2rem;
     font-family: Gabarito;
     text-align: center;
-    background-color: rgb(22, 22, 22);
+    
+    background-color: var(--color-background-front);
 
     padding: 0.6rem;
     margin: 0rem;
@@ -84,7 +87,7 @@
     left: calc(100% - 2.4rem);
     z-index: 100;
 
-    background-color: rgb(22, 22, 22);
+    background-color: var(--color-background-front);
 }
 
 .find-friend-container {
@@ -100,7 +103,9 @@
 }
 
 .friend-name-label {
-    color: rgba(255, 255, 255, 0.92);
+    align-self: center;
+
+    color: var(--color-text-primary);
     font-size: 1.2rem;
     font-family: Gabarito;
 }
@@ -111,7 +116,9 @@
     font-family: Gabarito;
     border: none;
     border-radius: 2px;
-    outline: none;
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
     background-color: rgba(255, 255, 255, 1.0);
 
     width: 100%;
@@ -143,7 +150,9 @@
 
     border: none;
     border-radius: 8px;
-    outline: 1px solid rgba(255, 255, 255, 0.5);
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
 
     width: calc(100% - (0.8rem * 2));
     padding: 0.8rem;
@@ -162,7 +171,7 @@
 .result-found-name {
     grid-area: 1 / 2 / 2 / -1;
 
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     font-size: 1.1rem;
     font-family: Gabarito;
 
@@ -215,7 +224,7 @@
 
 .response-message,
 .no-result-found {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--color-text-secondary);
     font-size: 1.1rem;
     font-family: Gabarito;
     text-align: center;
@@ -226,38 +235,6 @@
     opacity: 0%;
     transform: translateY(0.5rem);
     animation: 0.2s ease-in-out 0s 1 normal forwards fade-in;
-}
-
-.add-friend-submission-errors {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-
-    opacity: 0%;
-    transform: translateY(0.5rem);
-    animation: 0.2s ease-in-out 0.45s 1 normal forwards fade-in;
-}
-
-.add-friend-submission-errors-title {
-    color: rgba(255, 255, 255, 0.92);
-    font-size: 1.0rem;
-    font-family: Gabarito;
-    font-weight: normal;
-
-    padding: 0rem;
-    margin: 0rem;
-}
-
-.add-friend-submission-errors-list {
-    padding: 0rem auto;
-    margin: 0rem;
-}
-
-.add-friend-submission-error-item {
-    color: rgba(255, 255, 255, 0.92);
-    font-size: 0.9rem;
-    font-family: Gabarito;
-    font-weight: normal;
 }
 
 .waiting-wheel-container {

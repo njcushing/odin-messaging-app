@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import styles from "./index.module.css";
+import { setTheme } from "@/themes";
 
 import OptionsSidebar from "@/features/OptionsSidebar";
 import FriendsPanel from "@/features/FriendsPanel";
@@ -8,7 +9,6 @@ import AccountInformation from "@/features/AccountInformation";
 import Settings from "@/features/Settings";
 
 import getSelf from "@/utils/getSelf.js";
-import { trusted } from "mongoose";
 
 const Dashboard = () => {
     const [userInfo, setUserInfo] = useState({
@@ -17,7 +17,7 @@ const Dashboard = () => {
         attempting: true,
     })
     const [optionSelected, setOptionSelected] = useState("friends");
-    
+
     useEffect(() => {
         if (userInfo.attempting) {
             if (userInfo.abortController) userInfo.abortController.abort;
@@ -34,6 +34,7 @@ const Dashboard = () => {
                     abortController: null,
                     attempting: false,
                 });
+                setTheme(response.user.preferences.theme);
             })();
         } else {
             if (userInfo.abortController) userInfo.abortController.abort;

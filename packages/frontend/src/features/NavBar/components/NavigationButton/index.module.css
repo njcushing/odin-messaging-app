@@ -21,14 +21,14 @@
 .button {
     align-self: center;
 
-    color: rgba(255, 255, 255, 0.87);
+    color: var(--color-text-primary);
     font-size: 1.2rem;
     font-family: Gabarito;
     text-align: center;
     text-decoration: none;
     border: 0.1rem solid rgba(255, 255, 255, 0.0);
     border-radius: 0.4rem;
-    background-color: rgb(22, 22, 22);
+    background-color: var(--color-background-base);
 
     width: 100%;
     padding: 0.3rem 0.8rem;
@@ -42,11 +42,15 @@
 @media (hover: hover) {
     .button:hover {
         transform: scale(107%);
-        outline: 1px solid white;
+        outline-width: 1px;
+        outline-style: solid;
+        outline-color: var(--color-outline-primary);
     }
 }
 
 .button:focus {
     transform: scale(107%);
-    outline: 2px solid white;
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
 }

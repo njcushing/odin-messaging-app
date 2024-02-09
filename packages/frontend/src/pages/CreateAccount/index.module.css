@@ -44,7 +44,7 @@
     justify-content: center;
     align-items: center;
 
-    background-color: rgb(44, 44, 44);
+    background-color: var(--color-background-base);
     
     width: calc(100% - (0.6rem * 2));
     height: calc(100% - (0.6rem * 2));
@@ -59,7 +59,7 @@
     display: flex;
     flex-direction: column;
 
-    background-color: rgb(22, 22, 22);
+    background-color: var(--color-background-front);
     border-radius: 8px;
 
     width: 320px;
@@ -71,7 +71,7 @@
 }
 
 .title {
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     font-size: 1.2rem;
     font-family: Gabarito;
     text-align: center;
@@ -96,7 +96,7 @@
 }
 
 .requirement-message {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--color-text-secondary);
     font-size: 0.7rem;
     font-family: Gabarito;
 
@@ -108,7 +108,7 @@
 .email-label,
 .password-label,
 .confirm-password-label {
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-primary);
     font-size: 1.2rem;
     font-family: Gabarito;
 
@@ -128,7 +128,9 @@
     font-family: Gabarito;
     border: none;
     border-radius: 2px;
-    outline: none;
+    outline-width: 2px;
+    outline-style: solid;
+    outline-color: var(--color-outline-primary);
 
     width: calc(100% - 4px);
     height: 2.0rem;

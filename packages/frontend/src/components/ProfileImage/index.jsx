@@ -40,7 +40,7 @@ const ProfileImage = ({
                 className={styles["status-indicator"]}
                 aria-label="status-indicator"
                 style={{
-                    outline: `${Math.floor(sizePx / 11)}px solid rgb(22, 22, 22)`,
+                    outline: `${Math.floor(sizePx / 11)}px solid var(--color-background-front)`,
                     backgroundColor: statusIndicatorBackgroundColor,
 
                     height: `${Math.floor(sizePx / 3)}px`,
