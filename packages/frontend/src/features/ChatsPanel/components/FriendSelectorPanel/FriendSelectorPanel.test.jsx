@@ -265,8 +265,8 @@ describe("UI/DOM Testing...", () => {
             const loadMoreButton = screen.getByRole("button", { name: "load-more" });
             expect(loadMoreButton).toBeInTheDocument();
         });
-        test(`Should, when clicked, attempt to append more friends to the end
-         of the friends list`, async () => {
+        test(`Should, when clicked, attempt to append more friends to the end of
+         the friends list`, async () => {
             const user = userEvent.setup();
             getFriendsList.mockReturnValueOnce({
                 status: 200,

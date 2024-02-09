@@ -16,14 +16,14 @@ const ChatsPanel = ({
 }) => {
     const [chatsList, setChatsList] = useState({
         currentValue: [],
-        abortController: null,
-        attempting: !createChatPanelOpenDefault,
+        abortController: new AbortController(),
+        attempting: true,
         appending: false,
     });
     const [creatingChat, setCreatingChat] = useState({
         panelOpen: createChatPanelOpenDefault,
         currentValue: [],
-        abortController: null,
+        abortController: new AbortController(),
         attempting: false,
         submissionErrors: [],
     });
@@ -66,7 +66,11 @@ const ChatsPanel = ({
                 abortController: abortControllerNew,
             });
             (async () => {
-                const chatNew = await createChat(Array.from(creatingChat.currentValue), abortControllerNew);
+                let participants = [];
+                if (creatingChat.currentValue instanceof Set) {
+                    participants = Array.from(creatingChat.currentValue);
+                }
+                const chatNew = await createChat(participants, abortControllerNew);
                 setCreatingChat({
                     panelOpen: false,
                     abortController: null,
@@ -99,6 +103,9 @@ const ChatsPanel = ({
                         return chat._id.toString() !== chatSelectedId.toString()
                     });
                     if (typeof chatOptionToUpdate !== "undefined") {
+                        if (typeof chatOptionToUpdate.messages === "undefined") {
+                            chatOptionToUpdate.messages = [];
+                        }
                         chatOptionToUpdate.messages[0] = message;
                         chatsListOptionRemoved.unshift(chatOptionToUpdate);
                         setChatsList({
@@ -169,6 +176,7 @@ const ChatsPanel = ({
                     >
                         <OptionButton
                             text="add"
+                            label="create-chat"
                             tooltipText="Create New Chat"
                             tooltipPosition="bottom"
                             widthPx={50}
