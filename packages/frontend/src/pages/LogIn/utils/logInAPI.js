@@ -1,5 +1,8 @@
-const logInAPI = async (credentials) => {
+import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+
+const logInAPI = async (credentials, abortController) => {
     const data = await fetch(`${import.meta.env.VITE_SERVER_DOMAIN}/log-in`, {
+        signal: abortController ? abortController.signal : null,
         method: "POST",
         mode: "cors",
         headers: {
@@ -9,16 +12,8 @@ const logInAPI = async (credentials) => {
     })
         .then(async (response) => {
             const responseJSON = await response.json();
-            if (
-                responseJSON.data !== null &&
-                typeof responseJSON.data === "object" &&
-                "token" in responseJSON.data
-            ) {
-                localStorage.setItem(
-                    "odin-messaging-app-auth-token",
-                    responseJSON.data.token
-                );
-            }
+            saveTokenFromResponseJSON(responseJSON);
+
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
@@ -26,8 +21,8 @@ const logInAPI = async (credentials) => {
         })
         .catch((error) => {
             return {
-                status: 500,
-                message: "Log-in attempt failed",
+                status: error.status,
+                message: error.message,
             };
         });
     return data;
