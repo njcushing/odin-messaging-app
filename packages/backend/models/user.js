@@ -5,6 +5,12 @@ import {
     validateEmail,
     validatePassword,
 } from "../../../utils/validateCreateAccountFields.js";
+import {
+    validateDisplayName,
+    validateTagLine,
+    validateStatus,
+    validateProfileImage,
+} from "../../../utils/validateUserAccountInformationFields.js";
 
 const Schema = mongoose.Schema;
 
@@ -71,20 +77,42 @@ const UserSchema = new Schema(
             displayName: {
                 type: String,
                 trim: true,
-                maxlength: 40,
+                validate: {
+                    validator: function (value) {
+                        return validateDisplayName(value).status;
+                    },
+                    message: (props) =>
+                        validateDisplayName(props.value).message.back,
+                },
                 default: "",
             },
             tagLine: {
                 type: String,
                 trim: true,
-                maxlength: 100,
+                validate: {
+                    validator: function (value) {
+                        return validateTagLine(value).status;
+                    },
+                    message: (props) =>
+                        validateTagLine(props.value).message.back,
+                },
                 default: "",
             },
             image: { type: Schema.Types.ObjectId, ref: "Image" },
             setStatus: {
                 type: String,
-                enum: ["online", "busy", "away", "offline", null],
+                validate: {
+                    validator: function (value) {
+                        return validateStatus(value).status;
+                    },
+                    message: (props) =>
+                        validateStatus(props.value).message.back,
+                },
                 default: null,
+            },
+            theme: {
+                type: String,
+                default: "default",
             },
         },
     },
