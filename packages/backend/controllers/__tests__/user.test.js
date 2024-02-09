@@ -228,7 +228,7 @@ describe("Route testing...", () => {
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/self/Person1`).expect(404);
+            await request(app).get(`/self/Person1`).expect(401);
         });
         test(`Should respond with status code 404 if the user from the request
          parameters is not found in the database`, async () => {
@@ -270,14 +270,14 @@ describe("Route testing...", () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app).get(`/friends/personDoesNotExist`).expect(404);
         });
-        test(`Should respond with status code 404 if the user containing a
-         friend with the specified username is not found in the database`, async () => {
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/friends/Person2`).expect(404);
+            await request(app).get(`/friends/Person2`).expect(401);
         });
         test(`Should respond with a status of 400 if the user and friend
          are both found in the database, but they are not friends`, async () => {
@@ -330,14 +330,14 @@ describe("Route testing...", () => {
                 .get(`/friends/can-be-added/personDoesNotExist`)
                 .expect(404);
         });
-        test(`Should respond with status code 404 if the user is not found in
-         the database`, async () => {
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/friends/can-be-added/Person2`).expect(404);
+            await request(app).get(`/friends/can-be-added/Person2`).expect(401);
         });
         test(`Should respond with status code 400 if the '_id' of the
          potential friend being checked already exists within the currently
@@ -378,14 +378,14 @@ describe("Route testing...", () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
             await request(app).get(`/friends`).expect(400);
         });
-        test(`Should respond with status code 404 if the user is not found in
-         the database`, async () => {
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/friends`).expect(404);
+            await request(app).get(`/friends`).expect(401);
         });
         test(`Should respond with status code 200 if the user is found in
          the database`, async () => {
@@ -430,14 +430,14 @@ describe("Route testing...", () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
             await request(app).get(`/friend-requests`).expect(400);
         });
-        test(`Should respond with status code 404 if the user is not found in
-         the database`, async () => {
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/friend-requests`).expect(404);
+            await request(app).get(`/friend-requests`).expect(401);
         });
         test(`Should respond with status code 200 if the user is found in
          the database`, async () => {
@@ -506,8 +506,8 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(404);
         });
-        test(`Should respond with status code 404 if the user is not found in
-         the database`, async () => {
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person1",
@@ -518,7 +518,7 @@ describe("Route testing...", () => {
                 .send({ username: "Person2" })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect(404);
+                .expect(401);
         });
         test(`Should respond with status code 400 if the '_id' of the user
          being added already exists within the currently logged-in user's
@@ -624,8 +624,8 @@ describe("Route testing...", () => {
                 .put(`/friend-requests/personDoesNotExist/accept`)
                 .expect(404);
         });
-        test(`Should respond with status code 404 if the user is not found in
-         the database`, async () => {
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person5",
@@ -633,7 +633,7 @@ describe("Route testing...", () => {
             );
             await request(app)
                 .put(`/friend-requests/Person1/accept`)
-                .expect(404);
+                .expect(401);
         });
         test(`Should respond with status code 404 if the '_id' of the user being
          added does not exist within the currently logged-in user's
@@ -695,8 +695,8 @@ describe("Route testing...", () => {
                 .put(`/friend-requests/personDoesNotExist/decline`)
                 .expect(404);
         });
-        test(`Should respond with status code 404 if the user is not found in
-         the database`, async () => {
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person4",
@@ -704,7 +704,7 @@ describe("Route testing...", () => {
             );
             await request(app)
                 .put(`/friend-requests/Person3/decline`)
-                .expect(404);
+                .expect(401);
         });
         test(`Should respond with status code 404 if the '_id' of the user being
          added does not exist within the currently logged-in user's
@@ -732,6 +732,51 @@ describe("Route testing...", () => {
             await request(app)
                 .put(`/friend-requests/Person1/decline`)
                 .expect(200);
+        });
+    });
+
+    describe("/user/chats GET route...", () => {
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(null, "Person1", "person1*");
+            await request(app).get(`/chats`).expect(400);
+        });
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app).get(`/chats`).expect(401);
+        });
+        test(`Should respond with status code 200 if the chats are found in
+         the database, with an array of chats and a new token`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .get(`/chats`)
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (!data.hasOwnProperty("chats")) {
+                        throw new Error(
+                            `Server has not responded with chats array`
+                        );
+                    }
+                    if (!Array.isArray(data.chats)) {
+                        throw new Error(
+                            `Server has not responded with chats array`
+                        );
+                    }
+                    if (!data.hasOwnProperty("token")) {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
         });
     });
 });

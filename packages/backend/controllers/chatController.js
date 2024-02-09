@@ -30,6 +30,10 @@ const validateChatId = (res, next, chatId) => {
     }
 };
 
+const selfNotFound = (res, next, userId) => {
+    return sendResponse(res, 401, "User not found in database.");
+};
+
 const userNotFound = (res, userId) => {
     return sendResponse(res, 404, `User not found in database: ${userId}`);
 };
@@ -78,7 +82,7 @@ export const chatGet = [
                 match: { _id: chat._id },
             })
             .exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
@@ -93,7 +97,7 @@ export const chatPost = [
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
         let user = await User.findById(req.user._id).exec();
-        if (user === null) return userNotFound(res, next, req.user._id);
+        if (user === null) return selfNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
