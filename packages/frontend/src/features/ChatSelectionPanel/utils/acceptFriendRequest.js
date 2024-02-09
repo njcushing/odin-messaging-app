@@ -1,3 +1,5 @@
+import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+
 const acceptFriendRequest = async (username, abortController) => {
     const data = await fetch(
         `${
@@ -17,19 +19,12 @@ const acceptFriendRequest = async (username, abortController) => {
     )
         .then(async (response) => {
             const responseJSON = await response.json();
+            saveTokenFromResponseJSON(responseJSON);
+
             if (responseJSON.status === 401) {
                 window.location.href = "/log-in";
             }
-            if (
-                responseJSON.data !== null &&
-                typeof responseJSON.data === "object" &&
-                "token" in responseJSON.data
-            ) {
-                localStorage.setItem(
-                    "odin-messaging-app-auth-token",
-                    responseJSON.data.token
-                );
-            }
+
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
