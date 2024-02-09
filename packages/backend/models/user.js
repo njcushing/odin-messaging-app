@@ -20,12 +20,10 @@ const UserSchema = new Schema({
         default: false,
     },
     account_creation_date: { type: Date, default: Date.now },
+    image: { type: Schema.Types.ObjectId, ref: "Image" },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
     chats: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
-    groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
-    communities: [{ type: Schema.Types.ObjectId, ref: "Community" }],
     /*
-    profile_image,
     preferences,
     */
 });
