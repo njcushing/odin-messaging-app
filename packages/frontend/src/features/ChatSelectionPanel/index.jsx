@@ -103,9 +103,8 @@ const ChatSelectionPanel = ({
         );
     }
 
-    if (chatType !== "friends" && viewingFriendRequests) {
-        setViewingFriendRequests(false);
-    }
+    let title = chatType;
+    if (chatType === "friends" && viewingFriendRequests) title = "Friend Requests";
 
     return (
         <div className={styles["wrapper"]}>
@@ -114,9 +113,7 @@ const ChatSelectionPanel = ({
                 <h3
                     className={styles["chat-list-title"]}
                     aria-label="chat-list-title"
-                >{
-                    !viewingFriendRequests ? chatType : "Friend Requests"
-                }</h3>
+                >{title}</h3>
                 {chatType === "friends" || chatType === "groups"
                 ?   <ul
                         className={styles["chat-selection-panel-options-list"]}
@@ -221,28 +218,8 @@ const ChatSelectionPanel = ({
                         </li>
                     </ul>
                 :   null}
-                {!viewingFriendRequests
+                {chatType === "friends" && viewingFriendRequests
                 ?   <ul
-                        className={styles["chat-list-options"]}
-                        aria-label="chat-list-options"
-                    >
-                        {chatList.map((chat) => {
-                            return (
-                                <li
-                                    aria-label="chat-option"
-                                    key={chat._id}
-                                ><ChatOption
-                                    name={chat.name}
-                                    tagLine={chat.tagLine}
-                                    status={chat.status}
-                                    imageSrc={chat.imageSrc}
-                                    imageAlt={chat.imageAlt}
-                                    onClickHandler={() => {}}
-                                /></li>
-                            );
-                        })}
-                    </ul>
-                :   <ul
                         className={styles["friend-request-list"]}
                         aria-label="friend-request-list"
                     >
@@ -262,6 +239,26 @@ const ChatSelectionPanel = ({
                                             });
                                         setFriendRequests(reducedFriendRequestsArray);
                                     }}
+                                /></li>
+                            );
+                        })}
+                    </ul>
+                :   <ul
+                        className={styles["chat-list-options"]}
+                        aria-label="chat-list-options"
+                    >
+                        {chatList.map((chat) => {
+                            return (
+                                <li
+                                    aria-label="chat-option"
+                                    key={chat._id}
+                                ><ChatOption
+                                    name={chat.name}
+                                    tagLine={chat.tagLine}
+                                    status={chat.status}
+                                    imageSrc={chat.imageSrc}
+                                    imageAlt={chat.imageAlt}
+                                    onClickHandler={() => {}}
                                 /></li>
                             );
                         })}
