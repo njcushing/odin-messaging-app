@@ -11,24 +11,32 @@ const Dashboard = () => {
     let mainDashboardContent = null;
     switch (optionSelected) {
         case "friends":
-        default:
+        case "groups":
+        case "communities":
             mainDashboardContent = (
                 <>
                 <div className={styles["chat-selection-panel"]}>
-                    <ChatSelectionPanel />
+                    <ChatSelectionPanel
+                        chatType={optionSelected}
+                    />
                 </div>
                 <div className={styles["chat-panel"]}>
                     <ChatPanel />
                 </div>
                 </>
             );
+            break;
+        default:
+            mainDashboardContent = null;
     }
 
     return (
         <div className={styles["wrapper"]}>
         <div className={styles["container"]}>
             <div className={styles["options-sidebar"]}>
-                <OptionsSidebar />
+                <OptionsSidebar
+                    onOptionSelect={(option) => setOptionSelected(option)}
+                />
             </div>
             {mainDashboardContent}
         </div>
