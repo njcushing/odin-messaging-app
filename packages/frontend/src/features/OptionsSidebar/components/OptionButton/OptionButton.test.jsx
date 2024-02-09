@@ -10,17 +10,29 @@ import OptionButton from './index.jsx'
 const renderComponent = () => {
     render(<OptionButton
         text="Button"
+        tooltipText="tooltip"
+        tooltipPosition="bottom"
         onClickHandler={() => {}}
     />);
 }
+
+vi.mock('@/features/NavBar/components/Tooltip', () => ({ 
+    default: ({
+        text,
+        position,
+        pixelBuffer,
+    }) => {
+        return (<></>);
+    }
+}));
 
 describe("UI/DOM Testing...", () => {
     describe("The button element...", () => {
         test(`Should have the same textContent as the provided 'text' prop's
          value`, () => {
             renderComponent();
-            const button = screen.getByRole("listitem", { name: /Button/i });
-            expect(button).toBeInTheDocument();
+            const button = screen.getByRole("listitem", "option-button");
+            expect(button.textContent).toBe("Button");
         });
         test(`When clicked, should invoke the provided 'onClickHandler' prop
          callback function`, async () => {
@@ -29,9 +41,11 @@ describe("UI/DOM Testing...", () => {
             
             render(<OptionButton
                 text="Button"
+                tooltipText="tooltip"
+                tooltipPosition="bottom"
                 onClickHandler={callback}
             />);
-            const button = screen.getByRole("button", { name: /Button/i });
+            const button = screen.getByRole("button", "option-button");
 
             await user.click(button);
 
