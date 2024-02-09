@@ -372,6 +372,78 @@ describe("Route testing...", () => {
         });
     });
 
+    describe("/user/friend/can-be-added GET route...", () => {
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: null,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            await request(app)
+                .get(`/friend/can-be-added/personDoesNotExist`)
+                .expect(400);
+        });
+        test(`Should respond with status code 404 if the friend is not found in
+         the database`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: users[0]._id,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            await request(app)
+                .get(`/friend/can-be-added/personDoesNotExist`)
+                .expect(404);
+        });
+        test(`Should respond with status code 404 if the user is not found in
+         the database`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: new mongoose.Types.ObjectId(),
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            await request(app).get(`/friend/can-be-added/Person2`).expect(404);
+        });
+        test(`Should respond with status code 400 if the '_id' of the
+         potential friend being checked already exists within the currently
+         logged-in user's friends list`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: users[0]._id,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app).get(`/friend/can-be-added/Person2`).expect(400);
+        });
+        test(`Should respond with status code 200 if the '_id' of the
+         potential friend being checked does not exist within the currently
+         logged-in user's friends list`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: users[0]._id,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app).get(`/friend/can-be-added/Person3`).expect(200);
+        });
+    });
+
     describe("/user/friends GET route...", () => {
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
