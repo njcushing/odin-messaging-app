@@ -41,7 +41,7 @@ const getFriendsList = async ([first, last], abortController) => {
         })
         .catch(async (error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
                 friends: [],
             };

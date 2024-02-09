@@ -34,7 +34,7 @@ const updateChatImage = async (value, abortController, args) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
             };
         });

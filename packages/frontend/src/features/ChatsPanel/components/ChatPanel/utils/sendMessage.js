@@ -40,7 +40,7 @@ export const text = async (chatId, message, abortController) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
                 newMessage: null,
             };
@@ -87,7 +87,7 @@ export const image = async (chatId, image, abortController) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
                 newMessage: null,
             };

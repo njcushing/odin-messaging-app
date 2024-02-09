@@ -39,7 +39,7 @@ const createChat = async (participants, abortController) => {
         })
         .catch((error) => {
             return {
-                status: error.status,
+                status: error.status ? error.status : 500,
                 message: error.message,
                 chatId: null,
             };

@@ -88,9 +88,9 @@ const CreateAccount = () => {
         // Had to wrap this inside useEffect to prevent two API calls in StrictMode
         if (attemptingCreateAccount) {
             (async () => {
-                const createAccountResponse = await createAccountAPI(credentials);
-                if (createAccountResponse.status >= 400) {
-                    setCreateAccountError(createAccountResponse.message);
+                const response = await createAccountAPI(credentials);
+                if (response.status >= 400) {
+                    setCreateAccountError(response.message);
                     setAttemptingCreateAccount(false);
                     setCredentials({
                         username: credentials.username,

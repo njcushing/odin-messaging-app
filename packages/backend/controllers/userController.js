@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
 import { body, param, query, validationResult } from "express-validator";
-import passport from "passport";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
-import Message from "../models/message.js";
 import Image from "../models/image.js";
 
 import sendResponse from "../utils/sendResponse.js";
@@ -24,6 +27,17 @@ import {
     profileImage,
     theme,
 } from "../../../utils/validateUserFields.js";
+
+const defaultProfileImages = [
+    "/../public/images/profile/pink.png",
+    "/../public/images/profile/red.png",
+    "/../public/images/profile/orange.png",
+    "/../public/images/profile/lime.png",
+    "/../public/images/profile/cyan.png",
+    "/../public/images/profile/skyblue.png",
+    "/../public/images/profile/blue.png",
+    "/../public/images/profile/lilac.png",
+];
 
 const validateUserId = (res, next, userId) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -243,10 +257,50 @@ export const userPost = [
                     err
                 );
             } else {
+                const randomImage =
+                    defaultProfileImages[
+                        Math.floor(Math.random() * defaultProfileImages.length)
+                    ];
+                const imageFilePath = `${__dirname}${randomImage}`;
+                const imageBuffer = fs.readFileSync(imageFilePath);
+                const imageArray = Array.from(new Uint8Array(imageBuffer));
+                const validValue = profileImage(imageArray);
+                if (!validValue.status) {
+                    return sendResponse(
+                        res,
+                        400,
+                        validValue.message.front,
+                        null
+                    );
+                }
+
+                const imageId = new mongoose.Types.ObjectId();
+                const image = new Image({
+                    _id: imageId,
+                    "img.data": imageArray,
+                    "img.contentType": "image/png",
+                });
+                let imageSaveError = null;
+                await image.save().catch((error) => {
+                    imageSaveError = error;
+                });
+                if (imageSaveError) {
+                    return sendResponse(
+                        res,
+                        500,
+                        "Something went wrong when trying to generate a default profile image",
+                        null,
+                        imageSaveError
+                    );
+                }
+
                 const user = new User({
                     username: req.body.username,
                     email: req.body.email,
                     password: hashedPassword,
+                    preferences: {
+                        profileImage: imageId,
+                    },
                     admin: false,
                 });
                 await user
