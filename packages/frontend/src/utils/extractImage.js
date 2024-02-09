@@ -2,8 +2,14 @@ import ProfileImage from "@/components/ProfileImage";
 
 import * as validate from "../../../../utils/validateUserFields.js";
 
+const defaultProps = () => ({
+    src: new Uint8Array(),
+    alt: "",
+    status: null,
+});
+
 export const fromUser = (user) => {
-    const imageExtracted = { ...ProfileImage.defaultProps };
+    const imageExtracted = defaultProps();
     let found = false;
     if (user && user.constructor === Object) {
         if ("preferences" in user) {
@@ -13,7 +19,7 @@ export const fromUser = (user) => {
                     const profileImage = preferences.profileImage;
                     if (profileImage && profileImage.constructor === Object) {
                         if ("img" in profileImage) {
-                            imageExtracted.src = profileImage.img.data.data;
+                            imageExtracted.src = Uint8Array.from(profileImage.img.data.data);
                             found = true;
                         }
                         if ("alt" in profileImage) {
@@ -32,14 +38,14 @@ export const fromUser = (user) => {
 };
 
 export const fromChat = (chat) => {
-    const imageExtracted = { ...ProfileImage.defaultProps };
+    const imageExtracted = defaultProps();
     let found = false;
     if (chat && chat.constructor === Object) {
         if ("image" in chat) {
             const image = chat.image;
             if (image && image.constructor === Object) {
                 if ("img" in image) {
-                    imageExtracted.src = image.img.data.data;
+                    imageExtracted.src = Uint8Array.from(image.img.data.data);
                     found = true;
                 }
                 if ("alt" in image) {
@@ -52,14 +58,14 @@ export const fromChat = (chat) => {
 };
 
 export const fromMessage = (message) => {
-    const imageExtracted = { ...ProfileImage.defaultProps };
+    const imageExtracted = defaultProps();
     let found = false;
     if (message && message.constructor === Object) {
         if ("image" in message) {
             const image = message.image;
             if (image && image.constructor === Object) {
                 if ("img" in image) {
-                    imageExtracted.src = image.img.data.data;
+                    imageExtracted.src = Uint8Array.from(image.img.data.data);
                     found = true;
                 }
                 if ("alt" in image) {

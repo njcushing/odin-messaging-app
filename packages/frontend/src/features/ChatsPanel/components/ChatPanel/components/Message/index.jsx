@@ -150,8 +150,8 @@ Message.propTypes = {
     name: PropTypes.string,
     dateSent: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     profileImage: PropTypes.oneOfType([
-        PropTypes.number,
         PropTypes.shape({ ...ProfileImage.propTypes }),
+        PropTypes.number,
     ]),
     position: PropTypes.oneOf(["left", "right"]),
     replyingTo: PropTypes.oneOfType([PropTypes.shape({

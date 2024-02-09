@@ -354,9 +354,9 @@ const ChatPanel = ({
                     "user",
                 profileImage: participantInfo.get(authorId) ?
                     participantInfo.get(authorId).profileImage :
-                    "user",
+                    { ...ProfileImage.defaultProps },
             },
-            text: typeof message.text !== "undefined" ? message.text : null,
+            text: typeof message.text !== "undefined" ? message.text : "",
             image: typeof message.image !== "undefined" ?
                 extractImage.fromMessage(message).image :
                 null,
