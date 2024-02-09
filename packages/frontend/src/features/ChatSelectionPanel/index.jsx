@@ -8,12 +8,10 @@ import CreateChatPanel from "./components/CreateChatPanel";
 import FriendSelectorPanel from "./components/FriendSelectorPanel";
 import ChatOption from "./components/ChatOption";
 import ChatPanel from "./components/ChatPanel";
-import ProfileImage from "@/components/ProfileImage";
+import FriendRequest from "./components/FriendRequest";
 
 import * as getChatListFromAPI from "./utils/getChatListFromAPI.js";
 import getFriendRequests from "./utils/getFriendRequests.js";
-import acceptFriendRequest from "./utils/acceptFriendRequest";
-import declineFriendRequest from "./utils/declineFriendRequest";
 
 const ChatSelectionPanel = ({
     chatType,
@@ -103,6 +101,10 @@ const ChatSelectionPanel = ({
                 <ChatPanel />
             </div>
         );
+    }
+
+    if (chatType !== "friends" && viewingFriendRequests) {
+        setViewingFriendRequests(false);
     }
 
     return (
@@ -224,17 +226,17 @@ const ChatSelectionPanel = ({
                         className={styles["chat-list-options"]}
                         aria-label="chat-list-options"
                     >
-                        {chatList.map((chatOption, i) => {
+                        {chatList.map((chat) => {
                             return (
                                 <li
                                     aria-label="chat-option"
-                                    key={i}
+                                    key={chat._id}
                                 ><ChatOption
-                                    name={chatOption.name}
-                                    tagLine={chatOption.tagLine}
-                                    status={chatOption.status}
-                                    imageSrc={chatOption.imageSrc}
-                                    imageAlt={chatOption.imageAlt}
+                                    name={chat.name}
+                                    tagLine={chat.tagLine}
+                                    status={chat.status}
+                                    imageSrc={chat.imageSrc}
+                                    imageAlt={chat.imageAlt}
                                     onClickHandler={() => {}}
                                 /></li>
                             );
@@ -247,50 +249,20 @@ const ChatSelectionPanel = ({
                         {friendRequests.map((request) => {
                             return (
                                 <li
-                                    className={styles["friend-request"]}
                                     aria-label="friend-request"
                                     key={request._id}
-                                >
-                                    <div className={styles["profile-image"]}>
-                                        <ProfileImage
-                                            src={""}
-                                            alt={""}
-                                            sizePx={50}
-                                        />
-                                    </div>
-                                    <div className={styles["friend-request-right-side-content"]}>
-                                        <p
-                                            className={styles["friend-request-username"]}
-                                            aria-label="friend-request-username"
-                                        >{request.username}</p>
-                                        <div className={styles["friend-request-options"]}>
-                                            <button
-                                                className={styles["accept-friend-request-button"]}
-                                                aria-label="accept-friend-request-button"
-                                                onClick={(e) => {
-                                                    acceptFriendRequest(request.username);
-                                                    e.currentTarget.blur();
-                                                    e.preventDefault();
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.blur();
-                                                }}
-                                            >Accept</button>
-                                            <button
-                                                className={styles["decline-friend-request-button"]}
-                                                aria-label="decline-friend-request-button"
-                                                onClick={(e) => {
-                                                    declineFriendRequest(request.username);
-                                                    e.currentTarget.blur();
-                                                    e.preventDefault();
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.blur();
-                                                }}
-                                            >Decline</button>
-                                        </div>
-                                    </div>
-                                </li>
+                                ><FriendRequest
+                                    username={request.username}
+                                    imageSrc={""}
+                                    imageAlt={""}
+                                    onSuccessHandler={() => {
+                                        const reducedFriendRequestsArray =
+                                            friendRequests.filter((friend) => {
+                                                friend._id !== request._id
+                                            });
+                                        setFriendRequests(reducedFriendRequestsArray);
+                                    }}
+                                /></li>
                             );
                         })}
                     </ul>
