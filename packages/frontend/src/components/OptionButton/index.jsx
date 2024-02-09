@@ -29,6 +29,7 @@ const OptionButton = ({
                 onClickHandler(e);
                 e.currentTarget.blur();
                 e.preventDefault();
+                setTooltipElement(null);
             }}
             onMouseEnter={() => {
                 setTooltipElement(
