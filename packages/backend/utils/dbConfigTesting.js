@@ -31,7 +31,8 @@ const initialiseMongoServer = async () => {
         email,
         password,
         friends,
-        friendRequests
+        friendRequests,
+        chats
     ) => {
         const user = new User({
             _id: _id,
@@ -40,6 +41,7 @@ const initialiseMongoServer = async () => {
             password: password,
             friends: friends,
             friendRequests: friendRequests,
+            chats: chats,
         });
         await user.save();
         users[index] = user;
@@ -91,8 +93,8 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[0],
                     },
                 ],
-                [chatIds[4], chatIds[0], chatIds[5]],
-                [userIds[2]]
+                [userIds[2]],
+                [chatIds[4], chatIds[0], chatIds[5]]
             ),
             newUser(
                 1,
@@ -110,8 +112,8 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[1],
                     },
                 ],
-                [chatIds[0], chatIds[1], chatIds[5]],
-                [userIds[3]]
+                [userIds[3]],
+                [chatIds[0], chatIds[1], chatIds[5]]
             ),
             newUser(
                 2,
@@ -129,8 +131,8 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[2],
                     },
                 ],
-                [chatIds[1], chatIds[2], chatIds[5]],
-                [userIds[4]]
+                [userIds[4]],
+                [chatIds[1], chatIds[2], chatIds[5]]
             ),
             newUser(
                 3,
@@ -148,8 +150,8 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[3],
                     },
                 ],
-                [chatIds[3]],
-                [userIds[0]]
+                [userIds[0]],
+                [chatIds[3]]
             ),
             newUser(
                 4,
@@ -167,8 +169,8 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[4],
                     },
                 ],
-                [mockChatId, chatIds[4]],
-                [userIds[1]]
+                [userIds[1]],
+                [mockChatId, chatIds[4]]
             ),
         ]);
     };
