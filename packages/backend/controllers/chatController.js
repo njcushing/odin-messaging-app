@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
@@ -87,17 +87,97 @@ const validators = {
                 return value;
             }),
     },
+    param: {
+        page: param("page")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                if (isNaN(value)) {
+                    throw new Error(
+                        "'page' field (Number) must be a valid numeric value."
+                    );
+                }
+                value = parseInt(value);
+                if (!Number.isInteger(value)) {
+                    throw new Error(
+                        "'page' field (Number) must be an integer."
+                    );
+                }
+                if (value < 0) {
+                    throw new Error(
+                        "'page' field (Number) must be greater than or equal to 0."
+                    );
+                }
+                return value;
+            }),
+    },
+    query: {
+        firstMessage: query("firstMessage")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                if (isNaN(value)) {
+                    throw new Error(
+                        "'firstMessage' field (Number) must be a valid numeric value."
+                    );
+                }
+                value = parseInt(value);
+                if (!Number.isInteger(value)) {
+                    throw new Error(
+                        "'firstMessage' field (Number) must be an integer."
+                    );
+                }
+                if (value < 0) {
+                    throw new Error(
+                        "'firstMessage' field (Number) must be greater than or equal to 0."
+                    );
+                }
+                return value;
+            }),
+        lastMessage: query("lastMessage")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                if (isNaN(value)) {
+                    throw new Error(
+                        "'lastMessage' field (Number) must be a valid numeric value."
+                    );
+                }
+                value = parseInt(value);
+                if (!Number.isInteger(value)) {
+                    throw new Error(
+                        "'lastMessage' field (Number) must be an integer."
+                    );
+                }
+                if (value < 0) {
+                    throw new Error(
+                        "'lastMessage' field (Number) must be greater than or equal to 0."
+                    );
+                }
+                return value;
+            }),
+    },
 };
 
 export const chatGet = [
     protectedRouteJWT,
+    validators.query.firstMessage,
+    validators.query.lastMessage,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
         validateChatId(res, next, req.params.chatId);
-        let chat = await Chat.findOne(
+
+        const { firstMessage, lastMessage } = req.query;
+
+        const chat = await Chat.findOne(
             { _id: req.params.chatId },
-            { messages: { $slice: [-50, 50] } }
+            {
+                messages: {
+                    $slice: [
+                        Math.max(0, firstMessage) * -1 -
+                            Math.max(0, lastMessage - firstMessage),
+                        Math.max(0, lastMessage - firstMessage),
+                    ],
+                },
+            }
         )
             .select("-createdAt -updatedAt")
             .populate([
@@ -106,12 +186,12 @@ export const chatGet = [
                     populate: {
                         path: "user",
                         select: `
-                            username
-                            preferences.displayName
-                            preferences.tagLine
-                            preferences.image
-                            status
-                        `,
+                        username
+                        preferences.displayName
+                        preferences.tagLine
+                        preferences.image
+                        status
+                    `,
                     },
                 },
                 {
@@ -126,7 +206,7 @@ export const chatGet = [
                 },
             ])
             .exec();
-        if (chat === null) return chatNotFound(res, next, req.params.chatId);
+        if (chat === null) return chatNotFound(res, next, req.user._id);
 
         const token = await generateToken(req.user.username, req.user.password);
 
