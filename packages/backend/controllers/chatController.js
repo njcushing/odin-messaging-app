@@ -465,3 +465,190 @@ export const messagePost = [
         }
     }),
 ];
+
+export const addFriendsPost = [
+    protectedRouteJWT,
+    validators.participants,
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        let user = await User.findById(req.user._id).exec();
+        if (user === null) return selfNotFound(res, next, req.user._id);
+
+        validateChatId(res, next, req.params.chatId);
+        let chat = await Chat.findById(req.params.chatId).exec();
+        if (chat === null) return chatNotFound(res, next, req.params.chatId);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        // Validate that all participants are actual users within database
+        let invalidParticipant = false;
+        await Promise.all(
+            req.body.participants.map((participant) => {
+                return new Promise(async (resolve, reject) => {
+                    const user = await User.findById(participant).exec();
+                    if (user === null) {
+                        reject(
+                            new Error(
+                                `User not found in database: ${participant}`
+                            )
+                        );
+                    }
+                    resolve(user);
+                });
+            })
+        ).catch((err) => {
+            invalidParticipant = true;
+        });
+        if (invalidParticipant) {
+            return sendResponse(
+                res,
+                400,
+                "Not all participants are valid users.",
+                { token: token }
+            );
+        }
+
+        // Ensure all participants are on currently logged-in user's friends list
+        // Filter the participants to ensure no duplicate users will be added
+        const friendIds = user.friends.map((friend) => friend.user.toString());
+        const participantIds = chat.participants.map((participant) =>
+            participant.user.toString()
+        );
+        const friendsFiltered = [];
+        for (let i = 0; i < req.body.participants.length; i++) {
+            const participantIdString = req.body.participants[i].toString();
+            if (!friendIds.includes(participantIdString)) {
+                return sendResponse(
+                    res,
+                    404,
+                    `${req.body.participants[i]} is not on the currently
+                    logged-in user's friends list`,
+                    { token: token }
+                );
+            }
+            if (!participantIds.includes(participantIdString)) {
+                friendsFiltered.push(req.body.participants[i]);
+            }
+        }
+        if (friendsFiltered.length === 0) {
+            return sendResponse(
+                res,
+                400,
+                "All of the specified users are already in the chat.",
+                { token: token }
+            );
+        }
+
+        // Ensure currently logged-in user is a member of the chat
+        if (!participantIds.includes(user._id.toString())) {
+            return sendResponse(
+                res,
+                403,
+                `$The currently logged-in user is forbidden from adding friends
+                to this chat.`,
+                { token: token }
+            );
+        }
+
+        // Check currently logged-in user's privileges
+        const userInChatInfo = chat.participants.find(
+            (participant) => participant.user.toString() === user._id.toString()
+        );
+        if (
+            userInChatInfo.role !== "admin" &&
+            userInChatInfo.role !== "moderator"
+        ) {
+            return sendResponse(
+                res,
+                403,
+                `$The currently logged-in user does not have the authority to
+                perform this operation on this chat.`,
+                { token: token }
+            );
+        }
+
+        const session = await mongoose.startSession();
+        try {
+            session.startTransaction();
+
+            let chatId = chat._id;
+
+            // If this is an 'individual' chat, duplicate the existing chat and make it a 'group' chat
+            if (chat.type === "individual") {
+                const newChatId = new mongoose.Types.ObjectId();
+                const newChat = new Chat({
+                    _id: newChatId,
+                    type: "group",
+                    participants: [...chat.participants],
+                    messages: [...chat.messages],
+                });
+
+                // Add new chat _id to existing participants' 'chats' arrays
+                await User.updateMany(
+                    { _id: { $in: chat.participants } },
+                    { $addToSet: { chats: newChatId } }
+                ).catch((error) => {
+                    error.message =
+                        "Unable to add new chat to existing participants' chats.";
+                    error.status = 500;
+                    throw error;
+                });
+
+                await newChat.save().catch((error) => {
+                    error.message =
+                        "Unable to save duplicate of 'individual'-type chat.";
+                    error.status = 500;
+                    throw error;
+                });
+
+                chatId = newChatId;
+            }
+
+            // Add new chat _id to other users' 'chats' arrays
+            await User.updateMany(
+                { _id: { $in: friendsFiltered } },
+                { $addToSet: { chats: chatId } }
+            ).catch((error) => {
+                error.message =
+                    "Unable to add new chat to newly-added participants' chats.";
+                error.status = 500;
+                throw error;
+            });
+
+            // Add new participants to chat
+            const friendsObjectIds = friendsFiltered.map((friendStringId) => {
+                return new mongoose.Types.ObjectId(friendStringId);
+            });
+            await Chat.findByIdAndUpdate(chatId, {
+                $addToSet: { participants: { $each: friendsObjectIds } },
+            }).catch((error) => {
+                error.message =
+                    "Unable to add new participants to chat's participants.";
+                error.status = 500;
+                throw error;
+            });
+
+            session.commitTransaction();
+
+            sendResponse(
+                res,
+                201,
+                `Friend${
+                    friendsFiltered.length > 1 ? "s" : ""
+                } successfully added to chat at: ${chatId}.`,
+                { token: token }
+            );
+        } catch (error) {
+            return sendResponse(
+                res,
+                error.status,
+                error.message,
+                { token: token },
+                error
+            );
+        } finally {
+            session.endSession();
+        }
+    }),
+];
