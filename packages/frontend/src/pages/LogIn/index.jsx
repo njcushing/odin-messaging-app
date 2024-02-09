@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./index.module.css";
 
 import logInAPI from "./utils/logInAPI";
@@ -31,18 +31,21 @@ const LogIn = () => {
         setCredentials(formFields);
     }, []);
 
-    if (attemptingLogIn) {
-        (async () => {
-            const logInResponse = await logInAPI(credentials);
-            if (logInResponse.status >= 400) {
-                setLogInError(logInResponse.message);
-            } else {
-                window.location.href = "/dashboard";
-            }
-            setAttemptingLogIn(false);
-            setCredentials({ username: credentials.username });
-        })();
-    }
+    useEffect(() => {
+        if (attemptingLogIn) {
+            (async () => {
+                const logInResponse = await logInAPI(credentials);
+                console.log(logInResponse);
+                if (logInResponse.status >= 400) {
+                    setAttemptingLogIn(false);
+                    setCredentials({ username: credentials.username });
+                    setLogInError(logInResponse.message);
+                } else {
+                    window.location.href = "/dashboard";
+                }
+            })();
+        }
+    }, [attemptingLogIn]);
 
     return (
         <div className={styles["wrapper"]}>
