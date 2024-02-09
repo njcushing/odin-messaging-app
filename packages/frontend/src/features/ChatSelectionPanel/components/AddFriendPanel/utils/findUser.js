@@ -26,7 +26,7 @@ const findUser = async (username, abortController) => {
         .catch((error) => {
             return {
                 status: 500,
-                message: "Requesting friends list failed",
+                message: "Finding user failed",
                 user: null,
             };
         });
