@@ -6,6 +6,10 @@ import OptionButton from "@/components/OptionButton";
 
 import formatDate from "./utils/formatDate";
 
+const validateTypedArray = (value) => {
+    return (ArrayBuffer.isView(value) && !(value instanceof DataView));
+}
+
 const Message = ({
     text,
     image,
@@ -38,15 +42,19 @@ const Message = ({
 
     let imageSrc = null;
     if (image && image.constructor === Object) {
-        const blob = new Blob([Buffer.from(image.src)], { type: "image/png" });
-        imageSrc = URL.createObjectURL(blob);
+        if (validateTypedArray(image.src)) {
+            const blob = new Blob([Buffer.from(image.src)], { type: "image/png" });
+            imageSrc = URL.createObjectURL(blob);
+        }
     }
 
     let replyingToImageSrc = null;
     if (replyingTo && replyingTo.constructor === Object){
         if (replyingTo.image && replyingTo.image.constructor === Object) {
-            const blob = new Blob([Buffer.from(replyingTo.image.src)], { type: "image/png" });
-            replyingToImageSrc = URL.createObjectURL(blob);
+            if (validateTypedArray(replyingTo.image.src)) {
+                const blob = new Blob([Buffer.from(replyingTo.image.src)], { type: "image/png" });
+                replyingToImageSrc = URL.createObjectURL(blob);
+            }
         }
     }
 
@@ -58,13 +66,16 @@ const Message = ({
                     className={styles["replying-to-message-text"]}
                     aria-label="replying-to-message-text"
                 >{`${replyingTo.author}: ${replyingTo.text ? replyingTo.text : ""}`}</p>
-                {replyingTo.image && replyingTo.image.constructor === Object
+                {
+                    replyingTo.image &&
+                    replyingTo.image.constructor === Object &&
+                    validateTypedArray(replyingTo.image.src)
                 ?   <div className={styles["replying-to-message-image-container"]}>
                         <img
                             className={styles["replying-to-message-image"]}
                             aria-label="replying-to-message-image"
                             src={replyingToImageSrc}
-                            alt={image.alt}
+                            alt={replyingTo.image.alt}
                         ></img>
                     </div>
                 :   null}
@@ -146,9 +157,9 @@ Message.propTypes = {
         PropTypes.number,
         PropTypes.shape({
             src: function(props, propName, componentName) {
-                const propValue = props[propName]
+                const propValue = props[propName];
                 if (!ArrayBuffer.isView(propValue) || propValue instanceof DataView) {
-                    return new Error(`'${propName}' prop in ${componentName} needs to be a
+                    throw new Error(`'${propName}' prop in ${componentName} needs to be a
                     Typed Array (e.g. - Uint8Array); got ${typeof propValue}`);
                 }
                 return;
