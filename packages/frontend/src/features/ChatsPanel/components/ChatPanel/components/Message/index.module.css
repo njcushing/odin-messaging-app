@@ -19,10 +19,13 @@
 }
 
 .message-text-container {
-    max-width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
 
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
+
+    max-width: 100%;
 }
 
 .message-text {
@@ -44,6 +47,8 @@
 .replying-to-text-container {
     display: flex;
     flex-direction: start;
+
+    padding: 0.4rem 0.4rem 0rem 0.4rem;
 }
 
 .replying-to-text {
@@ -53,7 +58,7 @@
     font-size: 0.8rem;
     font-family: Gabarito;
     background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 6px;
+    border-radius: 8px;
     line-height: 1.1rem;
 
     padding: 0.2rem 0.4rem;
