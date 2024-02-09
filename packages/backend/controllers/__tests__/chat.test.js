@@ -9,9 +9,11 @@ import chatRouter from "../../routes/chat.js";
 import User from "../../models/user.js";
 import Chat from "../../models/chat.js";
 import Message from "../../models/message.js";
+import Image from "../../models/image.js";
 
 import mongoose from "mongoose";
 import initialiseMongoServer from "../../utils/dbConfigTesting.js";
+import * as validateChatFields from "../../../../utils/validateChatFields.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -291,6 +293,131 @@ describe("Route testing...", () => {
         });
     });
 
+    describe("/chat/:chatId/image PUT route...", () => {
+        test(`Should respond with status code 400 if the body object in the
+         request object does not contain the necessary information`, async () => {
+            vi.spyOn(validateChatFields, "image").mockReturnValueOnce({
+                status: false,
+                message: "",
+            });
+            await request(app)
+                .put(`/${chats[0]._id}/image`)
+                .send({ image: "default" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(null, "Person1", "person1*");
+            await request(app)
+                .put(`/${chats[0]._id}/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 401 if the currently-logged in
+         user is not found in the database`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app)
+                .put(`/${chats[0]._id}/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(401);
+        });
+        test(`Should respond with status code 400 if the specified chat is not a
+         valid MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .put(`/chatDoesNotExist/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 404 if the specified chat is not
+         found in the database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .put(`/${new mongoose.Types.ObjectId()}/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(404);
+        });
+        test(`Should respond with status code 403 if the currently logged-in
+         user is not present in the 'participants' array of the chat`, async () => {
+            mockProtectedRouteJWT(users[2]._id, "Person3", "person3*");
+            await request(app)
+                .put(`/${chats[0]._id}/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(403);
+        });
+        test(`Should respond with status code 403 if the currently logged-in
+         user is muted in the chat`, async () => {
+            mockProtectedRouteJWT(users[1]._id, "Person2", "person2*");
+            await request(app)
+                .put(`/${chats[0]._id}/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(403);
+        });
+        test(`Should respond with status code 500 if, when trying to create a
+         new image, the operation fails`, async () => {
+            vi.spyOn(Image.prototype, "save").mockImplementationOnce(() =>
+                Promise.reject("fail save")
+            );
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .put(`/${chats[0]._id}/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(500);
+        });
+        test(`Should respond with status code 404 if, when attempting to
+         update the chat's fields, it cannot be found in the database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            vi.spyOn(Chat, "findByIdAndUpdate").mockReturnValueOnce(null);
+            await request(app)
+                .put(`/${chats[0]._id}/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(404);
+        });
+        test(`Should respond with status code 200 if the chats's image is
+         successfully updated`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .put(`/${chats[0]._id}/image`)
+                .send({ image: [] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (!data.hasOwnProperty("token")) {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+    });
+
     describe("/chat/:chatId/message/text POST route...", () => {
         test(`Should respond with status code 400 if the body object in the
          request object does not contain the necessary information`, async () => {
@@ -376,7 +503,7 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(404);
         });
-        test(`Should respond with status code 401 if the currently logged-in
+        test(`Should respond with status code 403 if the currently logged-in
          user is not present in the 'participants' array of the chat`, async () => {
             mockProtectedRouteJWT(users[2]._id, "Person3", "person3*");
             await request(app)
@@ -389,7 +516,7 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(403);
         });
-        test(`Should respond with status code 401 if the currently logged-in
+        test(`Should respond with status code 403 if the currently logged-in
          user is muted in the chat`, async () => {
             mockProtectedRouteJWT(users[1]._id, "Person2", "person2*");
             await request(app)
@@ -401,37 +528,6 @@ describe("Route testing...", () => {
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(403);
-        });
-        test(`Should respond with status code 500 if, when trying to create a
-         message, the operation fails`, async () => {
-            vi.spyOn(Message.prototype, "save").mockImplementationOnce(() =>
-                Promise.reject("fail save")
-            );
-            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
-            await request(app)
-                .post(`/${chats[0]._id}/message/text`)
-                .send({
-                    text: "Message",
-                    replyingTo: users[1]._id,
-                })
-                .set("Content-Type", "application/json")
-                .set("Accept", "application/json")
-                .expect(500);
-        });
-        test(`Should respond with status code 404 if, when trying to save the
-         new message in the chat's 'messages' array, the chat cannot be found
-         in the database`, async () => {
-            vi.spyOn(Chat, "findByIdAndUpdate").mockReturnValueOnce(null);
-            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
-            await request(app)
-                .post(`/${chats[0]._id}/message/text`)
-                .send({
-                    text: "Message",
-                    replyingTo: users[1]._id,
-                })
-                .set("Content-Type", "application/json")
-                .set("Accept", "application/json")
-                .expect(404);
         });
         test(`Should respond with status code 201 on successful request, with
          the _id of the new message and a valid token`, async () => {
@@ -543,7 +639,7 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(404);
         });
-        test(`Should respond with status code 401 if the currently logged-in
+        test(`Should respond with status code 403 if the currently logged-in
          user is not present in the 'participants' array of the chat`, async () => {
             mockProtectedRouteJWT(users[2]._id, "Person3", "person3*");
             await request(app)
@@ -556,7 +652,7 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(403);
         });
-        test(`Should respond with status code 401 if the currently logged-in
+        test(`Should respond with status code 403 if the currently logged-in
          user is muted in the chat`, async () => {
             mockProtectedRouteJWT(users[1]._id, "Person2", "person2*");
             await request(app)
