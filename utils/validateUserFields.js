@@ -186,7 +186,36 @@ export const profileImage = (value) => {
         status: true,
         message: {
             front: `Valid Profile Image.`,
-            back: `Profile Image field (Image) is valid`,
+            back: `'profileImage' field (Image) is valid`,
+        },
+    };
+};
+
+export const theme = (value) => {
+    const themes = [
+        "default",
+        "red",
+        "orange",
+        "green",
+        "blue",
+        "purple",
+        "light",
+        "dark",
+    ];
+    if (!value in themes) {
+        return {
+            status: false,
+            message: {
+                front: `Your Theme must be one of the following: ${themes}.`,
+                back: `'theme' field (String) must be one of the following: ${themes}.`,
+            },
+        };
+    }
+    return {
+        status: true,
+        message: {
+            front: `Valid Theme.`,
+            back: `theme field (Image) is valid`,
         },
     };
 };
