@@ -9,13 +9,9 @@ import AddFriendPanel from './index.jsx'
 
 const renderComponent = async (
     onCloseHandler = () => {},
-    addFriendHandler = () => {},
-    addFriendSubmissionErrors = [],
 ) => { act(() => render(
     <AddFriendPanel
         onCloseHandler={onCloseHandler}
-        addFriendHandler={addFriendHandler}
-        addFriendSubmissionErrors={addFriendSubmissionErrors}
     />
 )); }
 
@@ -122,63 +118,6 @@ describe("UI/DOM Testing...", () => {
             await user.type(nameInput, "a");
             const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
             expect(addFriendButton).toBeInTheDocument();
-        });
-        test(`Which, when clicked, should invoke the callback function specified
-         in the 'addFriendHandler' prop`, async () => {
-            const user = userEvent.setup();
-            const callback = vi.fn();
-            await act(() => renderComponent(
-                () => {},
-                callback,
-                [],
-            ));
-            const nameInput = screen.getByRole("textbox", { name: "friend-name-input" });
-            await user.type(nameInput, "a");
-            const addFriendButton = screen.getByRole("button", { name: "add-friend-button" });
-            await user.click(addFriendButton);
-            expect(callback).toHaveBeenCalledTimes(1);
-        });
-    });
-    describe("The submission errors list title...", () => {
-        test(`Should not be present in the document if there are no errors`, async () => {
-            renderComponent();
-            const submissionErrorsList = screen.queryByRole("heading", { name: "add-friend-submission-errors-title" });
-            expect(submissionErrorsList).toBeNull();
-        });
-        test(`Should be present in the document if there are errors`, async () => {
-            await act(() => renderComponent(
-                () => {},
-                () => {},
-                ["error_1", "error_2", "error_3"],
-            ));
-            const submissionErrorsList = screen.queryByRole("heading", { name: "add-friend-submission-errors-title" });
-            expect(submissionErrorsList).toBeInTheDocument();
-        });
-    });
-    describe("The submission errors list...", () => {
-        test(`Should not be present in the document if there are no errors`, async () => {
-            renderComponent();
-            const submissionErrorsList = screen.queryByRole("list", { name: "add-friend-submission-errors-list" });
-            expect(submissionErrorsList).toBeNull();
-        });
-        test(`Should be present in the document if there are errors`, async () => {
-            await act(() => renderComponent(
-                () => {},
-                () => {},
-                ["error_1", "error_2", "error_3"],
-            ));
-            const submissionErrorsList = screen.getByRole("list", { name: "add-friend-submission-errors-list" });
-            expect(submissionErrorsList).toBeInTheDocument();
-        });
-        test(`Should have a number of list item children equivalent to the
-         number of errors`, async () => {
-            await act(() => renderComponent(
-                () => {},
-                () => {},
-                ["error_1", "error_2", "error_3"],
-            ));
-            const submissionErrorsList = screen.getAllByRole("listitem", { name: "add-friend-submission-error-item" });
-            expect(submissionErrorsList.length).toBe(3);
         });
     });
 });

@@ -428,9 +428,25 @@ describe("Route testing...", () => {
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app).get(`/friend/can-be-added/Person2`).expect(400);
         });
+        test(`Should respond with status code 400 if the '_id' of the
+         currently logged-in user exists within the potential friend's
+         'friendRequests' array`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: users[0]._id,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            generateToken.mockReturnValueOnce("Bearer token");
+            vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(null);
+            await request(app).get(`/friend/can-be-added/Person4`).expect(400);
+        });
         test(`Should respond with status code 200 if the '_id' of the
          potential friend being checked does not exist within the currently
-         logged-in user's friends list`, async () => {
+         logged-in user's friends list or the currently logged-in user does not
+         exist within the potential friend's 'friendRequests' array`, async () => {
             protectedRouteJWT.mockImplementationOnce((req, res, next) => {
                 req.user = {
                     _id: users[0]._id,
@@ -514,7 +530,6 @@ describe("Route testing...", () => {
                 .send()
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
-                .expect((res) => console.log(res))
                 .expect(400);
         });
         test(`Should respond with status code 400 if the user '_id' value
@@ -588,72 +603,8 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(400);
         });
-        test(`Should respond with status code 404 if the user being added has
-         the '_id' of the currently logged-in user in their 'friendRequests'
-         array but the friend is not found in the database when attempting to
-         update its fields`, async () => {
-            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
-                req.user = {
-                    _id: users[0]._id,
-                    username: "Person1",
-                    password: "person1*",
-                };
-                return next();
-            });
-            generateToken.mockReturnValueOnce("Bearer token");
-            vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(null);
-            await request(app)
-                .post(`/friends`)
-                .send({ username: "Person4" })
-                .set("Content-Type", "application/json")
-                .set("Accept", "application/json")
-                .expect(404);
-        });
-        test(`Should respond with status code 401 if the user being added has
-         the '_id' of the currently logged-in user in their 'friendRequests'
-         array but the currently logged-in user is not found in the database
-         when attempting to update its fields`, async () => {
-            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
-                req.user = {
-                    _id: users[0]._id,
-                    username: "Person1",
-                    password: "person1*",
-                };
-                return next();
-            });
-            generateToken.mockReturnValueOnce("Bearer token");
-            vi.spyOn(User, "findByIdAndUpdate")
-                .mockReturnValueOnce(users[0])
-                .mockReturnValueOnce(null);
-            await request(app)
-                .post(`/friends`)
-                .send({ username: "Person4" })
-                .set("Content-Type", "application/json")
-                .set("Accept", "application/json")
-                .expect(401);
-        });
-        test(`Should respond with status code 201 if the user being added has
-         the '_id' of the currently logged-in user in their 'friendRequests'
-         array and both the friend and currently logged-in user's fields are
-         successfully updated`, async () => {
-            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
-                req.user = {
-                    _id: users[0]._id,
-                    username: "Person1",
-                    password: "person1*",
-                };
-                return next();
-            });
-            generateToken.mockReturnValueOnce("Bearer token");
-            await request(app)
-                .post(`/friends`)
-                .send({ username: "Person4" })
-                .set("Content-Type", "application/json")
-                .set("Accept", "application/json")
-                .expect(201);
-        });
-        test(`Should respond with status code 404 if the user being added
-         does not have the '_id' of the currently logged-in user in their
+        test(`Should respond with status code 404 if the '_id' of the user being
+         added already exists within the currently logged-in user's
          'friendRequests' array but the friend is not found in the database when
          attempting to update its fields`, async () => {
             protectedRouteJWT.mockImplementationOnce((req, res, next) => {
@@ -673,8 +624,75 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(404);
         });
-        test(`Should respond with status code 201 if the user being added
-         does not have the '_id' of the currently logged-in user in their
+        test(`Should respond with status code 401 if the '_id' of the user being
+         added already exists within the currently logged-in user's
+         'friendRequests' array but the currently logged-in user is not found in
+         the database when attempting to update its fields`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: users[0]._id,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            generateToken.mockReturnValueOnce("Bearer token");
+            vi.spyOn(User, "findByIdAndUpdate")
+                .mockReturnValueOnce(users[2])
+                .mockReturnValueOnce(null);
+            await request(app)
+                .post(`/friends`)
+                .send({ username: "Person3" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(401);
+        });
+        test(`Should respond with status code 201 the '_id' of the user being
+         added already exists within the currently logged-in user's
+         'friendRequests' array and both the friend and currently logged-in
+         user's fields are successfully updated`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: users[0]._id,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            generateToken.mockReturnValueOnce("Bearer token");
+            vi.spyOn(User, "findByIdAndUpdate")
+                .mockReturnValueOnce(users[2])
+                .mockReturnValueOnce(users[0]);
+            await request(app)
+                .post(`/friends`)
+                .send({ username: "Person3" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(201);
+        });
+        test(`Should respond with status code 404 if the '_id' of the user being
+         added does not exist within the currently logged-in user's
+         'friendRequests' array but the friend is not found in the database when
+         attempting to update its fields`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: users[0]._id,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            generateToken.mockReturnValueOnce("Bearer token");
+            vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(null);
+            await request(app)
+                .post(`/friends`)
+                .send({ username: "Person4" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(404);
+        });
+        test(`Should respond with status code 201 if the '_id' of the user being
+         added does not exist within the currently logged-in user's
          'friendRequests' array and the friend's fields are successfully
          updated`, async () => {
             protectedRouteJWT.mockImplementationOnce((req, res, next) => {
@@ -686,9 +704,10 @@ describe("Route testing...", () => {
                 return next();
             });
             generateToken.mockReturnValueOnce("Bearer token");
+            vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(users[3]);
             await request(app)
                 .post(`/friends`)
-                .send({ username: "Person3" })
+                .send({ username: "Person4" })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(201);

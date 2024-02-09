@@ -308,7 +308,10 @@ export const friendCanBeAdded = [
                 res,
                 400,
                 "Provided username matches the user currently logged-in.",
-                { token: token }
+                {
+                    messageInformal: "You cannot add yourself as a friend.",
+                    token: token,
+                }
             );
         } else if (user.friends.length !== 0) {
             // User exists within friends list already
@@ -316,7 +319,21 @@ export const friendCanBeAdded = [
                 res,
                 400,
                 "Provided username already exists in the friends list for the currently logged-in user.",
-                { token: token }
+                {
+                    messageInformal: `You and ${friend.username} are already friends.`,
+                    token: token,
+                }
+            );
+        } else if (friend.friendRequests.length !== 0) {
+            // User exists within friends' pending friend requests list
+            sendResponse(
+                res,
+                400,
+                "Friend request already sent to specified username.",
+                {
+                    messageInformal: `You have already sent a friend request to ${friend.username}.`,
+                    token: token,
+                }
             );
         } else {
             sendResponse(
@@ -371,12 +388,7 @@ export const friendsPost = [
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
         let friend = await User.findOne({ username: req.body.username })
-            .select("_id friendRequests")
-            .populate({
-                path: "friendRequests",
-                select: "_id",
-                match: { _id: req.user._id },
-            })
+            .select("_id username")
             .exec();
         if (friend === null) {
             return userNotFound(res, next, req.body.username);
@@ -385,6 +397,11 @@ export const friendsPost = [
             .select("friends")
             .populate({
                 path: "friends",
+                select: "_id",
+                match: { _id: friend._id },
+            })
+            .populate({
+                path: "friendRequests",
                 select: "_id",
                 match: { _id: friend._id },
             })
@@ -408,35 +425,35 @@ export const friendsPost = [
                 "Provided username already exists in the friends list for the currently logged-in user.",
                 { token: token }
             );
-        } else if (friend.friendRequests.length !== 0) {
-            // User exists within friends' pending friend requests list
+        } else if (user.friendRequests.length !== 0) {
+            // Potential friend exists within currently logged-in user's pending friend requests list
             const updatedFriend = await User.findByIdAndUpdate(friend._id, {
                 $push: { friends: user._id },
-                $pull: { friendRequests: user._id },
             });
             if (updatedFriend === null) {
                 return sendResponse(
                     res,
                     404,
-                    `User not found in database: ${friend._id}`,
+                    `User not found in database: ${friend._id}.`,
                     { token: token }
                 );
             }
             const updatedUser = await User.findByIdAndUpdate(user._id, {
                 $push: { friends: friend._id },
+                $pull: { friendRequests: friend._id },
             });
             if (updatedUser === null) {
                 return sendResponse(
                     res,
                     401,
-                    `User not found in database: ${user._id}`,
+                    `User not found in database: ${user._id}.`,
                     { token: token }
                 );
             }
             sendResponse(
                 res,
                 201,
-                `${friend.username} successfully added as a friend`,
+                `${friend.username} successfully added as a friend.`,
                 { token: token }
             );
         } else {
@@ -448,14 +465,14 @@ export const friendsPost = [
                 return sendResponse(
                     res,
                     404,
-                    `User not found in database: ${friend._id}`,
+                    `User not found in database: ${friend._id}.`,
                     { token: token }
                 );
             }
             sendResponse(
                 res,
                 201,
-                `Friend request sent to ${friend.username}`,
+                `Friend request sent to ${friend.username}.`,
                 { token: token }
             );
         }

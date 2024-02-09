@@ -37,9 +37,17 @@ const getFriendCanBeAdded = async (username, abortController) => {
             ) {
                 friend = responseJSON.data.friend;
             }
+            let message = responseJSON.message;
+            if (
+                responseJSON.data !== null &&
+                typeof responseJSON.data === "object" &&
+                "messageInformal" in responseJSON.data
+            ) {
+                message = responseJSON.data.messageInformal;
+            }
             return {
                 status: responseJSON.status,
-                message: responseJSON.message,
+                message: message,
                 friend: friend,
             };
         })
