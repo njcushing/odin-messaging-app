@@ -24,6 +24,7 @@
     height: 3rem;
     min-height: 3rem;
     max-height: 6rem;
+    padding: 0.6rem;
 
     transition: background-color 0.15s ease-in-out 0s,
                 border-radius 0.1s ease-in-out 0s,
