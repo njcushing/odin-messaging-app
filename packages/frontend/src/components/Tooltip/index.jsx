@@ -14,10 +14,12 @@ const Tooltip = ({
     const elementRef = useRef(null);
 
     useEffect(() => {
-        setElementSize([
-            elementRef.current.offsetWidth,
-            elementRef.current.offsetHeight
-        ]);
+        if (elementRef.current) {
+            setElementSize([
+                elementRef.current.offsetWidth,
+                elementRef.current.offsetHeight
+            ]);
+        }
     }, [text, position]);
 
     let elementTop = "0%";
@@ -67,7 +69,7 @@ const Tooltip = ({
             }
     }
 
-    return (
+    return text.length > 0 ? (
         <div
             className={styles["wrapper"]}
             style={{
@@ -77,30 +79,30 @@ const Tooltip = ({
                 left: elementLeft,
             }}
         >
-        <div
-            className={styles["container"]}
-            ref={elementRef}
-            style={{
-                flexDirection: flexDirection,
-            }}
-        >
             <div
-                className={styles["text"]}
-                aria-label="tooltip-text"
-            >{text}</div>
-            <div
-                className={styles["arrow"]}
-                aria-label="tooltip-arrow"
+                className={styles["container"]}
+                ref={elementRef}
                 style={{
-                    width: "0",
-                    height: "0",
-
-                    ...arrowSides,
+                    flexDirection: flexDirection,
                 }}
-            ></div>
+            >
+                <div
+                    className={styles["text"]}
+                    aria-label="tooltip-text"
+                >{text}</div>
+                <div
+                    className={styles["arrow"]}
+                    aria-label="tooltip-arrow"
+                    style={{
+                        width: "0",
+                        height: "0",
+
+                        ...arrowSides,
+                    }}
+                ></div>
+            </div>
         </div>
-        </div>
-    );
+    ) : null;
 };
 
 Tooltip.propTypes = {
