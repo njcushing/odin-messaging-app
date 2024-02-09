@@ -1,3 +1,5 @@
+import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+
 const createAccountAPI = async (credentials) => {
     const data = await fetch(`${import.meta.env.VITE_SERVER_DOMAIN}/user`, {
         method: "POST",
@@ -9,16 +11,8 @@ const createAccountAPI = async (credentials) => {
     })
         .then(async (response) => {
             const responseJSON = await response.json();
-            if (
-                responseJSON.data !== null &&
-                typeof responseJSON.data === "object" &&
-                "token" in responseJSON.data
-            ) {
-                localStorage.setItem(
-                    "odin-messaging-app-auth-token",
-                    responseJSON.data.token
-                );
-            }
+            saveTokenFromResponseJSON(responseJSON);
+
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
