@@ -31,40 +31,8 @@ const ChatSelectionPanel = ({
 
     useEffect(() => {
         if (chatTypeAC) chatTypeAC.abort;
-        const chatTypeACNew = new AbortController();
-        setChatTypeAC(chatTypeACNew);
-        (async () => {
-            let response;
-            switch (chatType) {
-                case "friends":
-                    response = await getFriendsList(chatTypeACNew);
-                    setChatList(response.friends);
-                    setChatTypeAC(chatTypeACNew);
-                    break;
-                case "groups":
-                    response = await getChatListFromAPI.groups();
-                    setChatList(response);
-                    setChatTypeAC(chatTypeACNew);
-                    break;
-                case "communities":
-                    response = await getChatListFromAPI.communities();
-                    setChatList(response);
-                    setChatTypeAC(chatTypeACNew);
-                    break;
-                default:
-                    setChatList([]);
-                    setChatTypeAC(null);
-            }
-        })();
-
-        return () => {
-            if (chatTypeAC) chatTypeAC.abort;
-            if (friendRequestsAC) friendRequestsAC.abort;
-        }
-    }, [chatType]);
-
-    useEffect(() => {
         if (friendRequestsAC) friendRequestsAC.abort;
+        
         if (viewingFriendRequests) {
             const friendRequestsACNew = new AbortController();
             setFriendRequestsAC(friendRequestsACNew);
@@ -72,20 +40,56 @@ const ChatSelectionPanel = ({
                 const friendRequestsNew = await getFriendRequests(friendRequestsACNew);
                 setFriendRequests(friendRequestsNew.friendRequests);
             })();
+
+            setChatTypeAC(null);
         } else {
+            const chatTypeACNew = new AbortController();
+            setChatTypeAC(chatTypeACNew);
+            (async () => {
+                let response;
+                switch (chatType) {
+                    case "friends":
+                        response = await getFriendsList(chatTypeACNew);
+                        setChatList(response.friends);
+                        setChatTypeAC(chatTypeACNew);
+                        break;
+                    case "groups":
+                        response = await getChatListFromAPI.groups();
+                        setChatList(response);
+                        setChatTypeAC(chatTypeACNew);
+                        break;
+                    case "communities":
+                        response = await getChatListFromAPI.communities();
+                        setChatList(response);
+                        setChatTypeAC(chatTypeACNew);
+                        break;
+                    default:
+                        setChatList([]);
+                        setChatTypeAC(null);
+                }
+            })();
+
             setFriendRequestsAC(null);
         }
+
         return () => {
             if (chatTypeAC) chatTypeAC.abort;
             if (friendRequestsAC) friendRequestsAC.abort;
         }
-    }, [viewingFriendRequests]);
+    }, [chatType, viewingFriendRequests]);
 
     let rightPanelContent = null;
     if (addingFriend) {
         rightPanelContent = (
             <AddFriendPanel
                 onCloseHandler={() => setAddingFriend(false)}
+                onSuccessHandler={(username) => {
+                    const reducedFriendRequestsArray =
+                        friendRequests.filter((friend) => {
+                            return friend.username !== username
+                        });
+                    setFriendRequests(reducedFriendRequestsArray);
+                }}
             />
         );
     } else if (creatingChat) {
@@ -252,7 +256,7 @@ const ChatSelectionPanel = ({
                                     onSuccessHandler={() => {
                                         const reducedFriendRequestsArray =
                                             friendRequests.filter((friend) => {
-                                                friend._id !== request._id
+                                                return friend._id !== request._id
                                             });
                                         setFriendRequests(reducedFriendRequestsArray);
                                     }}
