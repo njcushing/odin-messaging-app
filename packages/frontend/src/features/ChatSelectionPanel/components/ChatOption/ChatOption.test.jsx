@@ -27,9 +27,9 @@ const renderComponent = (
 
 describe("UI/DOM Testing...", () => {
     describe("The element...", () => {
-        test(`Should be a list item present in the document`, () => {
+        test(`Should be present in the document`, () => {
             renderComponent();
-            const container = screen.getByRole("listitem", { name: "chat-option" });
+            const container = screen.getByRole("generic", { name: "chat-option" });
             expect(container).toBeInTheDocument();
         });
         test(`When clicked, should invoke the provided callback function`, async () => {
@@ -44,7 +44,7 @@ describe("UI/DOM Testing...", () => {
                 "image alt",
                 callback,
             );
-            const container = screen.getByRole("listitem", { name: "chat-option" });
+            const container = screen.getByRole("generic", { name: "chat-option" });
 
             await user.click(container);
 
