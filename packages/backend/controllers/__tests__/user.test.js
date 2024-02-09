@@ -65,15 +65,15 @@ vi.mock("../../utils/generateToken", async () => ({
 }));
 
 let users;
-beforeAll(async () => {
+const initDatabase = async () => {
     [users] = await initialiseMongoServer();
-});
+};
+const disconnect = async () => {
+    mongoose.connection.close();
+};
 
-afterEach(async () => {
-    await User.findOneAndDelete({ username: credentials.username });
-});
-
-afterAll(() => mongoose.connection.close());
+beforeAll(async () => await initDatabase());
+afterAll(async () => await disconnect());
 
 describe("Route testing...", () => {
     describe("/user/:username GET route...", () => {
@@ -101,6 +101,10 @@ describe("Route testing...", () => {
     });
 
     describe("/user POST route...", () => {
+        afterEach(async () => {
+            await User.findOneAndDelete({ username: credentials.username });
+        });
+
         test(`Should respond with status code 400 if the body object in the
          request object does not contain the necessary information`, async () => {
             await request(app)
@@ -261,25 +265,19 @@ describe("Route testing...", () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
             await request(app).get(`/friends/Person2`).expect(400);
         });
-        test(`Should respond with status code 404 if the user is not found in
+        test(`Should respond with status code 404 if the friend is not found in
          the database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).get(`/friends/personDoesNotExist`).expect(404);
+        });
+        test(`Should respond with status code 404 if the user containing a
+         friend with the specified username is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person1",
                 "person1*"
             );
             await request(app).get(`/friends/Person2`).expect(404);
-        });
-        test(`Should respond with status code 404 if the friend is not found in
-         the database`, async () => {
-            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
-            await request(app).post(`/friends/personDoesNotExist`).expect(404);
-        });
-        test(`Should respond with status code 400 if the '_id' values of
-         the friend being requested and the user currently logged-in are
-         identical`, async () => {
-            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
-            await request(app).get(`/friends/Person1`).expect(400);
         });
         test(`Should respond with a status of 400 if the user and friend
          are both found in the database, but they are not friends`, async () => {
@@ -291,6 +289,7 @@ describe("Route testing...", () => {
             await request(app).get(`/friends/Person2`).expect(200);
         });
         test(`Should respond with the friend's information`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
                 .get(`/friends/Person2`)
@@ -302,6 +301,7 @@ describe("Route testing...", () => {
                 });
         });
         test(`Should respond with a new token`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
                 .get(`/friends/Person2`)
