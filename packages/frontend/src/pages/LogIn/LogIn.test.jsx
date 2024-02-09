@@ -198,9 +198,8 @@ describe("UI/DOM Testing...", () => {
 
             await renderComponent();
 
-            let usernameInput = screen.getByRole("textbox", { name: "username-input" });
+            const usernameInput = screen.getByRole("textbox", { name: "username-input" });
             await user.type(usernameInput, "a");
-            usernameInput = screen.getByRole("textbox", { name: "username-input" });
 
             const logInButton = screen.getByRole("button", { name: "log-in-button" });
             await user.click(logInButton);
