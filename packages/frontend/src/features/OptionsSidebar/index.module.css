@@ -33,3 +33,11 @@
 
     width: 100%;
 }
+
+@container (width < calc(640px - 1.2rem)) {
+    .container,
+    .chat-options,
+    .settings-options {
+        flex-direction: row;
+    }
+}
