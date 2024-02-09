@@ -11,7 +11,7 @@ const ChatOption = ({
     onClickHandler,
     userId,
 }) => {
-    const [chatProps, setChatProps] = useState({...chatOptionProps.defaultProps });
+    const [chatProps, setChatProps] = useState({...chatOptionProps.defaultProps() });
 
     useEffect(() => {
         const chatPropsNew = chatOptionProps.calculateProps(chat, userId);
