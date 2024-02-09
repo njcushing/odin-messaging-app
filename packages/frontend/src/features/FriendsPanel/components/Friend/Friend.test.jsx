@@ -1,7 +1,7 @@
 /* global describe, test, expect */
 
 import { vi } from 'vitest'
-import {render, screen} from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { BrowserRouter } from "react-router-dom"
@@ -36,7 +36,7 @@ vi.mock('@/components/ProfileImage', () => ({
 }));
 
 describe("UI/DOM Testing...", () => {
-    describe("The element...", () => {
+    describe("The container element...", () => {
         test(`Should be present in the document`, () => {
             renderComponent();
             const container = screen.getByRole("generic", { name: "chat-option" });
@@ -57,6 +57,7 @@ describe("UI/DOM Testing...", () => {
             const container = screen.getByRole("generic", { name: "chat-option" });
 
             await user.click(container);
+            fireEvent.mouseLeave(container);
 
             expect(callback).toHaveBeenCalled();
         });
