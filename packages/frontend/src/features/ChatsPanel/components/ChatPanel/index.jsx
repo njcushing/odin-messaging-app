@@ -32,7 +32,7 @@ const ChatPanel = ({
 
     const [chat, setChat] = useState({
         currentValue: null,
-        abortController: null,
+        abortController: new AbortController(),
         attempting: false,
         appending: false,
     });
@@ -41,7 +41,7 @@ const ChatPanel = ({
 
     const [addingFriendsToChat, setAddingFriendsToChat] = useState({
         userIds: [],
-        abortController: null,
+        abortController: new AbortController(),
         attempting: false,
         submissionErrors: [],
     });
@@ -51,7 +51,7 @@ const ChatPanel = ({
         currentText: "",
         currentImage: null,
         replyingTo: null,
-        abortController: null,
+        abortController: new AbortController(),
         attempting: false,
         submissionErrors: [],
     });
@@ -206,7 +206,11 @@ const ChatPanel = ({
                 abortController: abortControllerNew,
             });
             (async () => {
-                let response;
+                let response = {
+                    status: 400,
+                    message: "Invalid message type (expecting 'text' or 'image')",
+                    newMessage: null,
+                };
                 switch (sendingMessage.currentType) {
                     case "text":
                         response = await sendMessage.text(chatId, {
@@ -224,11 +228,6 @@ const ChatPanel = ({
                                 : null,
                         }, abortControllerNew);
                         break;
-                    default:
-                        response = {
-                            status: 400,
-                            message: "Invalid message type (expecting 'text' or 'image')",
-                        }
                 }
                 if (response.status >= 400) {
                     setSendingMessage({
@@ -321,7 +320,7 @@ const ChatPanel = ({
     }, [addingFriendsToChat.attempting]);
 
     useEffect(() => {
-        if (chat.currentValue && typeof chat.currentValue === "object" && "participants" in chat.currentValue) {
+        if (chat.currentValue && chat.currentValue.constructor === Object && "participants" in chat.currentValue) {
             const participantInfoNew = new Map();
             chat.currentValue.participants.forEach((participant) => {
                 let participantName = "User";
@@ -343,6 +342,37 @@ const ChatPanel = ({
         }
     }, [chat.currentValue]);
 
+    const normaliseMessage = (message) => {
+        const authorId = typeof message.author !== "undefined" ? message.author : "";
+
+        const messageNormalised = {
+            _id: message._id,
+            author: {
+                _id: authorId,
+                name: participantInfo.get(authorId) ?
+                    participantInfo.get(authorId).name :
+                    "user",
+                profileImage: participantInfo.get(authorId) ?
+                    participantInfo.get(authorId).profileImage :
+                    "user",
+            },
+            text: typeof message.text !== "undefined" ? message.text : null,
+            image: typeof message.image !== "undefined" ?
+                extractImage.fromMessage(message).image :
+                null,
+            replyingTo: message.replyingTo ? {
+                author: participantInfo.get(message.replyingTo.author._id) ?
+                    participantInfo.get(message.replyingTo.author._id).name :
+                    "User",
+                text: message.replyingTo.text,
+                image: extractImage.fromMessage(message.replyingTo).image,
+            } : null,
+            createdAt: message.createdAt,
+            deleted: message.deleted,
+        };
+        return messageNormalised;
+    };
+
     const chatImage = extractImage.fromChat(chat.currentValue).image;
 
     useEffect(() => {
@@ -361,67 +391,29 @@ const ChatPanel = ({
                             {chat.currentValue.messages && Array.isArray(chat.currentValue.messages) && chat.currentValue.messages.length > 0
                             ?   <>
                                 {chat.currentValue.messages.map((message, i) => {
+                                    const messageNormalised = normaliseMessage(message);
                                     return (
                                         <li
                                             aria-label="chat-message"
                                             key={message._id}
                                         ><Message
-                                            text={message.text}
-                                            image={
-                                                typeof message.image !== "undefined"
-                                                    ? extractImage.fromMessage(message).image
-                                                    : null
-                                            }
-                                            name={
-                                                participantInfo.get(message.author) ?
-                                                participantInfo.get(message.author).name :
-                                                "user"
-                                            }
-                                            dateSent={message.createdAt}
-                                            profileImage={
-                                                participantInfo.get(message.author) ?
-                                                participantInfo.get(message.author).profileImage :
-                                                { ...ProfileImage.defaultProps }
-                                            }
-                                            position={
-                                                userId &&
-                                                message.author.toString() === userId.toString() ?
-                                                    "right" :
-                                                    "left"
-                                            }
-                                            replyingTo={message.replyingTo ?
-                                            {
-                                                author:
-                                                    participantInfo.get(message.replyingTo.author._id) ?
-                                                    participantInfo.get(message.replyingTo.author._id).name :
-                                                    "User",
-                                                text: message.replyingTo.text,
-                                                image: typeof message.replyingTo.image !== "undefined"
-                                                    ? extractImage.fromMessage(message.replyingTo).image
-                                                    : null,
-                                            }
-                                            : null}
+                                            text={messageNormalised.text}
+                                            image={messageNormalised.image}
+                                            name={messageNormalised.author.name}
+                                            dateSent={messageNormalised.createdAt}
+                                            profileImage={messageNormalised.author.profileImage}
+                                            position={userId && messageNormalised.author._id.toString() === userId.toString() ? "right" : "left"}
+                                            replyingTo={messageNormalised.replyingTo}
                                             onReplyToHandler={(e) => {
-                                                if (!sendMessage.attempting) {
-                                                    if (sendingMessage.replyingTo && sendingMessage.replyingTo._id.toString() === message._id.toString()) {
-                                                        setSendingMessage({
-                                                            ...sendingMessage,
-                                                            replyingTo: null,
-                                                        });
-                                                    } else {
-                                                        setSendingMessage({
-                                                            ...sendingMessage,
-                                                            replyingTo: {
-                                                                _id: message._id,
-                                                                authorId: message.author,
-                                                                authorName:
-                                                                    participantInfo.get(message.author) ?
-                                                                    participantInfo.get(message.author).name :
-                                                                    "user",
-                                                                text: message.text
-                                                            },
-                                                        });
-                                                    }
+                                                if (!sendingMessage.attempting) {
+                                                    setSendingMessage({
+                                                        ...sendingMessage,
+                                                        replyingTo: {
+                                                            _id: messageNormalised._id,
+                                                            authorId: messageNormalised.author._id,
+                                                            authorName: messageNormalised.author.name,
+                                                        },
+                                                    });
                                                 }
                                             }}
                                         /></li>
@@ -484,6 +476,7 @@ const ChatPanel = ({
                 setMidSectionContent((
                     <div
                         className={styles["update-chat-image-container"]}
+                        aria-label="update-chat-image"
                         key="update-chat-image-container"
                     >
                         <FieldUpdater
@@ -523,7 +516,7 @@ const ChatPanel = ({
                     <div className={styles["top-bar"]}>
                         <button
                             className={styles["chat-image"]}
-                            aria-label="chat-image"
+                            aria-label="toggle-update-chat-image-display"
                             onClick={(e) => {
                                 switchPanel("updatingChatImage")
                                 e.currentTarget.blur();
@@ -545,26 +538,18 @@ const ChatPanel = ({
                                 className={styles["chat-name-custom"]}
                                 aria-label="chat-name"
                             >{chat.currentValue.name}</h3>
-                        :   <>
-                            {chat.currentValue.participants.length > 0
-                            ?   <h3
-                                    className={styles["chat-name-participants"]}
-                                    aria-label="chat-participants"
-                                >{combineParticipantNames((() => {
-                                    const participants = Array.from(participantInfo.values());
-                                    const participantNames = [];
-                                    participants.forEach((participant) => {
-                                        if (userId && participant._id.toString() === userId.toString()) return;
-                                        participantNames.push(participant.name);
-                                    });
-                                    return participantNames;
-                                })(), 3)}</h3>
-                            :   <h3
-                                    className={styles["chat-name"]}
-                                    aria-label="chat-name"
-                                >Chat</h3>
-                            }
-                            </>
+                        :   <h3
+                                className={styles["chat-name-participants"]}
+                                aria-label="chat-participants"
+                            >{combineParticipantNames((() => {
+                                const participants = Array.from(participantInfo.values());
+                                const participantNames = [];
+                                participants.forEach((participant) => {
+                                    if (userId && participant._id.toString() === userId.toString()) return;
+                                    participantNames.push(participant.name);
+                                });
+                                return participantNames;
+                            })(), 3)}</h3>
                         }
                         <ul
                             className={styles["chat-options"]}
@@ -607,9 +592,12 @@ const ChatPanel = ({
                     </div>
                     {midSectionContent}
                     {sendingMessage.replyingTo
-                    ?   <div className={styles["replying-to-container"]}>
+                    ?   <h4
+                            className={styles["replying-to-container"]}
+                            aria-label="replying-to-message"
+                        >
                             {`Replying to ${sendingMessage.replyingTo.authorName}...`}
-                        </div>
+                        </h4>
                     :   null}
                     <div
                         className={styles["text-editor-container"]}

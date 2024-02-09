@@ -53,6 +53,10 @@
     padding: 0.6rem;
 }
 
+.replying-to-container {
+    margin: 0rem;
+}
+
 .top-bar {
     grid-area: 1 / 1 / 2 / -1;
 
