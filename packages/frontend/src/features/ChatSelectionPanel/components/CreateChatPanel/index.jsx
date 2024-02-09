@@ -61,10 +61,10 @@ const CreateChatPanel = ({
                                                 sizePx={60}
                                             />
                                         </div>
-                                        <p
+                                        <h5
                                             className={styles["friend-name"]}
                                             aria-label="friend-name"
-                                        >{friend.name}</p>
+                                        >{friend.name}</h5>
                                         <button
                                             className={styles["create-chat-button"]}
                                             aria-label="create-chat-button"
