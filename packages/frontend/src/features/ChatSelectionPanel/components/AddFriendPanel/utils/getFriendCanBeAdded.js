@@ -1,6 +1,8 @@
-const getFriend = async (username, abortController) => {
+const getFriendCanBeAdded = async (username, abortController) => {
     const data = await fetch(
-        `${import.meta.env.VITE_SERVER_DOMAIN}/user/friend/${username}`,
+        `${
+            import.meta.env.VITE_SERVER_DOMAIN
+        }/user/friend/can-be-added/${username}`,
         {
             signal: abortController.signal,
             method: "GET",
@@ -27,20 +29,28 @@ const getFriend = async (username, abortController) => {
                     responseJSON.data.token
                 );
             }
+            let friend = null;
+            if (
+                responseJSON.data !== null &&
+                typeof responseJSON.data === "object" &&
+                "friend" in responseJSON.data
+            ) {
+                friend = responseJSON.data.friend;
+            }
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
-                friend: responseJSON.data.friend,
+                friend: friend,
             };
         })
         .catch((error) => {
             return {
                 status: 500,
-                message: "Finding friend failed",
+                message: "Finding if friend can be added failed",
                 friend: null,
             };
         });
     return data;
 };
 
-export default getFriend;
+export default getFriendCanBeAdded;

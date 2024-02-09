@@ -127,6 +127,10 @@
 
     width: calc(100% - (0.8rem * 2));
     padding: 0.8rem;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0s 1 normal forwards fade-in;
 }
 
 .profile-image {
@@ -189,6 +193,7 @@
     cursor: pointer;
 }
 
+.response-message,
 .no-result-found {
     color: rgba(255, 255, 255, 0.6);
     font-size: 1.1rem;
@@ -197,6 +202,10 @@
 
     padding: 0rem;
     margin: 0rem;
+
+    opacity: 0%;
+    transform: translateY(0.5rem);
+    animation: 0.2s ease-in-out 0s 1 normal forwards fade-in;
 }
 
 .add-friend-submission-errors {
