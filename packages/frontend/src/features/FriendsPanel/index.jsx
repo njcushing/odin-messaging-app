@@ -16,53 +16,196 @@ const FriendsPanel = ({
     userId,
 }) => {
     const [listViewing, setListViewing] = useState(defaultList);
-    const [friendsList, setFriendsList] = useState([]);
-    const [friendsListAC, setFriendsListAC] = useState(null);
-    const [friendRequests, setFriendRequests] = useState([]);
-    const [friendRequestsAC, setFriendRequestsAC] = useState(null);
-    const [gettingList, setGettingList] = useState(false);
+
+    const [friendsList, setFriendsList] = useState({
+        currentValue: [],
+        abortController: null,
+        attempting: false,
+        appending: false,
+    });
+
+    const [friendRequests, setFriendRequests] = useState({
+        currentValue: [],
+        abortController: null,
+        attempting: false,
+        appending: false,
+    });
+
+    useEffect(() => {
+        if (friendsList.abortController) friendsList.abortController.abort;
+        const abortControllerNew = new AbortController();
+        if (friendsList.attempting || friendsList.appending) {
+            setFriendsList({
+                ...friendsList,
+                abortController: abortControllerNew,
+            });
+            (async () => {
+                const response = await getFriendsList([
+                    friendsList.currentValue.length,
+                    friendsList.currentValue.length + 20
+                ], abortControllerNew);
+                setFriendsList({
+                    ...friendsList,
+                    currentValue: [...friendsList.currentValue, ...response.friends],
+                    abortController: null,
+                    attempting: false,
+                    appending: false,
+                });
+            })();
+        }
+
+        return () => {
+            if (friendsList.abortController) friendsList.abortController.abort;
+        }
+    }, [friendsList.attempting, friendsList.appending]);
+
+    useEffect(() => {
+        if (friendRequests.abortController) friendRequests.abortController.abort;
+        const abortControllerNew = new AbortController();
+        if (friendRequests.attempting || friendRequests.appending) {
+            setFriendRequests({
+                ...friendRequests,
+                abortController: abortControllerNew,
+            });
+            (async () => {
+                const response = await getFriendRequests([
+                    friendRequests.currentValue.length,
+                    friendRequests.currentValue.length + 20
+                ], abortControllerNew);
+                setFriendRequests({
+                    ...friendRequests,
+                    currentValue: [...friendRequests.currentValue, ...response.friendRequests],
+                    abortController: null,
+                    attempting: false,
+                    appending: false,
+                });
+            })();
+        }
+
+        return () => {
+            if (friendRequests.abortController) friendRequests.abortController.abort;
+        }
+    }, [friendRequests.attempting, friendRequests.appending]);
+
     const [addingFriend, setAddingFriend] = useState(addingFriendDefault);
 
     useEffect(() => {
-        if (friendsListAC) friendsListAC.abort;
-        if (friendRequestsAC) friendRequestsAC.abort;
-
         switch (listViewing) {
-            case "friends":
-                const friendsListACNew = new AbortController();
-                setFriendsListAC(friendsListACNew);
-                setGettingList(true);
-                (async () => {
-                    const response = await getFriendsList(friendsListACNew);
-                    setFriendsList(response.friends);
-                    setGettingList(false);
-                })();
-                setFriendRequestsAC(null);
-                break;
             case "requests":
-                const friendRequestsACNew = new AbortController();
-                setFriendRequestsAC(friendRequestsACNew);
-                setGettingList(true);
-                (async () => {
-                    const friendRequestsNew = await getFriendRequests(friendRequestsACNew);
-                    setFriendRequests(friendRequestsNew.friendRequests);
-                    setGettingList(false);
-                })();
-                setFriendsListAC(null);
+                setFriendRequests({
+                    ...friendRequests,
+                    currentValue: [],
+                    attempting: true,
+                    page: 1,
+                });
                 break;
+            case "friends":
             default:
-                setFriendsListAC(null);
-                setFriendRequestsAC(null);
-        }
-        return () => {
-            if (friendsListAC) friendsListAC.abort;
-            if (friendRequestsAC) friendRequestsAC.abort;
+                setFriendsList({
+                    ...friendsList,
+                    currentValue: [],
+                    attempting: true,
+                    page: 1,
+                });
         }
     }, [listViewing]);
 
+    const loadMoreButton = (list) => {
+        <button
+            className={styles["load-more-button"]}
+            aria-label="load-more"
+            onClick={(e) => {
+                if (list === "requests") {
+                    setFriendRequests({
+                        ...friendRequests,
+                        appending: true,
+                    });
+                }
+                if (list === "friends") {
+                    setFriendsList({
+                        ...friendsList,
+                        appending: true,
+                    });
+                }
+                e.currentTarget.blur();
+                e.preventDefault();
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.blur();
+            }}
+        >{!chatsList.appending
+        ?   "Load More"
+        :   <div className={styles["load-more-button-waiting-wheel-container"]}>
+                <div
+                    className={styles["load-more-button-waiting-wheel"]}
+                    aria-label="waiting"
+                ></div>
+            </div>
+        }</button>
+    }
+
     let title, optionsList;
     switch(listViewing) {
+        case "requests":
+            title = "Friend Requests";
+            optionsList = (
+                <ul
+                    className={styles["friend-requests-list"]}
+                    aria-label="friend-requests-list"
+                    key={"friend-requests-list"}
+                >
+                    {friendRequests.currentValue.map((request) => {
+                        return (
+                            <li
+                                aria-label="friend-request"
+                                key={request._id}
+                            ><FriendRequest
+                                username={request.username}
+                                imageSrc={""}
+                                imageAlt={""}
+                                onSuccessHandler={() => {
+                                    const reducedFriendRequests =
+                                        friendRequests.currentValue.filter((friend) => {
+                                            return friend._id !== request._id
+                                        });
+                                    setFriendRequests({
+                                        ...friendRequests,
+                                        currentValue: reducedFriendRequests,
+                                    });
+                                }}
+                            /></li>
+                        );
+                    })}
+                    <button
+                        className={styles["load-more-button"]}
+                        aria-label="load-more"
+                        onClick={(e) => {
+                            if (!friendRequests.appending) {
+                                setFriendRequests({
+                                    ...friendRequests,
+                                    appending: true,
+                                });
+                            }
+                            e.currentTarget.blur();
+                            e.preventDefault();
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.blur();
+                        }}
+                    >{!friendRequests.appending
+                    ?   "Load More"
+                    :   <div className={styles["load-more-button-waiting-wheel-container"]}>
+                            <div
+                                className={styles["load-more-button-waiting-wheel"]}
+                                aria-label="waiting"
+                            ></div>
+                        </div>
+                    }</button>
+                </ul>
+            );
+            break;
         case "friends":
+        default:
             title = "Friends";
             optionsList = (
                 <ul
@@ -70,7 +213,7 @@ const FriendsPanel = ({
                     aria-label="friends-list"
                     key={"friends-list"}
                 >
-                    {friendsList.map((friend) => {
+                    {friendsList.currentValue.map((friend) => {
                         return (
                             <li
                                 aria-label="friend"
@@ -89,41 +232,33 @@ const FriendsPanel = ({
                             /></li>
                         );
                     })}
+                    <button
+                        className={styles["load-more-button"]}
+                        aria-label="load-more"
+                        onClick={(e) => {
+                            if (!friendsList.appending) {
+                                setFriendsList({
+                                    ...friendsList,
+                                    appending: true,
+                                });
+                            }
+                            e.currentTarget.blur();
+                            e.preventDefault();
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.blur();
+                        }}
+                    >{!friendsList.appending
+                    ?   "Load More"
+                    :   <div className={styles["load-more-button-waiting-wheel-container"]}>
+                            <div
+                                className={styles["load-more-button-waiting-wheel"]}
+                                aria-label="waiting"
+                            ></div>
+                        </div>
+                    }</button>
                 </ul>
             );
-            break;
-        case "requests":
-            title = "Friend Requests";
-            optionsList = (
-                <ul
-                    className={styles["friend-requests-list"]}
-                    aria-label="friend-requests-list"
-                    key={"friend-requests-list"}
-                >
-                    {friendRequests.map((request) => {
-                        return (
-                            <li
-                                aria-label="friend-request"
-                                key={request._id}
-                            ><FriendRequest
-                                username={request.username}
-                                imageSrc={""}
-                                imageAlt={""}
-                                onSuccessHandler={() => {
-                                    const reducedFriendRequests =
-                                        friendRequests.filter((friend) => {
-                                            return friend._id !== request._id
-                                        });
-                                    setFriendRequests(reducedFriendRequests);
-                                }}
-                            /></li>
-                        );
-                    })}
-                </ul>
-            );
-            break;
-        default:
-            optionsList = null;
             break;
     }
 
@@ -186,7 +321,7 @@ const FriendsPanel = ({
                         />
                     </li>
                 </ul>
-                {!gettingList
+                {!friendsList.attempting && !friendRequests.attempting
                 ?   optionsList
                 :   <div className={styles["waiting-wheel-container"]}>
                         <div
@@ -201,10 +336,13 @@ const FriendsPanel = ({
                     onCloseHandler={() => setAddingFriend(false)}
                     onSuccessHandler={(username) => {
                         const reducedFriendRequestsArray =
-                            friendRequests.filter((friend) => {
+                            friendRequests.currentValue.filter((friend) => {
                                 return friend.username !== username
                             });
-                        setFriendRequests(reducedFriendRequestsArray);
+                        setFriendRequests({
+                            ...friendRequests,
+                            currentValue: reducedFriendRequestsArray
+                        });
                     }}
                 />
             :   <div className={styles["right-side-content"]}></div>}
