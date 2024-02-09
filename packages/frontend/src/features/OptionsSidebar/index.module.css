@@ -10,11 +10,22 @@
 .container {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.8rem;
+    gap: 2rem;
 
     background-color: rgb(22, 22, 22);
     
+    padding: 8px;
     width: auto;
-    height: 100%;
+    height: calc(100% - (10px * 2));
+}
+
+.chat-options,
+.settings-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    width: 100%;
 }
