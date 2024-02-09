@@ -214,6 +214,46 @@ describe("Route testing...", () => {
         });
     });
 
+    describe("/user/self GET route...", () => {
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(null, "Person1", "person1*");
+            await request(app).get(`/self`).expect(400);
+        });
+        test(`Should respond with status code 401 if the currently-logged in
+         user is not found in the database`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app).get(`/self`).expect(401);
+        });
+        test(`Should respond with status code 200 on successful request with the
+         user's information and a new token`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .get(`/self`)
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (!data.hasOwnProperty("user")) {
+                        throw new Error(
+                            `Server has not responded with user's information`
+                        );
+                    }
+                    if (!data.hasOwnProperty("token")) {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+    });
+
     describe("/user/self/:username GET route...", () => {
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
@@ -221,7 +261,7 @@ describe("Route testing...", () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
             await request(app).get(`/self/Person1`).expect(400);
         });
-        test(`Should respond with status code 404 if the currently-logged in
+        test(`Should respond with status code 401 if the currently-logged in
          user is not found in the database`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),

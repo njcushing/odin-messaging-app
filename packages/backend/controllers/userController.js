@@ -232,6 +232,25 @@ export const userSelf = [
     }),
 ];
 
+export const getSelf = [
+    protectedRouteJWT,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+
+        let user = await User.findById(req.user._id)
+            .select("-admin -createdAt -updatedAt")
+            .exec();
+        if (user === null) return selfNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        return sendResponse(res, 200, "Currently logged-in user found.", {
+            user: user,
+            token: token,
+        });
+    }),
+];
+
 export const friendGet = [
     protectedRouteJWT,
     param("username", "'username' parameter (String) must not be empty")
