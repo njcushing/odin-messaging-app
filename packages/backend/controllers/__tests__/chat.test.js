@@ -8,6 +8,7 @@ import chatRouter from "../../routes/chat.js";
 
 import User from "../../models/user.js";
 import Chat from "../../models/chat.js";
+import Message from "../../models/message.js";
 
 import mongoose from "mongoose";
 import initialiseMongoServer from "../../utils/dbConfigTesting.js";
@@ -73,14 +74,15 @@ describe("Route testing...", () => {
                 .get(`/${new mongoose.Types.ObjectId()}`)
                 .expect(404);
         });
-        test(`Should respond with status code 401 if the currently-logged in
-         user is not found in the database`, async () => {
+        test(`Should respond with status code 404 if the currently-logged in
+         user is not found in the database or the chat is not found in the
+         user's 'chats' array`, async () => {
             mockProtectedRouteJWT(
                 new mongoose.Types.ObjectId(),
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/${chats[0]._id}`).expect(401);
+            await request(app).get(`/${chats[0]._id}`).expect(404);
         });
         test(`Should respond with status code 200 on successful request, with a
          valid token`, async () => {
