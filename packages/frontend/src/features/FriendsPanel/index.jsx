@@ -16,9 +16,9 @@ const FriendsPanel = ({
 }) => {
     const [listViewing, setListViewing] = useState(defaultList);
     const [friendsList, setFriendsList] = useState([]);
-    const [friendsListAC, setFriendsListAC] = useState([]);
+    const [friendsListAC, setFriendsListAC] = useState(null);
     const [friendRequests, setFriendRequests] = useState([]);
-    const [friendRequestsAC, setFriendRequestsAC] = useState([]);
+    const [friendRequestsAC, setFriendRequestsAC] = useState(null);
     const [addingFriend, setAddingFriend] = useState(addingFriendDefault);
 
     useEffect(() => {
