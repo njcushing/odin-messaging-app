@@ -522,6 +522,68 @@ describe("Route testing...", () => {
         });
     });
 
+    describe("/user/friendRequests GET route...", () => {
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: null,
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            await request(app).get(`/friendRequests`).expect(400);
+        });
+        test(`Should respond with status code 404 if the user is not found in
+         the database`, async () => {
+            protectedRouteJWT.mockImplementationOnce((req, res, next) => {
+                req.user = {
+                    _id: new mongoose.Types.ObjectId(),
+                    username: "Person1",
+                    password: "person1*",
+                };
+                return next();
+            });
+            await request(app).get(`/friendRequests`).expect(404);
+        });
+        test(`Should respond with status code 200 if the user is found in
+         the database`, async () => {
+            await request(app).get(`/friendRequests`).expect(200);
+        });
+        test(`Should respond with an array of friends`, async () => {
+            await request(app)
+                .get(`/friendRequests`)
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (!data.hasOwnProperty("friendRequests")) {
+                        throw new Error(
+                            `Server has not responded with friendRequests array`
+                        );
+                    }
+                    if (!Array.isArray(data.friendRequests)) {
+                        throw new Error(
+                            `Server has not responded with friendRequests array`
+                        );
+                    }
+                });
+        });
+        test(`Should respond with a new token`, async () => {
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .get(`/friendRequests`)
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+    });
+
     describe("/user/friends POST route...", () => {
         test(`Should respond with status code 400 if the body object in the
          request object does not contain the necessary information`, async () => {

@@ -8,6 +8,7 @@ router.get("/friend/can-be-added/:username", controller.friendCanBeAdded);
 router.get("/friend/:username", controller.friendGet);
 router.post("/friends", controller.friendsPost);
 router.get("/friends", controller.friendsGet);
+router.get("/friendRequests", controller.friendRequestsGet);
 router.get("/:username", controller.userGet);
 router.post("/", controller.userPost);
 

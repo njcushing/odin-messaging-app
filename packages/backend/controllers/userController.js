@@ -360,7 +360,14 @@ export const friendsGet = [
             .select("friends")
             .populate({
                 path: "friends",
-                select: "_id username preferences email",
+                select: `
+                    _id
+                    username
+                    preferences.displayName
+                    preferences.tagLine
+                    preferences.setStatus
+                    email
+                `,
             })
             .exec();
         if (user === null) {
@@ -475,6 +482,36 @@ export const friendsPost = [
                 `Friend request sent to ${friend.username}.`,
                 { token: token }
             );
+        }
+    }),
+];
+
+export const friendRequestsGet = [
+    protectedRouteJWT,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        let user = await User.findById(req.user._id)
+            .select("friendRequests")
+            .populate({
+                path: "friendRequests",
+                select: `
+                    _id
+                    username
+                    preferences.tagLine
+                `,
+            })
+            .exec();
+        if (user === null) {
+            userNotFound(res, next, req.user._id);
+        } else {
+            const token = await generateToken(
+                req.user.username,
+                req.user.password
+            );
+            sendResponse(res, 200, "Friend requests found.", {
+                friendRequests: [...user.friendRequests],
+                token: token,
+            });
         }
     }),
 ];
