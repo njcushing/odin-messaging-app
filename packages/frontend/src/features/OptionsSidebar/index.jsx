@@ -12,29 +12,41 @@ const OptionsSidebar = ({
             <div className={styles["chat-options"]}>
                 <OptionButton
                     text="mood"
+                    tooltipText="Friends"
+                    tooltipPosition="right"
                     onClickHandler={() => onOptionSelect("friends")}
                 />
                 <OptionButton
                     text="groups"
+                    tooltipText="Groups"
+                    tooltipPosition="right"
                     onClickHandler={() => onOptionSelect("groups")}
                 />
                 <OptionButton
                     text="communities"
+                    tooltipText="Communities"
+                    tooltipPosition="right"
                     onClickHandler={() => onOptionSelect("communities")}
                 />
             </div>
             <div className={styles["settings-options"]}>
                 <OptionButton
                     text="person"
+                    tooltipText="Account Information"
+                    tooltipPosition="right"
                     onClickHandler={() => onOptionSelect("account")}
                 />
                 <OptionButton
                     text="settings"
+                    tooltipText="Settings"
+                    tooltipPosition="right"
                     onClickHandler={() => onOptionSelect("settings")}
                 />
                 <OptionButton
                     text="logout"
-                    onClickHandler={() => onOptionSelect("sign-out")}
+                    tooltipText="Log Out"
+                    tooltipPosition="right"
+                    onClickHandler={() => onOptionSelect("log-out")}
                 />
             </div>
         </div>
