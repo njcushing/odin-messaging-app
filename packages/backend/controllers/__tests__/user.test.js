@@ -11,6 +11,7 @@ import Image from "../../models/image.js";
 
 import mongoose from "mongoose";
 import initialiseMongoServer from "../../utils/dbConfigTesting.js";
+import * as createMongoDBImageFromFile from "../../utils/createMongoDBImageFromFile.js";
 
 import * as validateUserFields from "../../../../utils/validateUserFields.js";
 
@@ -65,6 +66,11 @@ const generateToken = vi.fn(() => {
 });
 vi.mock("../../utils/generateToken", async () => ({
     default: () => generateToken(),
+}));
+
+const createMongoDBImageFromFileMock = vi.fn(() => [new mongoose.Types.ObjectId(), null]);
+vi.mock("../../utils/createMongoDBImageFromFile", async () => ({
+    default: () => createMongoDBImageFromFileMock(),
 }));
 
 let users;
@@ -148,6 +154,24 @@ describe("Route testing...", () => {
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(500);
+        });
+        test(`Should throw an error if the 'createMongoDBImageFromFile'
+         function returns an error`, async () => {
+            createMongoDBImageFromFileMock.mockImplementationOnce(() => {
+                const error = new Error("failed to create image");
+                error.status = 500;
+                return [null, error];
+            });
+            await request(app)
+                .post(`/`)
+                .send({ ...credentials })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect((res) => {
+                    if (!(res.error instanceof Error)) {
+                        throw new Error("Expected error to be thrown.");
+                    }
+                });
         });
         test(`Should throw an error if the User schema .save() operation fails`, async () => {
             vi.spyOn(User.prototype, "save").mockImplementationOnce(

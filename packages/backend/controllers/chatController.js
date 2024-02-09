@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
 import { body, param, query } from "express-validator";
-import fs from "fs";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
@@ -18,6 +13,7 @@ import protectedRouteJWT from "../utils/protectedRouteJWT.js";
 import generateToken from "../utils/generateToken.js";
 import * as validateChat from "../../../utils/validateChatFields.js";
 import * as validateMessage from "../../../utils/validateMessageFields.js";
+import createMongoDBImageFromFile from "../utils/createMongoDBImageFromFile.js"
 
 const defaultChatImages = [
     "/../public/images/chat/pink.png",
@@ -29,40 +25,6 @@ const defaultChatImages = [
     "/../public/images/chat/blue.png",
     "/../public/images/chat/lilac.png",
 ];
-
-const createDefaultImage = async () => {
-    const randomImage =
-        defaultChatImages[Math.floor(Math.random() * defaultChatImages.length)];
-    const imageFilePath = `${__dirname}${randomImage}`;
-    const imageBuffer = fs.readFileSync(imageFilePath);
-    const imageArray = Array.from(new Uint8Array(imageBuffer));
-    const validValue = validateChat.image(imageArray);
-    if (!validValue.status) {
-        const error = new Error(validValue.message.front);
-        error.status = 500;
-        return [null, error];
-    }
-
-    const imageId = new mongoose.Types.ObjectId();
-    const image = new Image({
-        _id: imageId,
-        "img.data": imageArray,
-        "img.contentType": "image/png",
-    });
-    let imageSaveError = null;
-    await image.save().catch((error) => {
-        imageSaveError = error;
-    });
-    if (imageSaveError) {
-        const error = new Error(
-            "Something went wrong when trying to generate a default profile image"
-        );
-        error.status = 500;
-        return [null, error];
-    }
-
-    return [imageId, null];
-};
 
 const validateUserId = (res, next, userId) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -390,7 +352,10 @@ export const chatPost = [
             try {
                 sessionIndividual.startTransaction();
 
-                const [imageId, imageError] = await createDefaultImage();
+                const [imageId, imageError] = await createMongoDBImageFromFile(
+                    defaultChatImages[Math.floor(Math.random() * defaultChatImages.length)],
+                    validateChat.image,
+                );
                 if (imageError) throw imageError;
 
                 let chat = await Chat.findOne({
@@ -479,7 +444,10 @@ export const chatPost = [
         try {
             sessionGroup.startTransaction();
 
-            const [imageId, imageError] = await createDefaultImage();
+            const [imageId, imageError] = await createMongoDBImageFromFile(
+                defaultChatImages[Math.floor(Math.random() * defaultChatImages.length)],
+                validateChat.image
+            );
             if (imageError) throw imageError;
 
             const chat = new Chat({
@@ -933,7 +901,10 @@ export const addFriendsPost = [
 
             // If this is an 'individual'-type chat, make a new 'group'-type chat
             if (chat.type === "individual") {
-                const [imageId, imageError] = await createDefaultImage();
+                const [imageId, imageError] = await createMongoDBImageFromFile(
+                    defaultChatImages[Math.floor(Math.random() * defaultChatImages.length)],
+                    validateChat.image
+                );
                 if (imageError) throw imageError;
 
                 const newChatId = new mongoose.Types.ObjectId();

@@ -3,14 +3,10 @@ import asyncHandler from "express-async-handler";
 import { body, param, query, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import fs from "fs";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 import User from "../models/user.js";
 import Chat from "../models/chat.js";
+import Message from "../models/message.js";
 import Image from "../models/image.js";
 
 import sendResponse from "../utils/sendResponse.js";
@@ -27,6 +23,7 @@ import {
     profileImage,
     theme,
 } from "../../../utils/validateUserFields.js";
+import createMongoDBImageFromFile from "../utils/createMongoDBImageFromFile.js"
 
 const defaultProfileImages = [
     "/../public/images/profile/pink.png",
@@ -257,40 +254,17 @@ export const userPost = [
                     err
                 );
             } else {
-                const randomImage =
-                    defaultProfileImages[
-                        Math.floor(Math.random() * defaultProfileImages.length)
-                    ];
-                const imageFilePath = `${__dirname}${randomImage}`;
-                const imageBuffer = fs.readFileSync(imageFilePath);
-                const imageArray = Array.from(new Uint8Array(imageBuffer));
-                const validValue = profileImage(imageArray);
-                if (!validValue.status) {
+                const [imageId, imageError] = await createMongoDBImageFromFile(
+                    defaultProfileImages[Math.floor(Math.random() * defaultProfileImages.length)],
+                    profileImage
+                );
+                if (imageError) {
                     return sendResponse(
                         res,
-                        400,
-                        validValue.message.front,
-                        null
-                    );
-                }
-
-                const imageId = new mongoose.Types.ObjectId();
-                const image = new Image({
-                    _id: imageId,
-                    "img.data": imageArray,
-                    "img.contentType": "image/png",
-                });
-                let imageSaveError = null;
-                await image.save().catch((error) => {
-                    imageSaveError = error;
-                });
-                if (imageSaveError) {
-                    return sendResponse(
-                        res,
-                        500,
-                        "Something went wrong when trying to generate a default profile image",
+                        imageError.status,
+                        imageError.message,
                         null,
-                        imageSaveError
+                        imageError
                     );
                 }
 

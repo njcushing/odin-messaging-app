@@ -14,6 +14,7 @@ import Image from "../../models/image.js";
 import mongoose from "mongoose";
 import initialiseMongoServer from "../../utils/dbConfigTesting.js";
 import * as validateChatFields from "../../../../utils/validateChatFields.js";
+import * as createMongoDBImageFromFile from "../../utils/createMongoDBImageFromFile.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -47,6 +48,11 @@ const generateToken = vi.fn(() => {
 });
 vi.mock("../../utils/generateToken", async () => ({
     default: () => generateToken(),
+}));
+
+const createMongoDBImageFromFileMock = vi.fn(() => [new mongoose.Types.ObjectId(), null]);
+vi.mock("../../utils/createMongoDBImageFromFile", async () => ({
+    default: () => createMongoDBImageFromFileMock(),
 }));
 
 let users, chats;
@@ -210,6 +216,25 @@ describe("Route testing...", () => {
                 .set("Accept", "application/json")
                 .expect(404);
         });
+        test(`Should throw an error if the 'createMongoDBImageFromFile'
+         function returns an error`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            createMongoDBImageFromFileMock.mockImplementationOnce(() => {
+                const error = new Error("failed to create image");
+                error.status = 500;
+                return [null, error];
+            });
+            await request(app)
+                .post(`/`)
+                .send({ participants: [users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect((res) => {
+                    if (!(res.error instanceof Error)) {
+                        throw new Error("Expected error to be thrown.");
+                    }
+                });
+        });
         test(`Should throw an error if the Chat schema .save() operation fails`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             vi.spyOn(Chat.prototype, "save").mockImplementationOnce(
@@ -218,7 +243,6 @@ describe("Route testing...", () => {
                 }
             );
             vi.spyOn(Chat, "findOne").mockReturnValueOnce(null);
-            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
                 .post(`/`)
                 .send({ participants: [users[1]._id] })
@@ -284,6 +308,26 @@ describe("Route testing...", () => {
                     const data = res.body.data;
                     if (data.token !== "Bearer token") {
                         throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+        test(`Should throw an error if the 'createMongoDBImageFromFile'
+         function returns an error when trying to create one for more than two
+         users`, async () => {
+            createMongoDBImageFromFileMock.mockImplementationOnce(() => {
+                const error = new Error("failed to create image");
+                error.status = 500;
+                return [null, error];
+            });
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/`)
+                .send({ participants: [users[4]._id, users[1]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect((res) => {
+                    if (!(res.error instanceof Error)) {
+                        throw new Error("Expected error to be thrown.");
                     }
                 });
         });
@@ -987,6 +1031,26 @@ describe("Route testing...", () => {
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(403);
+        });
+        test(`Should throw an error if the 'createMongoDBImageFromFile'
+         function returns an error, if the chat being added to is an
+         'individual'-type chat`, async () => {
+            createMongoDBImageFromFileMock.mockImplementationOnce(() => {
+                const error = new Error("failed to create image");
+                error.status = 500;
+                return [null, error];
+            });
+            mockProtectedRouteJWT(users[1]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${chats[1]._id}/add-friends`)
+                .send({ participants: [users[0]._id] })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect((res) => {
+                    if (!(res.error instanceof Error)) {
+                        throw new Error("Expected error to be thrown.");
+                    }
+                });
         });
         test(`Should throw an error if the User schema .updateMany() operation
          fails when trying to add a new chat to those users' 'chats' array, if
