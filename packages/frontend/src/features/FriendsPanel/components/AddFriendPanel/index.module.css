@@ -82,10 +82,8 @@
 }
 
 .option-button {
-    position: absolute;
     top: -1rem;
     left: calc(100% - 2.4rem);
-    z-index: 100;
 
     background-color: var(--color-background-front);
 }

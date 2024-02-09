@@ -9,8 +9,6 @@
 }
 
 .message-text-box {
-    position: relative;
-
     grid-area: 1 / 1 / -1 / 2;
 
     color: var(--color-text-primary);

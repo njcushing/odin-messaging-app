@@ -2,7 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
-// When using this component, ensure its parent's 'position' style rule is set to 'relative'
+/*
+    When using this component, ensure its parent's 'position' style rule is set
+    to 'relative' - this will set the positioning of the Tooltip correctly.
+
+    Also, to ensure the Tooltip will appear above surrounding elements, set
+    the 'position' to something non-static ('relative', 'absolute', etc.) and
+    the 'z-index' of the containing element on the same level of nesting as the
+    surrounding elements to appear above (this is what I have found to work).
+*/
 
 const Tooltip = ({
     text,

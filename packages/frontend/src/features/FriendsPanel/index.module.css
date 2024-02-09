@@ -79,6 +79,10 @@
 
     padding: 0rem;
     margin: 0rem;
+
+    /* Tooltip */
+    position: relative;
+    z-index: 1000;
 }
 
 .friends-list,

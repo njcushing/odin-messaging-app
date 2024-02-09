@@ -33,9 +33,7 @@ const OptionButton = ({
     return (
         <div
             className="container"
-            style={{
-                position: "relative",
-            }}
+            style={{ position: "relative" }}
         >
         <button
             className="option-button"
