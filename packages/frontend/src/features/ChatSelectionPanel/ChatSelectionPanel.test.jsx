@@ -96,11 +96,18 @@ vi.mock('./utils/getChatListFromAPI', async () => {
 });
 
 describe("UI/DOM Testing...", () => {
-    describe("The chat list...", () => {
+    describe("The chat selection panel...", () => {
         test(`Should contain a heading element for the title`, async () => {
             await act(() => renderComponent());
             const chatListTitle = screen.getByRole("heading", { name: "chat-list-title" });
             expect(chatListTitle).toBeInTheDocument();
+        });
+    });
+    describe("The chat list...", () => {
+        test(`Should be present in the document`, async () => {
+            await act(() => renderComponent());
+            const chatList = screen.getByRole("list", { name: "chat-list-options" });
+            expect(chatList).toBeInTheDocument();
         });
         test(`Should contain the correct number of messages if the value of the
          'chatType' prop is set to 'friends'`, async () => {
