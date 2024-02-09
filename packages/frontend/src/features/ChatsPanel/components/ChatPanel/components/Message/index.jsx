@@ -19,6 +19,9 @@ const Message = ({
     const containerStyleRules = {
         flexDirection: position === "left" ? "row" : "row-reverse",
     }
+    const messageTextContainerStyleRules = {
+        alignSelf: position === "left" ? "start" : "end",
+    }
     const messageTextStyleRules = {
         backgroundColor: position === "left" ? "rgb(4, 187, 28)" : "rgb(4, 98, 187)",
         borderBottomLeftRadius: position === "right" ? "12px" : "0px",
@@ -45,12 +48,13 @@ const Message = ({
             <div className={styles["message-info-container"]}>
                 <div
                     className={styles["message-text-container"]}
+                    style={{ ...messageTextContainerStyleRules }}
                 >
                     <p
                         className={styles["message-text"]}
                         aria-label="message-text"
                         style={{ ...messageTextStyleRules }}
-                    >{text}</p>
+                    >{new DOMParser().parseFromString(text, "text/html").body.textContent}</p>
                 </div>
                 <p
                     className={styles["name-and-date-string"]}

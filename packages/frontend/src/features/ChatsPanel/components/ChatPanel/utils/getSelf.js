@@ -1,3 +1,5 @@
+import saveTokenFromResponseJSON from "@/utils/saveTokenFromResponseJSON.js";
+
 const getSelf = async (abortController) => {
     const data = await fetch(
         `${import.meta.env.VITE_SERVER_DOMAIN}/user/self`,

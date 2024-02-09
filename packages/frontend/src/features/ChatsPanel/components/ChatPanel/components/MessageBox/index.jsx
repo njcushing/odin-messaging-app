@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
@@ -6,13 +7,22 @@ const MessageBox = ({
     placeholder,
     submissionErrors,
     onSubmitHandler,
+    sending,
 }) => {
+    const formRef = useRef(null);
+    const textareaRef = useRef(null);
+
+    useEffect(() => {
+        textareaRef.current.value = text;
+    }, [text]);
+
     return (    
         <form
             className={styles["message-box"]}
             aria-label="message-form"
             method="POST"
             action=""
+            ref={formRef}
         >
             <textarea
                 className={styles["message-text-box"]}
@@ -25,13 +35,14 @@ const MessageBox = ({
                 style={{
                     resize: "none"
                 }}
+                ref={textareaRef}
             ></textarea>
             <button
                 className={styles["send-message-button"]}
                 aria-label="send-message-button"
                 type="submit"
                 onClick={(e) => {
-                    onSubmitHandler(e);
+                    onSubmitHandler(formRef.current);
                     e.currentTarget.blur();
                     e.preventDefault();
                 }}
@@ -68,6 +79,7 @@ MessageBox.propTypes = {
     placeholder: PropTypes.string,
     submissionErrors: PropTypes.arrayOf(PropTypes.string),
     onSubmitHandler: PropTypes.func,
+    sending: PropTypes.bool,
 }
 
 MessageBox.defaultProps = {
@@ -75,6 +87,7 @@ MessageBox.defaultProps = {
     placeholder: "Write your message",
     submissionErrors: [],
     onSubmitHandler: () => {},
+    sending: false,
 }
 
 export default MessageBox;

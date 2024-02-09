@@ -12,8 +12,8 @@ const sendMessage = async (chatId, message, abortController) => {
                 authorization: localStorage.getItem(
                     "odin-messaging-app-auth-token"
                 ),
-                body: JSON.stringify(message),
             },
+            body: JSON.stringify(message),
         }
     )
         .then(async (response) => {
@@ -24,16 +24,26 @@ const sendMessage = async (chatId, message, abortController) => {
                 window.location.href = "/log-in";
             }
 
+            let message = null;
+            if (
+                responseJSON.data !== null &&
+                typeof responseJSON.data === "object" &&
+                "message" in responseJSON.data
+            ) {
+                message = responseJSON.data.message;
+            }
+
             return {
                 status: responseJSON.status,
                 message: responseJSON.message,
+                newMessage: message,
             };
         })
         .catch((error) => {
             return {
                 status: 500,
                 message: "Sending message failed",
-                chat: null,
+                newMessage: null,
             };
         });
     return data;

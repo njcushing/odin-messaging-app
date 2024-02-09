@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import styles from "./index.module.css";
 
@@ -8,19 +8,42 @@ import FriendSelectorPanel from "../FriendSelectorPanel";
 import Message from "./components/Message"
 import MessageBox from "./components/MessageBox";
 
+import getSelf from "./utils/getSelf";
 import getChat from "./utils/getChat";
 import combineParticipantNames from "../../utils/combineParticipantNames";
+import sendMessage from "./utils/sendMessage";
 
 import mongoose from "mongoose";
 
 const ChatPanel = ({
     chatId,
 }) => {
+    const [userInfo, setUserInfo] = useState({});
+    const [getUserInfoAC, setGetUserInfoAC] = useState(null);
     const [addingFriendsToChat, setAddingFriendsToChat] = useState(false);
     const [chat, setChat] = useState(null);
     const [gettingChat, setGettingChat] = useState(false);
     const [gettingChatAC, setGettingChatAC] = useState(null);
+    const [sendingMessageAC, setSendingMessageAC] = useState(null);
+    const [attemptingSendMessage, setAttemptingSendMessage] = useState(false);
+    const [currentMessage, setCurrentMessage] = useState("");
+    const [replyingTo, setReplyingTo] = useState(null);
     const [messageSubmissionErrors, setMessageSubmissionErrors] = useState([]);
+
+    useEffect(() => {
+        if (getUserInfoAC) getUserInfoAC.abort;
+        const getUserInfoACNew = new AbortController();
+        setGetUserInfoAC(getUserInfoACNew);
+        (async () => {
+            const response = await getSelf(getUserInfoACNew);
+            setUserInfo(response.user);
+            setGetUserInfoAC(null);
+        })();
+
+        return () => {
+            if (getUserInfoAC) getUserInfoAC.abort;
+        }
+    }, []);
 
     useEffect(() => {
         if (mongoose.Types.ObjectId.isValid(chatId)) {
@@ -45,6 +68,62 @@ const ChatPanel = ({
             setGettingChat(false);
         })();
     };
+    
+    const attemptSendMessage = useCallback(async (form) => {
+        const formData = new FormData(form);
+        const formFields = Object.fromEntries(formData);
+
+        // Client-side validation
+        let validCredentials = true;
+        const messageSubmissionErrorsNew = [];
+        if (formFields.text.length < 1 || formFields.text.length > 1000) {
+            validCredentials = false;
+            messageSubmissionErrorsNew.push("Message text must not be empty and cannot exceed 1000 characters in length.");
+        }
+        if (replyingTo && !mongoose.Types.ObjectId.isValid(replyingTo)) {
+            validCredentials = false;
+            messageSubmissionErrorsNew.push("Cannot reply to this message as the id of its author is invalid.")
+        }
+
+        setMessageSubmissionErrors(messageSubmissionErrorsNew);
+        if (!validCredentials) return;
+
+        setAttemptingSendMessage(true);
+        setCurrentMessage(formFields.text);
+    }, []);
+
+    useEffect(() => {
+        if (sendingMessageAC) sendingMessageAC.abort;
+        const sendingMessageACNew = new AbortController();
+        if (attemptingSendMessage) {
+            setSendingMessageAC(sendingMessageACNew);
+            (async () => {
+                const response = await sendMessage(chatId, {
+                    messageText: currentMessage,
+                    messageReplyingTo: replyingTo,
+                }, sendingMessageACNew);
+                if (response.status >= 400) {
+                    setMessageSubmissionErrors([response.message]);
+                } else {
+                    const messages = [...chat.messages];
+                    messages.push(response.newMessage);
+                    setChat({
+                        ...chat,
+                        messages: messages,
+                    });
+                    setCurrentMessage("");
+                }
+                setAttemptingSendMessage(false);
+                setSendingMessageAC(null);
+            })();
+        } else {
+            setSendingMessageAC(null);
+        }
+
+        return () => {
+            if (sendingMessageAC) sendingMessageAC.abort;
+        }
+    }, [attemptingSendMessage]);
 
     return (
         <div className={styles["wrapper"]}>
@@ -126,7 +205,7 @@ const ChatPanel = ({
                                 aria-label="chat-message-list"
                             >
                                 {chat.messages && Array.isArray(chat.messages) && chat.messages.length > 0
-                                ?   chat.messages.map((message) => {
+                                ?   chat.messages.toReversed().map((message) => {
                                         return (
                                             <li
                                                 aria-label="chat-message"
@@ -134,10 +213,16 @@ const ChatPanel = ({
                                             ><Message
                                                 text={message.text}
                                                 name={message.author.name}
-                                                dateSent={message.dateSent}
+                                                dateSent={message.createdAt}
                                                 imageSrc={message.author.imageSrc}
                                                 imageAlt={message.author.imageAlt}
-                                                position={message.author._id === "self" ? "right" : "left"}
+                                                position={
+                                                    userInfo &&
+                                                    userInfo.hasOwnProperty("_id") &&
+                                                    message.author.toString() === userInfo._id.toString() ?
+                                                        "right" :
+                                                        "left"
+                                                }
                                             /></li>
                                         )
                                     })
@@ -162,8 +247,14 @@ const ChatPanel = ({
                         className={styles["text-editor-container"]}
                     >
                         <MessageBox
+                            text={currentMessage}
                             submissionErrors={messageSubmissionErrors}
-                            onSubmitHandler={() => {}}
+                            onSubmitHandler={(form) => {
+                                if (!attemptingSendMessage) {
+                                    attemptSendMessage(form);
+                                }
+                            }}
+                            sending={attemptingSendMessage}
                         />
                     </div>
                     </>
