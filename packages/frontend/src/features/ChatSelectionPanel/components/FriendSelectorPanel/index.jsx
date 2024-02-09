@@ -23,7 +23,11 @@ const FriendSelectorPanel = ({
     useEffect(() => {
         (async () => {
             const response = await getFriendsList();
-            setFriendsList(Array.isArray(response.data) ? response.data : []);
+            setFriendsList(
+                Array.isArray(response.friends) ?
+                response.friends :
+                []
+            );
         })();
     }, []);
 
@@ -65,7 +69,7 @@ const FriendSelectorPanel = ({
                                 className={styles["friends-selected-list"]}
                                 aria-label="friends-selected-list"
                             >
-                                {friendsList.map((friend, i) => {
+                                {friendsList.map((friend) => {
                                     if (friendsSelected.has(friend._id)) {
                                         return(
                                             <li
@@ -76,7 +80,11 @@ const FriendSelectorPanel = ({
                                                 <h5
                                                     className={styles["friend-selected-name"]}
                                                     aria-label="friend-selected-name"
-                                                >{friend.name}</h5>
+                                                >{
+                                                    friend.preferences.displayName !== "" ?
+                                                    friend.preferences.displayName :
+                                                    friend.username
+                                                }</h5>
                                                 <button
                                                     className={styles["remove-button"]}
                                                     aria-label="remove-button"
@@ -102,7 +110,7 @@ const FriendSelectorPanel = ({
                             className={styles["friends-list"]}
                             aria-label="friends-list"
                         >
-                            {friendsList.map((friend, i) => {
+                            {friendsList.map((friend) => {
                                 if (!friendsSelected.has(friend._id)) {
                                     return(
                                         <li
@@ -120,7 +128,11 @@ const FriendSelectorPanel = ({
                                             <h5
                                                 className={styles["friend-name"]}
                                                 aria-label="friend-name"
-                                            >{friend.name}</h5>
+                                            >{
+                                                friend.preferences.displayName !== "" ?
+                                                friend.preferences.displayName :
+                                                friend.username
+                                            }</h5>
                                             <button
                                                 className={styles["add-button"]}
                                                 aria-label="add-button"
