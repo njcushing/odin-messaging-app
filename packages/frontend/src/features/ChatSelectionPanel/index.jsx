@@ -41,41 +41,45 @@ const ChatSelectionPanel = ({
                     className={styles["chat-list-title"]}
                     aria-label="chat-list-title"
                 >{chatType}</h3>
-                <ul
-                    className={styles["chat-selection-panel-options-list"]}
-                    aria-label="chat-selection-panel-options-list"
-                >
-                    <li
-                        className={styles["add-friend-button"]}
-                        aria-label="add-friend-button"
+                {chatType === "friends" || chatType === "groups"
+                ?   <ul
+                        className={styles["chat-selection-panel-options-list"]}
+                        aria-label="chat-selection-panel-options-list"
                     >
-                        <OptionButton
-                            text="person_add"
-                            tooltipText="Add Friend"
-                            tooltipPosition="bottom"
-                            widthPx={50}
-                            heightPx={50}
-                            fontSizePx={24}
-                            borderStyle="circular"
-                            onClickHandler={() => {}}
-                        />
-                    </li>
-                    <li
-                        className={styles["create-chat-button"]}
-                        aria-label="create-chat-button"
-                    >
-                        <OptionButton
-                            text="add"
-                            tooltipText="Create New Chat"
-                            tooltipPosition="bottom"
-                            widthPx={50}
-                            heightPx={50}
-                            fontSizePx={24}
-                            borderStyle="circular"
-                            onClickHandler={() => {}}
-                        />
-                    </li>
-                </ul>
+                        {chatType === "friends"
+                        ?   <li
+                                className={styles["add-friend-button"]}
+                                aria-label="add-friend-button"
+                            >
+                                <OptionButton
+                                    text="person_add"
+                                    tooltipText="Add Friend"
+                                    tooltipPosition="bottom"
+                                    widthPx={50}
+                                    heightPx={50}
+                                    fontSizePx={24}
+                                    borderStyle="circular"
+                                    onClickHandler={() => {}}
+                                />
+                            </li>
+                        :   null}
+                        <li
+                            className={styles["create-chat-button"]}
+                            aria-label="create-chat-button"
+                        >
+                            <OptionButton
+                                text="add"
+                                tooltipText="Create New Chat"
+                                tooltipPosition="bottom"
+                                widthPx={50}
+                                heightPx={50}
+                                fontSizePx={24}
+                                borderStyle="circular"
+                                onClickHandler={() => {}}
+                            />
+                        </li>
+                    </ul>
+                :   null}
                 <ul
                     className={styles["chat-list-options"]}
                     aria-label="chat-list-options"

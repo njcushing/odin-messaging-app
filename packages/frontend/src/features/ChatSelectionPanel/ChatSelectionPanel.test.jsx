@@ -104,20 +104,99 @@ describe("UI/DOM Testing...", () => {
         });
     });
     describe("The chat selection panel options list...", () => {
-        test(`Should be present in the document`, async () => {
-            await act(() => renderComponent());
+        test(`Should be present in the document if the value of the 'chatType'
+         prop is set to 'friends'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="friends"
+                />
+            ));
             const chatSelectionPanelOptionsList = screen.getByRole("list", { name: "chat-selection-panel-options-list" });
             expect(chatSelectionPanelOptionsList).toBeInTheDocument();
         });
-        test(`Should contain an option to add a friend`, async () => {
-            await act(() => renderComponent());
+        test(`Should be present in the document if the value of the 'chatType'
+         prop is set to 'groups'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="groups"
+                />
+            ));
+            const chatSelectionPanelOptionsList = screen.getByRole("list", { name: "chat-selection-panel-options-list" });
+            expect(chatSelectionPanelOptionsList).toBeInTheDocument();
+        });
+        test(`Should not be present in the document if the value of the
+         'chatType' prop is set to 'communities'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="communities"
+                />
+            ));
+            const chatSelectionPanelOptionsList = screen.queryByRole("list", { name: "chat-selection-panel-options-list" });
+            expect(chatSelectionPanelOptionsList).toBeNull();
+        });
+    });
+    describe("The 'Add Friend' option...", () => {
+        test(`Should be present in the document if the value of the 'chatType'
+         prop is set to 'friends'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="friends"
+                />
+            ));
             const addFriendButton = screen.getByRole("listitem", { name: "add-friend-button" });
             expect(addFriendButton).toBeInTheDocument();
         });
-        test(`Should contain an option to create a new chat`, async () => {
-            await act(() => renderComponent());
+        test(`Should not be present in the document if the value of the
+         'chatType' prop is set to 'groups'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="groups"
+                />
+            ));
+            const addFriendButton = screen.queryByRole("listitem", { name: "add-friend-button" });
+            expect(addFriendButton).toBeNull();
+        });
+        test(`Should not be present in the document if the value of the
+         'chatType' prop is set to 'communities'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="communities"
+                />
+            ));
+            const addFriendButton = screen.queryByRole("listitem", { name: "add-friend-button" });
+            expect(addFriendButton).toBeNull();
+        });
+    });
+    describe("The 'Add Friend' option...", () => {
+        test(`Should be present in the document if the value of the 'chatType'
+         prop is set to 'friends'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="friends"
+                />
+            ));
             const createChatButton = screen.getByRole("listitem", { name: "create-chat-button" });
             expect(createChatButton).toBeInTheDocument();
+        });
+        test(`Should be present in the document if the value of the 'chatType'
+         prop is set to 'groups'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="groups"
+                />
+            ));
+            const createChatButton = screen.getByRole("listitem", { name: "create-chat-button" });
+            expect(createChatButton).toBeInTheDocument();
+        });
+        test(`Should not be present in the document if the value of the
+         'chatType' prop is set to 'communities'`, async () => {
+            await act(async () => render(
+                <ChatSelectionPanel
+                    chatType="communities"
+                />
+            ));
+            const createChatButton = screen.queryByRole("listitem", { name: "create-chat-button" });
+            expect(createChatButton).toBeNull();
         });
     });
     describe("The chat list...", () => {
