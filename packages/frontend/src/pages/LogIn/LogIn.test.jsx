@@ -18,7 +18,7 @@ const logInAPIMock = vi.fn(() => ({
     status: 200,
     message: "Log in attempt successful",
 }));
-vi.mock('./utils/logIn', async () => ({
+vi.mock('./utils/logInAPI', async () => ({
     default: () => logInAPIMock(),
 }));
 
@@ -139,7 +139,7 @@ describe("UI/DOM Testing...", () => {
             const logInButton = screen.getByRole("button", { name: "log-in-button" });
             expect(logInButton).toBeInTheDocument();
         });
-        test(`When clicked, should not invoke the 'logIn' API function if the
+        test(`When clicked, should not invoke the 'logInAPI' function if the
          Username and/or Password fields are invalid`, async () => {
             const user = userEvent.setup();
             const logInAPISpy = vi.spyOn(logInAPI, "default");
@@ -153,7 +153,7 @@ describe("UI/DOM Testing...", () => {
             await user.click(logInButton);
             expect(logInAPISpy).toHaveBeenCalledTimes(0);
         });
-        test(`When clicked, should invoke the 'logIn' API function if both the
+        test(`When clicked, should invoke the 'logInAPI' function if both the
          Username and Password fields are valid`, async () => {
             const user = userEvent.setup();
             const logInAPISpy = vi.spyOn(logInAPI, "default");
