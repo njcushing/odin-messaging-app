@@ -189,6 +189,56 @@ const createCirclesFieldUpdater = (state, setter, labelText, context, fieldName,
     return createOtherFieldContainer(state, setter, labelText, updater, input);
 }
 
+const createImageFieldUpdater = (state, setter, labelText, context, fieldName, updater) => {
+    const blob = new Blob([Buffer.from(state.currentValue)], { type: "image/png" });
+    const imgSrc = URL.createObjectURL(blob);
+
+    const input = (
+        <>
+        <img
+            className={styles["image-container"]}
+            src={imgSrc}
+        ></img>    
+        <label
+            className={styles[`browse-button`]}
+            aria-label="browse-images"
+            onClick={(e) => {
+                e.currentTarget.blur();
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.blur();
+            }}
+        >Browse
+            <input
+                className={styles[`image-input${state.error !== null ? "-error" : ""}`]}
+                id={fieldName}
+                name={fieldName}
+                type="file"
+                accept="image/*"
+                style={{ resize: "none" }}
+                onChange={(e) => {
+                    const file = new FileReader();
+                    file.readAsArrayBuffer(e.target.files[0]);
+                    file.onloadend = (e) => {
+                        if (e.target.error) return;
+                        const imgArray = Array.from(new Uint8Array(e.target.result));
+                        const validValue = state.validator(imgArray);
+                        setter({
+                            ...state,
+                            error: !validValue.status ? validValue.message.front : null,
+                            currentValue: validValue.status ? imgArray : state.currentValue,
+                        });
+                    }
+                }}
+                disabled={state.attemptingUpdate}
+                ref={state.inputRef}
+            ></input>
+        </label>
+        </>
+    );
+    return createOtherFieldContainer(state, setter, labelText, updater, input);
+}
+
 const FieldUpdater = ({
     labelText,
     fieldName,
@@ -220,6 +270,7 @@ const FieldUpdater = ({
             validator: validator,
             apiFunction: apiFunction,
             attemptingUpdate: false,
+            abortController: null,
             tooltip: { id: "", element: null },
             error: null,
         });
@@ -274,6 +325,9 @@ const FieldUpdater = ({
         case "circles":
             element = createCirclesFieldUpdater(field, setField, labelText, context, fieldName, updater);
             break;
+        case "image":
+            element = createImageFieldUpdater(field, setField, labelText, context, fieldName, updater);
+            break;
         default:
     }
 
@@ -317,6 +371,9 @@ FieldUpdater.propTypes = {
             })),
             widthPx: PropTypes.string,
             heightPx: PropTypes.string,
+        }),
+        PropTypes.shape({ // for images
+            type: "image",
         }),
     ]).isRequired,
     onUpdateHandler: PropTypes.func,

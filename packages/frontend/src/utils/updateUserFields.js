@@ -1,3 +1,4 @@
+import { encodeBase64 } from "bcryptjs";
 import saveTokenFromResponseJSON from "./saveTokenFromResponseJSON.js";
 
 export const displayName = async (value, abortController) => {
