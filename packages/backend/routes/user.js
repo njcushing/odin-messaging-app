@@ -5,6 +5,7 @@ import * as controller from "../controllers/userController.js";
 
 router.put("/preferences/displayName", controller.displayNamePut);
 router.put("/preferences/tagLine", controller.tagLinePut);
+router.put("/preferences/profileImage", controller.profileImagePut);
 router.put("/preferences/setStatus", controller.setStatusPut);
 router.put("/preferences/theme", controller.themePut);
 router.get("/self/:username", controller.userSelf);

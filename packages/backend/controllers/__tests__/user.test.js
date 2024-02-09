@@ -7,6 +7,7 @@ import { vi } from "vitest";
 import userRouter from "../../routes/user.js";
 
 import User from "../../models/user.js";
+import Image from "../../models/image.js";
 
 import mongoose from "mongoose";
 import initialiseMongoServer from "../../utils/dbConfigTesting.js";
@@ -418,7 +419,7 @@ describe("Route testing...", () => {
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
             mockProtectedRouteJWT(null, "Person1", "person1*");
-            await request(app).get(`/friend?first=0&last=1`).expect(400);
+            await request(app).get(`/friends?first=0&last=1`).expect(400);
         });
         test(`Should respond with status code 401 if the currently logged-in
          user is not found in the database`, async () => {
@@ -427,15 +428,15 @@ describe("Route testing...", () => {
                 "Person1",
                 "person1*"
             );
-            await request(app).get(`/friend?first=0&last=1`).expect(401);
+            await request(app).get(`/friends?first=0&last=1`).expect(401);
         });
         test(`Should respond with status code 200 if the user is found in
          the database`, async () => {
-            await request(app).get(`/friend?first=0&last=1`).expect(200);
+            await request(app).get(`/friends?first=0&last=1`).expect(200);
         });
         test(`Should respond with an array of friends`, async () => {
             await request(app)
-                .get(`/friend?first=0&last=1`)
+                .get(`/friends?first=0&last=1`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
@@ -454,7 +455,7 @@ describe("Route testing...", () => {
         test(`Should respond with a new token`, async () => {
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
-                .get(`/friend?first=0&last=1`)
+                .get(`/friends?first=0&last=1`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
@@ -937,6 +938,79 @@ describe("Route testing...", () => {
             await request(app)
                 .put(`/preferences/tagLine`)
                 .send({ tagLine: "Tag line" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(200)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (!data.hasOwnProperty("token")) {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+    });
+
+    describe("/user/preferences/profileImage PUT route...", () => {
+        test(`Should respond with status code 400 if the body object in the
+         request object does not contain the necessary information`, async () => {
+            vi.spyOn(validateUserFields, "profileImage").mockReturnValueOnce({
+                status: false,
+                message: "",
+            });
+            await request(app)
+                .put(`/preferences/profileImage`)
+                .send({ profileImage: "default" })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(null, "Person1", "person1*");
+            await request(app)
+                .put(`/preferences/profileImage`)
+                .send({ profileImage: new ArrayBuffer() })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(400);
+        });
+        test(`Should respond with status code 401 if the currently logged-in
+         user is not found in the database`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app)
+                .put(`/preferences/profileImage`)
+                .send({ profileImage: new ArrayBuffer() })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(401);
+        });
+        test(`Should respond with status code 401 if, when attempting to
+         update the currently logged-in user's fields, it cannot be found in the
+         database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            vi.spyOn(User, "findByIdAndUpdate").mockReturnValueOnce(null);
+            await request(app)
+                .put(`/preferences/profileImage`)
+                .send({ profileImage: new ArrayBuffer() })
+                .set("Content-Type", "application/json")
+                .set("Accept", "application/json")
+                .expect(401);
+        });
+        test(`Should respond with status code 200 if the user's profile image is
+         successfully updated`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .put(`/preferences/profileImage`)
+                .send({ profileImage: new ArrayBuffer() })
                 .set("Content-Type", "application/json")
                 .set("Accept", "application/json")
                 .expect(200)
