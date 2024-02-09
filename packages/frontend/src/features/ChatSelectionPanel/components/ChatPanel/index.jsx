@@ -4,6 +4,7 @@ import styles from "./index.module.css";
 
 import ProfileImage from "@/components/ProfileImage";
 import OptionButton from "@/components/OptionButton";
+import FriendSelectorPanel from "../FriendSelectorPanel";
 import Message from "../Message"
 import MessageBox from "../MessageBox";
 
@@ -11,6 +12,7 @@ import getChatFromAPI from "./utils/getChatFromAPI";
 import combineParticipantNames from "./utils/combineParticipantNames";
 
 const ChatPanel = () => {
+    const [addingFriendsToChat, setAddingFriendsToChat] = useState(false);
     const [chat, setChat] = useState(null);
     const [messageSubmissionErrors, setMessageSubmissionErrors] = useState([]);
 
@@ -56,7 +58,7 @@ const ChatPanel = () => {
                             heightPx={44}
                             fontSizePx={22}
                             borderStyle="circular"
-                            onClickHandler={() => {}}
+                            onClickHandler={() => { setAddingFriendsToChat(!addingFriendsToChat) }}
                         />
                         <OptionButton
                             text="call"
@@ -80,33 +82,45 @@ const ChatPanel = () => {
                         />
                     </ul>
                 </div>
-                <div className={styles["messages-container"]}>
-                    <ul
-                        className={styles["message-list"]}
-                        aria-label="chat-message-list"
-                    >
-                        {chat.messages && Array.isArray(chat.messages) && chat.messages.length > 0
-                        ?   chat.messages.map((message) => {
-                                return (
-                                    <li
-                                        aria-label="chat-message"
-                                        key={message._id}
-                                    ><Message
-                                        text={message.text}
-                                        name={message.author.name}
-                                        dateSent={message.dateSent}
-                                        imageSrc={message.author.imageSrc}
-                                        imageAlt={message.author.imageAlt}
-                                        position={message.author._id === "self" ? "right" : "left"}
-                                    /></li>
-                                )
-                            })
-                        :   <p
-                                className={styles["empty-chat-text"]}
-                                aria-label="empty-chat-text"
-                            >There are no messages in this chat yet!</p>}
-                    </ul>
-                </div>
+                {!addingFriendsToChat
+                ?   <div className={styles["messages-container"]}>
+                        <ul
+                            className={styles["message-list"]}
+                            aria-label="chat-message-list"
+                        >
+                            {chat.messages && Array.isArray(chat.messages) && chat.messages.length > 0
+                            ?   chat.messages.map((message) => {
+                                    return (
+                                        <li
+                                            aria-label="chat-message"
+                                            key={message._id}
+                                        ><Message
+                                            text={message.text}
+                                            name={message.author.name}
+                                            dateSent={message.dateSent}
+                                            imageSrc={message.author.imageSrc}
+                                            imageAlt={message.author.imageAlt}
+                                            position={message.author._id === "self" ? "right" : "left"}
+                                        /></li>
+                                    )
+                                })
+                            :   <p
+                                    className={styles["empty-chat-text"]}
+                                    aria-label="empty-chat-text"
+                                >There are no messages in this chat yet!</p>}
+                        </ul>
+                    </div>
+                :   <FriendSelectorPanel
+                        title="Add Friends to Chat"
+                        removeButtonText="Remove"
+                        addButtonText="Add"
+                        submitButtonText="Add Friends"
+                        noFriendsText="You have no friends you can add to this chat"
+                        onCloseHandler={() => setAddingFriendsToChat(false)}
+                        onSubmitHandler={() => {}}
+                        submissionErrors={[]}
+                    />
+                }
                 <div
                     className={styles["text-editor-container"]}
                 >
