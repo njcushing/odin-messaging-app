@@ -41,7 +41,6 @@ const AddFriendPanel = ({
         if (addingFriend) {
             (async () => {
                 const response = await addFriend(searchUsername);
-                console.log(response);
                 if (response.status < 400) setResultFound(null);
                 setResponseMessage(response.message);
                 setAddingFriend(false);
