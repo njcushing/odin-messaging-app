@@ -26,13 +26,17 @@ const Settings = ({
                         fieldName="theme"
                         initialValue={userSettings.theme}
                         validator={validateUserFields.theme}
-                        apiFunction={updateUserFields.theme}
+                        apiFunction={{
+                            func: updateUserFields.theme,
+                            args: [],
+                        }}
                         context={{
                             type: "circles",
                             options: themes.options().map((theme) => {
                                 return {
                                     name: theme.name,
                                     colour: theme.colour,
+                                    image: null,
                                     tooltipText: theme.name,
                                     tooltipPosition: "bottom",
                                 }

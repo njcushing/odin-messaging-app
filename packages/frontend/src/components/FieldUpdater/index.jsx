@@ -293,7 +293,11 @@ const FieldUpdater = ({
                     abortController: abortControllerNew,
                 });
                 (async () => {
-                    const response = await state.apiFunction(state.currentValue, state.abortController);
+                    const response = await state.apiFunction.func(
+                        state.currentValue,
+                        state.abortController,
+                        [...state.apiFunction.args]
+                    );
                     setter({
                         ...state,
                         abortController: null,
@@ -354,8 +358,11 @@ FieldUpdater.propTypes = {
         return;
     },
     validator: PropTypes.func.isRequired,
-    apiFunction: PropTypes.func.isRequired,
-    context: PropTypes.oneOf([
+    apiFunction: PropTypes.shape({
+        func: PropTypes.func.isRequired,
+        args: PropTypes.arrayOf(PropTypes.any),
+    }),
+    context: PropTypes.oneOfType([
         PropTypes.shape({ // 'text'-type input
             type: "text",
         }),
@@ -368,7 +375,7 @@ FieldUpdater.propTypes = {
             options: PropTypes.arrayOf(PropTypes.shape({
                 name: PropTypes.string,
                 colour: PropTypes.string,
-                image: null,
+                image: PropTypes.oneOf([PropTypes.array, PropTypes.number]),
                 tooltipText: PropTypes.string,
                 tooltipPosition: PropTypes.oneOf(["bottom", "top", "left", "right"]),
             })),

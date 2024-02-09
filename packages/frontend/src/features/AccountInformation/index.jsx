@@ -24,7 +24,10 @@ const AccountInformation = ({
                     fieldName="displayName"
                     initialValue={userInfo.displayName}
                     validator={validateUserFields.displayName}
-                    apiFunction={updateUserFields.displayName}
+                    apiFunction={{
+                        func: updateUserFields.displayName,
+                        args: [],
+                    }}
                     context={{ type: "text" }}
                     onUpdateHandler={() => onUpdateHandler()}
                 />
@@ -33,7 +36,10 @@ const AccountInformation = ({
                     fieldName="tagLine"
                     initialValue={userInfo.tagLine}
                     validator={validateUserFields.tagLine}
-                    apiFunction={updateUserFields.tagLine}
+                    apiFunction={{
+                        func: updateUserFields.tagLine,
+                        args: [],
+                    }}
                     context={{ type: "text" }}
                     onUpdateHandler={() => onUpdateHandler()}
                 />
@@ -42,7 +48,10 @@ const AccountInformation = ({
                     fieldName="status"
                     initialValue={userInfo.status}
                     validator={validateUserFields.status}
-                    apiFunction={updateUserFields.status}
+                    apiFunction={{
+                        func: updateUserFields.status,
+                        args: [],
+                    }}
                     context={{ type: "select", options: ["online", "away", "busy", "offline", null] }}
                     onUpdateHandler={() => onUpdateHandler()}
                 />
@@ -51,7 +60,10 @@ const AccountInformation = ({
                     fieldName="profileImage"
                     initialValue={userInfo.profileImage}
                     validator={validateUserFields.profileImage}
-                    apiFunction={updateUserFields.profileImage}
+                    apiFunction={{
+                        func: updateUserFields.profileImage,
+                        args: [],
+                    }}
                     context={{ type: "image" }}
                     onUpdateHandler={() => onUpdateHandler()}
                 />

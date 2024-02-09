@@ -115,6 +115,13 @@ const ChatsPanel = ({
                     })
                     setChatSelectedId(chatId);
                 }}
+                updatedChatImageHandler={() => {
+                    setChatsList({
+                        ...chatsList,
+                        currentValue: [],
+                        attempting: true,
+                    })
+                }}
                 key={chatSelectedId}
             />
         </div>
