@@ -9,12 +9,16 @@ import Message from './index.jsx'
 
 const renderComponent = (
     text = "Sample Text",
+    name = "My Name",
+    dateSent = "2023-01-01T00:00:00",
     imageSrc = "image_src",
     imageAlt = "image alt",
     position = "right",
 ) => {
     render(<Message
         text={text}
+        name={name}
+        dateSent={dateSent}
         imageSrc={imageSrc}
         imageAlt={imageAlt}
         position={position}
@@ -38,6 +42,13 @@ describe("UI/DOM Testing...", () => {
             renderComponent();
             const messageText = screen.getByText("Sample Text");
             expect(messageText).toBeInTheDocument();
+        });
+    });
+    describe("The <p> element displaying the message author name and date...", () => {
+        test(`Should be present in the document`, () => {
+            renderComponent();
+            const nameAndDate = screen.getByText("My Name at 01/01/2023, 00:00:00");
+            expect(nameAndDate).toBeInTheDocument();
         });
     });
 });
