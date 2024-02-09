@@ -50,10 +50,6 @@
     align-items: center;
 }
 
-.status-indicator {
-    grid-area: 1 / 1 / -1 / 2;
-}
-
 .texts {
     grid-area: 1 / 2 / -1 / -1;
 

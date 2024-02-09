@@ -31,15 +31,10 @@ const ChatOption = ({
                 <ProfileImage
                     src={imageSrc}
                     alt={imageAlt}
+                    status={status}
                     sizePx={50}
                 />
             </div>
-            {status !== null
-            ?   <div
-                    className={styles["status-indicator"]}
-                    aria-label="status-indicator"
-                ></div>
-            :   null}
             <div className={styles["texts"]}>
                 {name.length > 0
                 ?   <h4

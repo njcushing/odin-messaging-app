@@ -61,27 +61,6 @@ describe("UI/DOM Testing...", () => {
             expect(callback).toHaveBeenCalled();
         });
     });
-    describe("The element displaying the status indicator...", () => {
-        test(`Should not be present in the document if the provided 'status'
-         prop's value is null`, () => {
-            renderComponent(
-                "Test Name",
-                "Test tag line",
-                null,
-                "image_src",
-                "image alt",
-                () => {},
-            );
-            const statusIndicator = screen.queryByRole("generic", { name: "status-indicator" });
-            expect(statusIndicator).toBeNull();
-        });
-        test(`Should be present in the document if the provided 'status' prop's
-         value is not null`, () => {
-            renderComponent();
-            const statusIndicator = screen.queryByRole("generic", { name: "status-indicator" });
-            expect(statusIndicator).toBeInTheDocument();
-        });
-    });
     describe("The element displaying the name...", () => {
         test(`Should have the same textContent as the provided 'username' prop's
             value`, () => {
