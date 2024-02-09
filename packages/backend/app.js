@@ -101,6 +101,7 @@ import * as routes from "./routes/index.js";
 app.use("/", routes.index);
 app.use("/log-in", routes.login);
 app.use("/user", routes.user);
+app.use("/chat", routes.chat);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
