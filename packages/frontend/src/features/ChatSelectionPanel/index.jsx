@@ -8,8 +8,12 @@ import CreateChatPanel from "./components/CreateChatPanel";
 import FriendSelectorPanel from "./components/FriendSelectorPanel";
 import ChatOption from "./components/ChatOption";
 import ChatPanel from "./components/ChatPanel";
+import ProfileImage from "@/components/ProfileImage";
 
 import * as getChatListFromAPI from "./utils/getChatListFromAPI.js";
+import getFriendRequests from "./utils/getFriendRequests.js";
+import acceptFriendRequest from "./utils/acceptFriendRequest";
+import declineFriendRequest from "./utils/declineFriendRequest";
 
 const ChatSelectionPanel = ({
     chatType,
@@ -18,6 +22,9 @@ const ChatSelectionPanel = ({
     const [addingFriend, setAddingFriend] = useState(false);
     const [creatingChat, setCreatingChat] = useState(false);
     const [creatingGroup, setCreatingGroup] = useState(false);
+    const [viewingFriendRequests, setViewingFriendRequests] = useState(false);
+    const [friendRequests, setFriendRequests] = useState([]);
+    const [friendRequestsAC, setFriendRequestsAC] = useState(null);
 
     useEffect(() => {
         (async () => {
@@ -37,7 +44,28 @@ const ChatSelectionPanel = ({
             }
             setChatList(chatListNew);
         })();
+
+        return () => {
+            if (friendRequestsAC) friendRequestsAC.abort;
+        }
     }, [chatType]);
+
+    useEffect(() => {
+        if (friendRequestsAC) friendRequestsAC.abort;
+        if (viewingFriendRequests) {
+            const friendRequestsACNew = new AbortController();
+            setFriendRequestsAC(friendRequestsACNew);
+            (async () => {
+                const friendRequestsNew = await getFriendRequests(friendRequestsACNew);
+                setFriendRequests(friendRequestsNew.friendRequests);
+            })();
+        } else {
+            setFriendRequestsAC(null);
+        }
+        return () => {
+            if (friendRequestsAC) friendRequestsAC.abort;
+        }
+    }, [viewingFriendRequests]);
 
     let rightPanelContent = null;
     if (addingFriend) {
@@ -84,14 +112,17 @@ const ChatSelectionPanel = ({
                 <h3
                     className={styles["chat-list-title"]}
                     aria-label="chat-list-title"
-                >{chatType}</h3>
+                >{
+                    !viewingFriendRequests ? chatType : "Friend Requests"
+                }</h3>
                 {chatType === "friends" || chatType === "groups"
                 ?   <ul
                         className={styles["chat-selection-panel-options-list"]}
                         aria-label="chat-selection-panel-options-list"
                     >
                         {chatType === "friends"
-                        ?   <li
+                        ?   <>
+                            <li
                                 className={styles["add-friend-button"]}
                                 aria-label="add-friend-button"
                             >
@@ -110,6 +141,43 @@ const ChatSelectionPanel = ({
                                     }}
                                 />
                             </li>
+                            {viewingFriendRequests
+                            ?   <li
+                                    className={styles["view-friend-chats-button"]}
+                                    aria-label="view-friend-chats-button"
+                                >
+                                    <OptionButton
+                                        text="chat"
+                                        tooltipText="View Chats"
+                                        tooltipPosition="bottom"
+                                        widthPx={50}
+                                        heightPx={50}
+                                        fontSizePx={24}
+                                        borderStyle="circular"
+                                        onClickHandler={() => {
+                                            setViewingFriendRequests(!viewingFriendRequests);
+                                        }}
+                                    />
+                                </li>
+                            :   <li
+                                    className={styles["view-friend-requests-button"]}
+                                    aria-label="view-friend-requests-button"
+                                >
+                                    <OptionButton
+                                        text="how_to_reg"
+                                        tooltipText="View Friend Requests"
+                                        tooltipPosition="bottom"
+                                        widthPx={50}
+                                        heightPx={50}
+                                        fontSizePx={24}
+                                        borderStyle="circular"
+                                        onClickHandler={() => {
+                                            setViewingFriendRequests(!viewingFriendRequests);
+                                        }}
+                                    />
+                                </li>
+                            }
+                            </>
                         :   null}
                         <li
                             className={styles["create-chat-button"]}
@@ -151,26 +219,82 @@ const ChatSelectionPanel = ({
                         </li>
                     </ul>
                 :   null}
-                <ul
-                    className={styles["chat-list-options"]}
-                    aria-label="chat-list-options"
-                >
-                    {chatList.map((chatOption, i) => {
-                        return (
-                            <li
-                                aria-label="chat-option"
-                                key={i}
-                            ><ChatOption
-                                name={chatOption.name}
-                                tagLine={chatOption.tagLine}
-                                status={chatOption.status}
-                                imageSrc={chatOption.imageSrc}
-                                imageAlt={chatOption.imageAlt}
-                                onClickHandler={() => {}}
-                            /></li>
-                        );
-                    })}
-                </ul>
+                {!viewingFriendRequests
+                ?   <ul
+                        className={styles["chat-list-options"]}
+                        aria-label="chat-list-options"
+                    >
+                        {chatList.map((chatOption, i) => {
+                            return (
+                                <li
+                                    aria-label="chat-option"
+                                    key={i}
+                                ><ChatOption
+                                    name={chatOption.name}
+                                    tagLine={chatOption.tagLine}
+                                    status={chatOption.status}
+                                    imageSrc={chatOption.imageSrc}
+                                    imageAlt={chatOption.imageAlt}
+                                    onClickHandler={() => {}}
+                                /></li>
+                            );
+                        })}
+                    </ul>
+                :   <ul
+                        className={styles["friend-request-list"]}
+                        aria-label="friend-request-list"
+                    >
+                        {friendRequests.map((request) => {
+                            return (
+                                <li
+                                    className={styles["friend-request"]}
+                                    aria-label="friend-request"
+                                    key={request._id}
+                                >
+                                    <div className={styles["profile-image"]}>
+                                        <ProfileImage
+                                            src={""}
+                                            alt={""}
+                                            sizePx={50}
+                                        />
+                                    </div>
+                                    <div className={styles["friend-request-right-side-content"]}>
+                                        <p
+                                            className={styles["friend-request-username"]}
+                                            aria-label="friend-request-username"
+                                        >{request.username}</p>
+                                        <div className={styles["friend-request-options"]}>
+                                            <button
+                                                className={styles["accept-friend-request-button"]}
+                                                aria-label="accept-friend-request-button"
+                                                onClick={(e) => {
+                                                    acceptFriendRequest(request.username);
+                                                    e.currentTarget.blur();
+                                                    e.preventDefault();
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.blur();
+                                                }}
+                                            >Accept</button>
+                                            <button
+                                                className={styles["decline-friend-request-button"]}
+                                                aria-label="decline-friend-request-button"
+                                                onClick={(e) => {
+                                                    declineFriendRequest(request.username);
+                                                    e.currentTarget.blur();
+                                                    e.preventDefault();
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.blur();
+                                                }}
+                                            >Decline</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                }
             </div>
             {rightPanelContent}
         </div>
