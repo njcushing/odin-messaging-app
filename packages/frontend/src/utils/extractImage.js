@@ -8,10 +8,10 @@ export const fromUser = (user) => {
     if (user && user.constructor === Object) {
         if ("preferences" in user) {
             const preferences = user.preferences;
-            if (preferences.constructor === Object) {
+            if (preferences && preferences.constructor === Object) {
                 if ("profileImage" in preferences) {
                     const profileImage = preferences.profileImage;
-                    if (profileImage.constructor === Object) {
+                    if (profileImage && profileImage.constructor === Object) {
                         if ("img" in profileImage) {
                             imageExtracted.src = profileImage.img.data.data;
                             found = true;
@@ -37,7 +37,7 @@ export const fromChat = (chat) => {
     if (chat && chat.constructor === Object) {
         if ("image" in chat) {
             const image = chat.image;
-            if (image.constructor === Object) {
+            if (image && image.constructor === Object) {
                 if ("img" in image) {
                     imageExtracted.src = image.img.data.data;
                     found = true;
@@ -57,7 +57,7 @@ export const fromMessage = (message) => {
     if (message && message.constructor === Object) {
         if ("image" in message) {
             const image = message.image;
-            if (image.constructor === Object) {
+            if (image && image.constructor === Object) {
                 if ("img" in image) {
                     imageExtracted.src = image.img.data.data;
                     found = true;
