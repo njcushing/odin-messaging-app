@@ -8,7 +8,7 @@ import { BrowserRouter } from "react-router-dom"
 import LogIn from './index.jsx'
 
 import * as logInAPI from './utils/logInAPI.js'
-import * as validateFields from './utils/validateFields.js'
+import * as validateFields from "../../../../../utils/validateUserFields.js"
 
 // For 'Not implemented: navigation' error 
 let assignMock = vi.fn();
@@ -36,8 +36,8 @@ const password = vi.fn(() => ({
     status: true,
     message: "Valid Password.",
 }));
-vi.mock('./utils/validateFields', async () => {
-    const actual = await vi.importActual("./utils/validateFields");
+vi.mock("../../../../../utils/validateUserFields.js", async () => {
+    const actual = await vi.importActual("../../../../../utils/validateUserFields.js");
     return {
         ...actual,
         username: () => username(),
