@@ -5,7 +5,7 @@ import styles from "./index.module.css";
 import OptionButton from "@/components/OptionButton";
 import ProfileImage from "@/components/ProfileImage";
 
-import getFriendsList from "./utils/getFriendsList";
+import getFriendsList from "../../utils/getFriendsList";
 
 const CreateChatPanel = ({
     onCloseHandler,
