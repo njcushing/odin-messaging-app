@@ -11,8 +11,8 @@ router.get("/self/:username", controller.userSelf);
 router.get("/self", controller.getSelf);
 router.get("/friends/can-be-added/:username", controller.friendCanBeAdded);
 router.get("/friends/:username", controller.friendGet);
-router.post("/friends", controller.friendsPost);
 router.get("/friends", controller.friendsGet);
+router.post("/friends", controller.friendsPost);
 router.put(
     "/friend-requests/:username/accept",
     controller.friendRequestsAccept
@@ -22,7 +22,7 @@ router.put(
     controller.friendRequestsDecline
 );
 router.get("/friend-requests", controller.friendRequestsGet);
-router.get("/chats/:page", controller.chatsGet);
+router.get("/chats", controller.chatsGet);
 router.get("/:username", controller.userGet);
 router.post("/", controller.userPost);
 

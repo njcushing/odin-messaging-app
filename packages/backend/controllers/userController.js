@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -162,6 +162,50 @@ const validators = {
                 if (value < 0) {
                     throw new Error(
                         "'page' field (Number) must be greater than or equal to 0."
+                    );
+                }
+                return value;
+            }),
+    },
+    query: {
+        first: query("first")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                if (isNaN(value)) {
+                    throw new Error(
+                        "'first' field (Number) must be a valid numeric value."
+                    );
+                }
+                value = parseInt(value);
+                if (!Number.isInteger(value)) {
+                    throw new Error(
+                        "'first' field (Number) must be an integer."
+                    );
+                }
+                if (value < 0) {
+                    throw new Error(
+                        "'first' field (Number) must be greater than or equal to 0."
+                    );
+                }
+                return value;
+            }),
+        last: query("last")
+            .trim()
+            .custom((value, { req, loc, path }) => {
+                if (isNaN(value)) {
+                    throw new Error(
+                        "'last' field (Number) must be a valid numeric value."
+                    );
+                }
+                value = parseInt(value);
+                if (!Number.isInteger(value)) {
+                    throw new Error(
+                        "'last' field (Number) must be an integer."
+                    );
+                }
+                if (value < 0) {
+                    throw new Error(
+                        "'last' field (Number) must be greater than or equal to 0."
                     );
                 }
                 return value;
@@ -457,11 +501,21 @@ export const friendCanBeAdded = [
 
 export const friendsGet = [
     protectedRouteJWT,
+    validators.query.first,
+    validators.query.last,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
-        let user = await User.findById(req.user._id)
-            .select("friends")
+        const { first, last } = req.query;
+
+        const user = await User.findOne(
+            { _id: req.user._id },
+            {
+                friends: {
+                    $slice: [Math.max(0, first), Math.max(0, last - first)],
+                },
+            }
+        )
             .populate({
                 path: "friends.user",
                 select: `
@@ -617,31 +671,37 @@ export const friendsPost = [
 
 export const friendRequestsGet = [
     protectedRouteJWT,
+    validators.query.first,
+    validators.query.last,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
-        let user = await User.findById(req.user._id)
-            .select("friendRequests")
+
+        const { first, last } = req.query;
+
+        const user = await User.findOne(
+            { _id: req.user._id },
+            {
+                friendRequests: {
+                    $slice: [Math.max(0, first), Math.max(0, last - first)],
+                },
+            }
+        )
             .populate({
                 path: "friendRequests",
                 select: `
-                    _id
-                    username
-                    preferences.tagLine
-                `,
+                _id
+                username
+                preferences.tagLine
+            `,
             })
             .exec();
-        if (user === null) {
-            selfNotFound(res, next, req.user._id);
-        } else {
-            const token = await generateToken(
-                req.user.username,
-                req.user.password
-            );
-            sendResponse(res, 200, "Friend requests found.", {
-                friendRequests: [...user.friendRequests],
-                token: token,
-            });
-        }
+        if (user === null) return selfNotFound(res, next, req.user._id);
+
+        const token = await generateToken(req.user.username, req.user.password);
+        sendResponse(res, 200, "Friend requests found.", {
+            friendRequests: [...user.friendRequests],
+            token: token,
+        });
     }),
 ];
 
@@ -793,27 +853,41 @@ export const friendRequestsDecline = [
 
 export const chatsGet = [
     protectedRouteJWT,
-    validators.param.page,
+    validators.query.first,
+    validators.query.last,
     asyncHandler(async (req, res, next) => {
         validateUserId(res, next, req.user._id);
 
-        const page = req.params.page;
+        const { first, last } = req.query;
 
-        const user = await User.findOne(
-            { _id: req.user._id },
+        const user = await User.aggregate([
+            { $match: { _id: req.user._id } },
             {
-                chats: {
-                    $slice: [
-                        Math.max(0, (page - 1) * 20),
-                        Math.max(0, page * 20),
-                    ],
+                $lookup: {
+                    from: Chat.collection.name,
+                    localField: "chats",
+                    foreignField: "_id",
+                    as: "chatsInfo",
                 },
-            }
-        ).exec();
-        if (user === null) return selfNotFound(res, next, req.user._id);
+            },
+            { $unwind: "$chatsInfo" },
+            { $sort: { "chatsInfo.updatedAt": -1 } },
+            { $group: { _id: "$_id", chatsInfo: { $push: "$chatsInfo" } } },
+            {
+                $project: {
+                    chatsInfo: {
+                        $slice: [
+                            "$chatsInfo",
+                            Math.max(0, first),
+                            Math.max(0, last - first),
+                        ],
+                    },
+                },
+            },
+        ]);
 
         const chats = await Chat.find(
-            { _id: { $in: user.chats } },
+            { _id: { $in: user[0].chatsInfo } },
             { messages: { $slice: -1 } }
         )
             .sort({ updatedAt: -1 })
