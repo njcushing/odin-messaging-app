@@ -6,16 +6,14 @@ const protectedRouteJWT = (req, res, next) => {
         "jwt",
         { session: false },
         (err, success, options) => {
-            if (err) {
+            if (success) {
+                return next();
+            } else if (options && options.message) {
+                res.redirect(401, "/log-in");
+            } else {
                 return next(
                     createError(500, `Something went wrong with your request.`)
                 );
-            }
-            if (success) {
-                return next();
-            }
-            if (options && options.message) {
-                return next(createError(401, options.message));
             }
         }
     )(req, res, next);
