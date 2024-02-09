@@ -45,9 +45,10 @@ const initialiseMongoServer = async () => {
         users[index] = user;
     };
 
-    const newChat = async (index, _id, participants) => {
+    const newChat = async (index, _id, type, participants) => {
         const chat = new Chat({
             _id: _id,
+            type: type,
             participants: participants,
         });
         await chat.save();
@@ -80,11 +81,11 @@ const initialiseMongoServer = async () => {
                 "person1*",
                 [
                     {
-                        _id: userIds[4],
+                        user: userIds[4],
                         chat: chatIds[4],
                     },
                     {
-                        _id: userIds[1],
+                        user: userIds[1],
                         chat: chatIds[0],
                     },
                 ],
@@ -98,11 +99,11 @@ const initialiseMongoServer = async () => {
                 "person2*",
                 [
                     {
-                        _id: userIds[0],
+                        user: userIds[0],
                         chat: chatIds[0],
                     },
                     {
-                        _id: userIds[2],
+                        user: userIds[2],
                         chat: chatIds[1],
                     },
                 ],
@@ -116,11 +117,11 @@ const initialiseMongoServer = async () => {
                 "person3*",
                 [
                     {
-                        _id: userIds[1],
+                        user: userIds[1],
                         chat: chatIds[1],
                     },
                     {
-                        _id: userIds[3],
+                        user: userIds[3],
                         chat: chatIds[2],
                     },
                 ],
@@ -134,11 +135,11 @@ const initialiseMongoServer = async () => {
                 "person4*",
                 [
                     {
-                        _id: userIds[2],
+                        user: userIds[2],
                         chat: null,
                     },
                     {
-                        _id: userIds[4],
+                        user: userIds[4],
                         chat: chatIds[3],
                     },
                 ],
@@ -152,11 +153,11 @@ const initialiseMongoServer = async () => {
                 "person5*",
                 [
                     {
-                        _id: userIds[3],
+                        user: userIds[3],
                         chat: new mongoose.Types.ObjectId(),
                     },
                     {
-                        _id: userIds[0],
+                        user: userIds[0],
                         chat: chatIds[4],
                     },
                 ],
@@ -167,23 +168,23 @@ const initialiseMongoServer = async () => {
 
     const createChats = async () => {
         await Promise.all([
-            newChat(0, chatIds[0], [
+            newChat(0, chatIds[0], "individual", [
                 { user: userIds[0] },
                 { user: userIds[1] },
             ]),
-            newChat(1, chatIds[1], [
+            newChat(1, chatIds[1], "individual", [
                 { user: userIds[1] },
                 { user: userIds[2] },
             ]),
-            newChat(2, chatIds[2], [
+            newChat(2, chatIds[2], "individual", [
                 { user: userIds[2] },
                 { user: userIds[3] },
             ]),
-            newChat(3, chatIds[3], [
+            newChat(3, chatIds[3], "individual", [
                 { user: userIds[3] },
                 { user: userIds[4] },
             ]),
-            newChat(4, chatIds[4], [
+            newChat(4, chatIds[4], "individual", [
                 { user: userIds[4] },
                 { user: userIds[0] },
             ]),
