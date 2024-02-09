@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/user.js";
 
 import sendResponse from "../utils/sendResponse.js";
-import checkBodyValidationError from "../utils/checkBodyValidationError.js";
+import checkRequestValidationError from "../utils/checkRequestValidationError.js";
 import protectedRouteJWT from "../utils/protectedRouteJWT.js";
 import generateToken from "../utils/generateToken.js";
 import {
@@ -84,9 +84,34 @@ const userPostValidateFields = [
         .escape(),
 ];
 
+export const userGet = [
+    param("username", "'username' parameter (String) must not be empty")
+        .trim()
+        .isLength({ min: 1 })
+        .escape(),
+    checkRequestValidationError,
+    asyncHandler(async (req, res, next) => {
+        let user = await User.findOne({ username: req.params.username })
+            .select("_id username preferences")
+            .exec();
+        if (user === null) {
+            userNotFound(res, next, req.param.username);
+        } else {
+            const extractUserFields = {
+                username: user.username,
+                preferences: {
+                    displayName: user.preferences.displayName,
+                    tagLine: user.preferences.tagLine,
+                },
+            };
+            sendResponse(res, 200, "User found.", { user: extractUserFields });
+        }
+    }),
+];
+
 export const userPost = [
     userPostValidateFields,
-    checkBodyValidationError,
+    checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
             if (err) {

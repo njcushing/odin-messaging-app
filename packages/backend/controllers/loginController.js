@@ -3,7 +3,7 @@ import { body } from "express-validator";
 import jwt from "jsonwebtoken";
 
 import sendResponse from "../utils/sendResponse.js";
-import checkBodyValidationError from "../utils/checkBodyValidationError.js";
+import checkRequestValidationError from "../utils/checkRequestValidationError.js";
 import {
     validateUsername,
     validatePassword,
@@ -37,7 +37,7 @@ const validateFields = [
 
 export const loginPost = [
     validateFields,
-    checkBodyValidationError,
+    checkRequestValidationError,
     asyncHandler(async (req, res, next) => {
         const [status, user, message] = await validateUserCredentials(
             req.body.username,
