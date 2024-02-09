@@ -21,17 +21,19 @@ const FriendsPanel = ({
 
     const [friendsList, setFriendsList] = useState({
         currentValue: [],
-        abortController: null,
+        abortController: new AbortController(),
         attempting: false,
         appending: false,
     });
 
     const [friendRequests, setFriendRequests] = useState({
         currentValue: [],
-        abortController: null,
+        abortController: new AbortController(),
         attempting: false,
         appending: false,
     });
+
+    const [addingFriend, setAddingFriend] = useState(addingFriendDefault);
 
     useEffect(() => {
         if (friendsList.abortController) friendsList.abortController.abort;
@@ -89,8 +91,6 @@ const FriendsPanel = ({
         }
     }, [friendRequests.attempting, friendRequests.appending]);
 
-    const [addingFriend, setAddingFriend] = useState(addingFriendDefault);
-
     useEffect(() => {
         switch (listViewing) {
             case "requests":
@@ -111,40 +111,6 @@ const FriendsPanel = ({
                 });
         }
     }, [listViewing]);
-
-    const loadMoreButton = (list) => {
-        <button
-            className={styles["load-more-button"]}
-            aria-label="load-more"
-            onClick={(e) => {
-                if (list === "requests") {
-                    setFriendRequests({
-                        ...friendRequests,
-                        appending: true,
-                    });
-                }
-                if (list === "friends") {
-                    setFriendsList({
-                        ...friendsList,
-                        appending: true,
-                    });
-                }
-                e.currentTarget.blur();
-                e.preventDefault();
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.blur();
-            }}
-        >{!chatsList.appending
-        ?   "Load More"
-        :   <div className={styles["load-more-button-waiting-wheel-container"]}>
-                <div
-                    className={styles["load-more-button-waiting-wheel"]}
-                    aria-label="waiting"
-                ></div>
-            </div>
-        }</button>
-    }
 
     let title, optionsList;
     switch(listViewing) {
@@ -276,11 +242,11 @@ const FriendsPanel = ({
                 >
                     <li
                         className={styles["add-friend-button"]}
-                        aria-label="add-friend-button"
                         key="add-friend-button"
                     >
                         <OptionButton
                             text="person_add"
+                            label="add-friend-button"
                             tooltipText="Add Friend"
                             tooltipPosition="bottom"
                             widthPx={50}
@@ -294,7 +260,6 @@ const FriendsPanel = ({
                     </li>
                     <li
                         className={styles["list-viewing-button"]}
-                        aria-label="list-viewing-button"
                         key="list-viewing-button"
                     >
                         <OptionButton
@@ -302,6 +267,7 @@ const FriendsPanel = ({
                                 "people" :
                                 "how_to_reg"
                             }
+                            label="list-viewing-button"
                             tooltipText={listViewing === "friends" ?
                                 "View Friend Requests" :
                                 "View Friends"

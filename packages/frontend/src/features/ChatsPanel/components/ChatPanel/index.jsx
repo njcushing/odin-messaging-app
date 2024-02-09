@@ -572,6 +572,7 @@ const ChatPanel = ({
                         >
                             <OptionButton
                                 text="person_add"
+                                label="add person"
                                 tooltipText="Add Person"
                                 tooltipPosition="bottom"
                                 widthPx={44}
@@ -582,6 +583,7 @@ const ChatPanel = ({
                             />
                             <OptionButton
                                 text="call"
+                                label="call"
                                 tooltipText="Call"
                                 tooltipPosition="bottom"
                                 widthPx={44}
@@ -592,6 +594,7 @@ const ChatPanel = ({
                             />
                             <OptionButton
                                 text="videocam"
+                                label="call with video"
                                 tooltipText="Video Call"
                                 tooltipPosition="bottom"
                                 widthPx={44}
