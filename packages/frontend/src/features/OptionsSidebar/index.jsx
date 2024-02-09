@@ -40,7 +40,10 @@ const OptionsSidebar = ({
                     text="logout"
                     tooltipText="Log Out"
                     tooltipPosition="right"
-                    onClickHandler={() => onOptionSelect("log-out")}
+                    onClickHandler={() => {
+                        localStorage.removeItem("odin-messaging-app-auth-token");
+                        window.location.href = "/log-in";
+                    }}
                 />
             </div>
         </div>
