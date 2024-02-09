@@ -11,9 +11,24 @@ const OptionButton = ({
     widthPx,
     heightPx,
     fontSizePx,
+    borderStyle,
     onClickHandler,
 }) => {
     const [tooltipElement, setTooltipElement] = useState(null);
+
+    let borderRadius;
+    switch (borderStyle) {
+        case "rectangular":
+            borderRadius = `0rem`;
+            break;
+        case "circular":
+            borderRadius = `9999rem`;
+            break;
+        case "rounded":
+        default:
+            borderRadius = `0.2rem`;
+            break;
+    }
 
     return (
         <div
@@ -43,6 +58,8 @@ const OptionButton = ({
                 setTooltipElement(null);
             }}
             style={{
+                borderRadius: borderRadius,
+
                 width: `${widthPx}px`,
                 height: `${heightPx}px`,
             }}
@@ -66,6 +83,7 @@ OptionButton.propTypes = {
     widthPx: PropTypes.number,
     heightPx: PropTypes.number,
     fontSizePx: PropTypes.number,
+    borderStyle: PropTypes.oneOf(["rectangular", "rounded", "circular"]),
     onClickHandler: PropTypes.func,
 }
 
@@ -74,6 +92,7 @@ OptionButton.defaultProps = {
     widthPx: 64,
     heightPx: 64,
     fontSizePx: 32,
+    borderStyle: "rounded",
     onClickHandler: () => {},
 }
 
