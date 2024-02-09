@@ -69,8 +69,10 @@ const initialiseMongoServer = async () => {
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
         new mongoose.Types.ObjectId(),
+        new mongoose.Types.ObjectId(),
     ];
 
+    const mockChatId = new mongoose.Types.ObjectId();
     const createUsers = async () => {
         await Promise.all([
             newUser(
@@ -89,6 +91,7 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[0],
                     },
                 ],
+                [chatIds[4], chatIds[0], chatIds[5]],
                 [userIds[2]]
             ),
             newUser(
@@ -107,6 +110,7 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[1],
                     },
                 ],
+                [chatIds[0], chatIds[1], chatIds[5]],
                 [userIds[3]]
             ),
             newUser(
@@ -125,6 +129,7 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[2],
                     },
                 ],
+                [chatIds[1], chatIds[2], chatIds[5]],
                 [userIds[4]]
             ),
             newUser(
@@ -143,6 +148,7 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[3],
                     },
                 ],
+                [chatIds[3]],
                 [userIds[0]]
             ),
             newUser(
@@ -161,6 +167,7 @@ const initialiseMongoServer = async () => {
                         chat: chatIds[4],
                     },
                 ],
+                [mockChatId, chatIds[4]],
                 [userIds[1]]
             ),
         ]);
@@ -187,6 +194,11 @@ const initialiseMongoServer = async () => {
             newChat(4, chatIds[4], "individual", [
                 { user: userIds[4] },
                 { user: userIds[0] },
+            ]),
+            newChat(5, chatIds[5], "group", [
+                { user: userIds[0] },
+                { user: userIds[1] },
+                { user: userIds[2] },
             ]),
         ]);
     };
