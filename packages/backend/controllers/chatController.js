@@ -12,24 +12,30 @@ import generateToken from "../utils/generateToken.js";
 
 const validateUserId = (res, next, userId) => {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return next(sendResponse(res, 400, "User credentials are invalid."));
+        return next(
+            sendResponse(res, 400, `User credentials are invalid: ${userId}`)
+        );
     }
 };
 
 const validateChatId = (res, next, chatId) => {
     if (!mongoose.Types.ObjectId.isValid(chatId)) {
         return next(
-            sendResponse(res, 400, "Provided chat id is not a valid id.")
+            sendResponse(
+                res,
+                400,
+                `Provided chat id is not a valid id: ${chatId}`
+            )
         );
     }
 };
 
 const userNotFound = (res, userId) => {
-    return sendResponse(res, 404, "User not found in database.");
+    return sendResponse(res, 404, `User not found in database: ${userId}`);
 };
 
 const chatNotFound = (res, chatId) => {
-    return sendResponse(res, 404, "Chat not found in database.");
+    return sendResponse(res, 404, `Chat not found in database: ${chatId}`);
 };
 
 const validators = {
@@ -62,31 +68,94 @@ export const chatGet = [
         let user = await User.findById(req.user._id).exec();
         if (user === null) return userNotFound(res, next, req.user._id);
 
-        validateChatId(res, next, req.params.chatId);
-        let chat = await Chat.findById(req.params.chatId);
-        if (chat === null) return chatNotFound(res, next, req.params.chatId);
+        validateUserId(res, next, req.params.userId);
+        let friend = await User.findById(req.params.userId);
+        if (friend === null) return userNotFound(res, next, req.params.userId);
 
         const token = await generateToken(req.user.username, req.user.password);
 
-        if (!user.chats.includes(req.params.chatId.toString())) {
-            sendResponse(
-                res,
-                401,
-                "Currently logged-in user is not authorised to view this chat.",
-                {
-                    token: token,
-                    chat: null,
-                }
-            );
+        // Check if chat exists
+        const [link1, link2] = [
+            `${user._id.toString()}${friend._id.toString()}`,
+            `${friend._id.toString()}${user._id.toString()}`,
+        ];
+        let chat;
+        chat = await Chat.findOne({ linkId: link1 });
+        if (chat === null) await Chat.findOne({ linkId: link2 });
+        if (chat === null) {
+            sendResponse(res, 404, "Chat not found.", {
+                chat: null,
+                token: token,
+            });
         } else {
             sendResponse(res, 200, "Chat found.", {
-                token: token,
                 chat: chat,
+                token: token,
             });
         }
     }),
 ];
 
+export const chatPost = [
+    protectedRouteJWT,
+    asyncHandler(async (req, res, next) => {
+        validateUserId(res, next, req.user._id);
+        let user = await User.findById(req.user._id).exec();
+        if (user === null) return userNotFound(res, next, req.user._id);
+
+        validateUserId(res, next, req.params.userId);
+        let friend = await User.findById(req.params.userId);
+        if (friend === null) return userNotFound(res, next, req.params.userId);
+
+        const token = await generateToken(req.user.username, req.user.password);
+
+        // Check if chat already exists
+        const [link1, link2] = [
+            `${user._id.toString()}${friend._id.toString()}`,
+            `${friend._id.toString()}${user._id.toString()}`,
+        ];
+        let chat;
+        chat = await Chat.findOne({ linkId: link1 });
+        if (chat === null) await Chat.findOne({ linkId: link2 });
+        if (chat !== null) {
+            sendResponse(res, 409, "This chat already exists.", {
+                token: token,
+                chat: null,
+            });
+        } else {
+            // Create and save new chat
+            const chat = new Chat({
+                linkId: `${user._id.toString()}${friend._id.toString()}`,
+            });
+            await chat
+                .save()
+                .then(async (chat) => {
+                    sendResponse(
+                        res,
+                        201,
+                        `Chat successfully created at: ${chat._id}.`,
+                        {
+                            chat: chat,
+                            token: token,
+                        }
+                    );
+                })
+                .catch((err) => {
+                    sendResponse(
+                        res,
+                        500,
+                        "Chat could not be created.",
+                        { token: token },
+                        err
+                    );
+                });
+        }
+    }),
+];
+
+// Leaving this in for now because I am going to repurpose this code for group creation
+
+/*
 export const chatPost = [
     protectedRouteJWT,
     validators.participants,
@@ -184,3 +253,4 @@ export const chatPost = [
             });
     }),
 ];
+*/

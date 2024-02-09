@@ -54,7 +54,7 @@ beforeAll(async () => {
 afterAll(() => mongoose.connection.close());
 
 describe("Route testing...", () => {
-    describe("/chat/:chatId GET route...", () => {
+    describe("/chat/:userId GET route...", () => {
         test(`Should respond with status code 400 if the user '_id' value
          extracted from the token in the 'authorization' header is not a valid
          MongoDB ObjectId`, async () => {
@@ -70,29 +70,29 @@ describe("Route testing...", () => {
             );
             await request(app).get(`/${chats[0]._id}`).expect(404);
         });
-        test(`Should respond with status code 400 if the chatId from the request
+        test(`Should respond with status code 400 if the userId from the request
          parameters is not a valid MongoDB ObjectId`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app).get(`/${null}`).expect(400);
         });
-        test(`Should respond with status code 404 if the chat is not found in
+        test(`Should respond with status code 404 if the user is not found in
          the database`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             await request(app)
                 .get(`/${new mongoose.Types.ObjectId()}`)
                 .expect(404);
         });
-        test(`Should respond with status code 401 if the user is not authorised
-         to receive the chat because it is not found in their chats array`, async () => {
+        test(`Should respond with status code 404 if the chat is not found in
+         the database`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
-            await request(app).get(`/${chats[2]._id}`).expect(401);
+            await request(app).get(`/${users[2]._id}`).expect(404);
         });
         test(`Should respond with status code 200 on successful request, with a
          valid token`, async () => {
             mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
             generateToken.mockReturnValueOnce("Bearer token");
             await request(app)
-                .get(`/${chats[0]._id}`)
+                .get(`/${users[1]._id}`)
                 .expect(200)
                 .expect((res) => {
                     const data = res.body.data;
@@ -103,8 +103,58 @@ describe("Route testing...", () => {
         });
     });
 
-    generateToken.mockReturnValueOnce("Bearer token");
+    describe("/chat/:userId POST route...", () => {
+        test(`Should respond with status code 400 if the user '_id' value
+         extracted from the token in the 'authorization' header is not a valid
+         MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(null, "Person1", "person1*");
+            await request(app).post(`/${users[1]._id}`).expect(400);
+        });
+        test(`Should respond with status code 404 if the currently-logged in
+         user is not found in the database`, async () => {
+            mockProtectedRouteJWT(
+                new mongoose.Types.ObjectId(),
+                "Person1",
+                "person1*"
+            );
+            await request(app).post(`/${users[1]._id}`).expect(404);
+        });
+        test(`Should respond with status code 400 if the userId from the request
+         parameters is not a valid MongoDB ObjectId`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).post(`/${null}`).expect(400);
+        });
+        test(`Should respond with status code 404 if the user is not found in
+         the database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app)
+                .post(`/${new mongoose.Types.ObjectId()}`)
+                .expect(404);
+        });
+        test(`Should respond with status code 409 if the chat between the two
+         users already exists within the database`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            await request(app).post(`/${users[1]._id}`).expect(409);
+        });
+        test(`Should respond with status code 201 on successful request, with a
+         valid token`, async () => {
+            mockProtectedRouteJWT(users[0]._id, "Person1", "person1*");
+            generateToken.mockReturnValueOnce("Bearer token");
+            await request(app)
+                .post(`/${users[2]._id}`)
+                .expect(201)
+                .expect((res) => {
+                    const data = res.body.data;
+                    if (data.token !== "Bearer token") {
+                        throw new Error(`Server has not responded with token`);
+                    }
+                });
+        });
+    });
 
+    // Leaving this in for now because I am going to repurpose this code for group creation
+
+    /*
     describe("/chat POST route...", () => {
         test(`Should respond with status code 400 if the body object in the
          request object does not contain the necessary information`, async () => {
@@ -229,4 +279,5 @@ describe("Route testing...", () => {
                 });
         });
     });
+    */
 });
