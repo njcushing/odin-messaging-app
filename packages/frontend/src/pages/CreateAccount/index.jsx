@@ -192,18 +192,20 @@ const CreateAccount = () => {
                             aria-label="create-account-error"
                         >{createAccountError}</h3>
                     :   null}
-                    <button
-                        className={styles["return-to-log-in-button"]}
-                        aria-label="return-to-log-in"
-                        onClick={(e) => {
-                            window.location.href = "/log-in"
-                            e.currentTarget.blur();
-                            e.preventDefault();
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.blur();
-                        }}
-                    >Return to Log In</button>
+                    <div className={styles["return-to-log-in-button-container"]}>
+                        <button
+                            className={styles["return-to-log-in-button"]}
+                            aria-label="return-to-log-in"
+                            onClick={(e) => {
+                                window.location.href = "/log-in"
+                                e.currentTarget.blur();
+                                e.preventDefault();
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.blur();
+                            }}
+                        >Return to Log In</button>
+                    </div>
                     </>
                 :   <div className={styles["waiting-wheel-container"]}>
                         <div

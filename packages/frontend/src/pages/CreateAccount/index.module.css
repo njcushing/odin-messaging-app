@@ -222,16 +222,18 @@
     animation: 0.2s ease-in-out 0.3s 1 normal forwards fade-in;
 }
 
-.return-to-log-in-button {
+.return-to-log-in-button-container {
     align-self: center;
-
-    background-color: rgb(197, 112, 0);
 
     margin-top: 1rem;
 
     opacity: 0%;
     transform: translateY(0.5rem);
     animation: 0.2s ease-in-out 0.45s 1 normal forwards fade-in;
+}
+
+.return-to-log-in-button {
+    background-color: rgb(197, 112, 0);
 }
 
 .return-to-log-in-button:hover {
